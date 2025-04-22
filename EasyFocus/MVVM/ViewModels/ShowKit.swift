@@ -1,0 +1,13 @@
+//
+//  ShowKit.swift
+//  EasyFocus
+//
+//  Created by DBL on 2025/4/22.
+//
+
+import SwiftUI
+
+final class ShowKit: ObservableObject {
+  @Published var tags: Bool = false
+  @Published var lego: Bool = false
+}

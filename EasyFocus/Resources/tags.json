@@ -1,0 +1,41 @@
+[{
+  "id": "study",
+  "name": "Study",
+  "icon": "book.pages.fill",
+  "backgroundColor": "#22c55e",
+}, {
+  "id": "work",
+  "name": "Work",
+  "icon": "macbook",
+  "backgroundColor": "#fde047",
+}, {
+  "id": "sport",
+  "name": "Sport",
+  "icon": "figure.badminton",
+  "backgroundColor": "#2563eb",
+}, {
+  "id": "reading",
+  "name": "Reading",
+  "icon": "book.fill",
+  "backgroundColor": "#c4b5fd",
+}, {
+  "id": "writing",
+  "name": "Writing",
+  "icon": "applepencil.tip",
+  "backgroundColor": "#fda4af",
+}, {
+  "id": "meditation",
+  "name": "Meditation",
+  "icon": "circle.dotted",
+  "backgroundColor": "#fdba74",
+}, {
+  "id": "workout",
+  "name": "Workout",
+  "icon": "figure.run",
+  "backgroundColor": "#d8b4fe",
+}, {
+  "id": "others",
+  "name": "Others",
+  "icon": "ellipsis",
+  "backgroundColor": "",
+}]
