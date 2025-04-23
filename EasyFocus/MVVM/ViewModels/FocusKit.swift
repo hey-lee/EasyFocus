@@ -8,8 +8,7 @@
 import SwiftUI
 import BackgroundTasks
 
-@Observable
-class FocusKit {
+extension FocusKit {
   enum State: String, CustomStringConvertible {
     case idle, running, paused
     var description: String { rawValue }
@@ -24,8 +23,10 @@ class FocusKit {
     case work, rest
     var description: String { rawValue }
   }
-  
-  // AppStorage Properties
+}
+
+@Observable
+class FocusKit {
   var minutes: Int {
     set { UserDefaults.standard.set(newValue, forKey: "minutes") }
     get {
@@ -150,6 +151,7 @@ class FocusKit {
   }
   
   func stop() {
+    print("stop")
     timer?.invalidate()
     state = .idle
     secondsSinceStart = 0
@@ -178,8 +180,10 @@ class FocusKit {
   }
   
   private func handleBackgroundTask(_ task: BGProcessingTask) {
+    print("handleBackgroundTask")
     backgroundTask = task
     task.expirationHandler = { [weak self] in
+      print("expirationHandler")
       self?.stop()
     }
     
@@ -224,6 +228,10 @@ class FocusKit {
     }
     mode = mode == .work ? .rest : .work
     stop()
+  }
+  
+  func getSessionProgress(_ index: Int) -> CGFloat {
+    sessionIndex > index ? 1 : ((sessionIndex == index) && mode == .work ? percent : 0)
   }
   
   func format(_ seconds: Int) -> String {
