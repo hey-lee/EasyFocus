@@ -73,9 +73,6 @@ struct FocusView: View {
         .presentationDragIndicator(.visible)
         .presentationCornerRadius(32)
     }
-    .onChange(of: focus.state) { oldValue, newValue in
-      print("focus.state", newValue)
-    }
   }
   
   var focusView: some View {
@@ -221,7 +218,6 @@ struct FocusView: View {
       .onChange(of: onTouching) { oldValue, newValue in
         if onTouching && focus.state == .running {
           progressTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true, block: { _ in
-            print("progress", progress)
             if progress <= 1 {
               progress += 0.04
             } else {

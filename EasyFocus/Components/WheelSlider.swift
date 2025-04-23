@@ -72,7 +72,6 @@ struct WheelSlider: View {
       }
     }
     .onChange(of: value) { _, newValue in
-      print(newValue)
       if Int(newValue) % 2 == 0 {
         Tools.haptic(.rigid)
       }

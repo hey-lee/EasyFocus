@@ -151,7 +151,6 @@ class FocusKit {
   }
   
   func stop() {
-    print("stop")
     timer?.invalidate()
     state = .idle
     secondsSinceStart = 0
@@ -180,10 +179,8 @@ class FocusKit {
   }
   
   private func handleBackgroundTask(_ task: BGProcessingTask) {
-    print("handleBackgroundTask")
     backgroundTask = task
     task.expirationHandler = { [weak self] in
-      print("expirationHandler")
       self?.stop()
     }
     
