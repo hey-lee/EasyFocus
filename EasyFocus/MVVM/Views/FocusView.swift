@@ -9,9 +9,10 @@ import SwiftUI
 import Shimmer
 
 struct FocusView: View {
+  @Environment(\.scenePhase) var phase
   @Environment(FocusKit.self) var focus
   @Environment(TagsKit.self) var tagsKit
-
+  
   @EnvironmentObject var show: ShowKit
   
   @State var onTouching = false
@@ -24,10 +25,11 @@ struct FocusView: View {
     VStack {
       VStack(spacing: 0) {
         focusView
-        tagView
         
         if focus.state == .running {
           sessionsView
+        } else {
+          tagView
         }
       }
       
@@ -39,35 +41,41 @@ struct FocusView: View {
           .background(.black)
           .clipShape(Capsule())
           .onTapGesture {
-            focus.start()
+            withAnimation {
+              focus.start()
+            }
+            
             Tools.haptic()
           }
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(LongTapArea())
-        .overlay(LongTapProgressView())
-        .overlay {
-          if showWheelSlider {
-            wheelSliderView
+    .background(LongTapArea())
+    .overlay(LongTapProgressView())
+    .overlay {
+      if showWheelSlider {
+        wheelSliderView
+      }
+    }
+    .toolbar {
+      ToolbarItem(placement: .topBarTrailing) {
+        Symbol("sf.gearshape.fill")
+          .onTapGesture {
+            self.showSettings = true
           }
-        }
-        .toolbar {
-          ToolbarItem(placement: .topBarTrailing) {
-            Symbol("sf.gearshape.fill")
-              .onTapGesture {
-                self.showSettings = true
-              }
-          }
-        }
-        .sheet(isPresented: $show.tags) {
-          TagsView()
-            .presentationDetents([
-              .medium,
-            ])
-            .presentationDragIndicator(.visible)
-            .presentationCornerRadius(32)
-        }
+      }
+    }
+    .sheet(isPresented: $show.tags) {
+      TagsView()
+        .presentationDetents([
+          .medium,
+        ])
+        .presentationDragIndicator(.visible)
+        .presentationCornerRadius(32)
+    }
+    .onChange(of: focus.state) { oldValue, newValue in
+      print("focus.state", newValue)
+    }
   }
   
   var focusView: some View {
@@ -95,7 +103,7 @@ struct FocusView: View {
       }
     }
   }
-
+  
   @ViewBuilder
   var tagView: some View {
     if let label = tagsKit.label {
@@ -109,7 +117,7 @@ struct FocusView: View {
       }
     }
   }
-
+  
   var sessionsView: some View {
     HStack(spacing: 16) {
       ForEach(1...focus.sessionsCount, id: \.self) { index in
@@ -118,7 +126,7 @@ struct FocusView: View {
             .stroke(Color.black, lineWidth: 4)
             .frame(width: 20, height: 20)
           Circle()
-            .trim(from: 0, to: focus.sessionIndex > index ? 1 : ((focus.sessionIndex == index) && focus.mode == .work ? focus.percent : 0))
+            .trim(from: 0, to: focus.getSessionProgress(index))
             .stroke(Color.black, lineWidth: 10)
             .frame(width: 10, height: 10)
             .animation(.linear(duration: 0.5), value: focus.percent)
@@ -127,14 +135,14 @@ struct FocusView: View {
     }
     .padding()
   }
-
+  
   var wheelSliderView: some View {
     VStack {
       WheelSlider(value: Binding(
         get: { CGFloat(focus.minutes) },
         set: {
           focus.minutes = Int($0)
-          UserDefaults.standard.set(Int($0), forKey: "minutes")
+          //            UserDefaults.standard.set(Int($0), forKey: "minutes")
         }
       ), config: WheelSlider.Config(
         count: 12,
@@ -158,7 +166,7 @@ struct FocusView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(.white)
   }
-
+  
   @ViewBuilder
   func LongTapProgressView() -> some View {
     if focus.state == .running {
@@ -185,7 +193,7 @@ struct FocusView: View {
         .padding(.top, 300)
     }
   }
-
+  
   @ViewBuilder
   func LongTapArea() -> some View {
     Color.white
@@ -211,8 +219,9 @@ struct FocusView: View {
           }
       )
       .onChange(of: onTouching) { oldValue, newValue in
-        if onTouching {
+        if onTouching && focus.state == .running {
           progressTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true, block: { _ in
+            print("progress", progress)
             if progress <= 1 {
               progress += 0.04
             } else {
@@ -225,6 +234,11 @@ struct FocusView: View {
           progress = 0
           progressTimer?.invalidate()
           progressTimer = nil
+        }
+      }
+      .onChange(of: phase) { oldValue, newValue in
+        if phase != .active {
+          onTouching = false
         }
       }
   }
