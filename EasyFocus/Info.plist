@@ -4,7 +4,7 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.focuskit.timer</string>
+		<string>co.banli.apps.easyfocus.timer</string>
 	</array>
 	<key>UIAppFonts</key>
 	<array>
