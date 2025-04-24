@@ -176,4 +176,7 @@ struct FocusView: View {
     .environment(TagsKit())
     .environment(FocusKit())
     .environmentObject(ShowKit())
+    .modelContainer(for: [
+      Focus.self,
+    ])
 }

@@ -19,6 +19,8 @@ struct EasyFocusApp: App {
     .environment(FocusKit())
     .environment(TagsKit.shared)
     .environmentObject(ShowKit())
-    .modelContainer(for: [])
+    .modelContainer(for: [
+      Focus.self,
+    ])
   }
 }
