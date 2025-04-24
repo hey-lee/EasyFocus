@@ -18,6 +18,7 @@ struct EasyFocusApp: App {
     }
     .environment(FocusKit())
     .environment(TagsKit.shared)
+    .environmentObject(NavKit())
     .environmentObject(ShowKit())
     .modelContainer(for: [
       Focus.self,

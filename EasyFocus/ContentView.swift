@@ -9,14 +9,24 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+  @EnvironmentObject var nav: NavKit
   
   var body: some View {
-    FocusView()
+    TabView(selection: $nav.activeTab) {
+      FocusView()
+        .tag("focus")
+      VStack {
+        Text("settings")
+      }
+        .tag("settings")
+    }
+    .tabViewStyle(.page)
   }
 }
 
 #Preview {
   ContentView()
     .environment(FocusKit())
+    .environmentObject(NavKit())
     .modelContainer(for: [])
 }
