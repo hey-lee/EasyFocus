@@ -8,16 +8,6 @@
 import SwiftData
 import Foundation
 
-// Codable structs
-class C {
-  struct TagLabel: Decodable, Identifiable, Hashable, Equatable {
-    var id: String = UUID().uuidString
-    var name: String
-    var icon: String
-    var backgroundColor: String = ""
-  }
-}
-
 @Model
 class Focus {
   var minutes: Int
@@ -26,7 +16,7 @@ class Focus {
   var completedSessionsCount: Int
   var restShort: Int
   var restLong: Int
-  var label: C.TagLabel
+  var label: Tag
   var createdAt: Date
   
   init(
@@ -36,7 +26,7 @@ class Focus {
     completedSessionsCount: Int,
     restShort: Int,
     restLong: Int,
-    label: C.TagLabel,
+    label: Tag,
     createdAt: Date = Date()
   ) {
     self.minutes = minutes
@@ -47,5 +37,25 @@ class Focus {
     self.restLong = restLong
     self.label = label
     self.createdAt = createdAt
+  }
+}
+
+@Model
+class Tag {
+  var id: String
+  var name: String
+  var icon: String
+  var backgroundColor: String
+  
+  init(
+    id: String = UUID().uuidString,
+    name: String,
+    icon: String,
+    backgroundColor: String = ""
+  ) {
+    self.id = id
+    self.name = name
+    self.icon = icon
+    self.backgroundColor = backgroundColor
   }
 }
