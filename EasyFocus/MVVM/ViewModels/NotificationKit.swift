@@ -48,4 +48,8 @@ final class NotificationKit {
 
     center.add(request)
   }
+  
+  static func clearPending(identifiers: [String] = []) {
+    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+  }
 }
