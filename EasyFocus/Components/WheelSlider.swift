@@ -17,8 +17,9 @@ struct WheelSlider: View {
   }
   
   @Binding var value: CGFloat
-  @State var config: Config
+  let config: Config
   @State var isLoaded: Bool = false
+  @State private var lastHapticValue: CGFloat = 0
   
   var body: some View {
     GeometryReader {
@@ -27,7 +28,7 @@ struct WheelSlider: View {
       let offsetX = (size.width - barWidth) / 2
       
       ScrollView(.horizontal, showsIndicators: false) {
-        HStack(spacing: config.spacing) {
+        LazyHStack(spacing: config.spacing) {
           let totalSteps = config.steps * config.count
           
           ForEach(0...totalSteps, id: \.self) { index in
@@ -58,6 +59,8 @@ struct WheelSlider: View {
       }, set: { newValue in
         if let newValue {
           value = (CGFloat(newValue) / CGFloat(config.steps)) * CGFloat(config.multiplier)
+          
+          handleHaptic(by: value)
         }
       }))
       .overlay(alignment: .center) {
@@ -71,10 +74,15 @@ struct WheelSlider: View {
         if !isLoaded { isLoaded = true }
       }
     }
-    .onChange(of: value) { _, newValue in
-      if Int(newValue) % 2 == 0 {
+  }
+  
+  private func handleHaptic(by value: CGFloat) {
+    let stepIncrement = CGFloat(config.multiplier) / CGFloat(config.steps)
+    let currentStep = round(value / stepIncrement)
+
+    if currentStep != round(lastHapticValue / stepIncrement) {
         Tools.haptic(.rigid)
-      }
+        lastHapticValue = value
     }
   }
 }
