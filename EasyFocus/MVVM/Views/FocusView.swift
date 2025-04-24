@@ -38,11 +38,10 @@ struct FocusView: View {
           .background(.black)
           .clipShape(Capsule())
           .onTapGesture {
+            Tools.haptic()
             withAnimation {
               focus.start()
             }
-            
-            Tools.haptic()
           }
       }
     }
