@@ -11,7 +11,7 @@ struct WheelSlider: View {
   struct Config: Equatable {
     var count: Int
     var steps: Int = 5
-    var multipiler: Int = 10
+    var multiplier: Int = 10
     var spacing: CGFloat = 10
     var showIndicator: Bool = false
   }
@@ -39,7 +39,7 @@ struct WheelSlider: View {
               .frame(maxHeight: 40, alignment: .top)
               .overlay(alignment: .top) {
                 if remainder == 0 && config.showIndicator {
-                  Text("\((index / config.steps) * config.multipiler)")
+                  Text("\((index / config.steps) * config.multiplier)")
                     .font(.custom("Code Next ExtraBold", size: 32))
                     .fontWeight(.semibold)
                     .textScale(.secondary)
@@ -54,10 +54,10 @@ struct WheelSlider: View {
       }
       .scrollTargetBehavior(.viewAligned)
       .scrollPosition(id: Binding(get: {
-        isLoaded ? (Int(value) * config.steps) / config.multipiler : nil
+        isLoaded ? (Int(value) * config.steps) / config.multiplier : nil
       }, set: { newValue in
         if let newValue {
-          value = (CGFloat(newValue) / CGFloat(config.steps)) * CGFloat(config.multipiler)
+          value = (CGFloat(newValue) / CGFloat(config.steps)) * CGFloat(config.multiplier)
         }
       }))
       .overlay(alignment: .center) {
@@ -80,7 +80,7 @@ struct WheelSlider: View {
 }
 
 #Preview {
-  WheelSlider(value: .constant(120), config: WheelSlider.Config(
+  WheelSlider(value: .constant(120), config: .init(
     count: 12,
     showIndicator: true
   ))
