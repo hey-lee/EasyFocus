@@ -9,17 +9,12 @@ import SwiftUI
 import Shimmer
 
 struct FocusView: View {
-  @Environment(\.scenePhase) var phase
   @Environment(FocusKit.self) var focus
   @Environment(TagsKit.self) var tagsKit
-  
   @EnvironmentObject var show: ShowKit
-  
-  @State var onTouching = false
+
   @State var showSettings = false
   @State var showWheelSlider = false
-  @State var progress: CGFloat = 0
-  @State var progressTimer: Timer?
   
   var body: some View {
     VStack {
@@ -52,8 +47,21 @@ struct FocusView: View {
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(LongTapArea())
-    .overlay(LongTapProgressView())
+    .overlay {
+      if focus.state == .running {
+        LongTapView {
+          withAnimation {
+            if focus.isForwardMode {
+              self.focus.stop()
+            } else {
+              if self.focus.percent != 0 {
+                self.focus.stop()
+              }
+            }
+          }
+        }
+      }
+    }
     .overlay {
       if showWheelSlider {
         wheelSliderView
@@ -164,87 +172,6 @@ struct FocusView: View {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(.white)
-  }
-  
-  @ViewBuilder
-  func LongTapProgressView() -> some View {
-    if focus.state == .running {
-      if onTouching {
-        VStack {
-          ZStack(alignment: .leading) {
-            let size: CGSize = CGSize(width: 200, height: 4)
-            RoundedRectangle(cornerRadius: size.height / 2, style: .continuous)
-              .fill(.black.opacity(0.2))
-              .frame(width: size.width, height: size.height)
-            
-            RoundedRectangle(cornerRadius: size.height / 2, style: .continuous)
-              .fill(.black.opacity(0.8))
-              .frame(width: size.width * progress, height: size.height)
-          }
-          .padding(.top, 240)
-        }
-      }
-      
-      Text("长按退出")
-        .font(.body)
-        .shimmering()
-        .foregroundColor(onTouching ? Color.slate900 : Color.slate300)
-        .padding(.top, 300)
-    }
-  }
-  
-  @ViewBuilder
-  func LongTapArea() -> some View {
-    Color.white
-      .opacity(0.001)
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .clipShape(Rectangle())
-      .gesture(
-        DragGesture(minimumDistance: 0)
-          .onChanged { gesture in
-            if !self.onTouching {
-              if focus.state == .running {
-                Tools.haptic()
-              }
-              withAnimation {
-                self.onTouching = true
-              }
-            }
-          }
-          .onEnded { _ in
-            withAnimation(.linear(duration: 0.1)) {
-              self.onTouching = false
-            }
-          }
-      )
-      .onChange(of: onTouching) { oldValue, newValue in
-        if onTouching && focus.state == .running {
-          progressTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true, block: { _ in
-            if progress <= 1 {
-              progress += 0.04
-            } else {
-              withAnimation {
-                if focus.isForwardMode {
-                  self.focus.stop()
-                } else {
-                  if self.focus.percent != 0 {
-                    self.focus.stop()
-                  }
-                }
-              }
-            }
-          })
-        } else {
-          progress = 0
-          progressTimer?.invalidate()
-          progressTimer = nil
-        }
-      }
-      .onChange(of: phase) { oldValue, newValue in
-        if phase != .active {
-          onTouching = false
-        }
-      }
   }
 }
 
