@@ -12,7 +12,7 @@ struct FocusView: View {
   @Environment(FocusKit.self) var focus
   @Environment(TagsKit.self) var tagsKit
   @EnvironmentObject var show: ShowKit
-
+  
   @State var showSettings = false
   @State var showWheelSlider = false
   
@@ -87,19 +87,19 @@ struct FocusView: View {
   
   var focusView: some View {
     HStack(spacing: 8) {
-      Text(focus.display.minutes)
-        .tracking(-4)
-        .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focus.state == .idle) ? 80 : 100).monospacedDigit())
-      VStack {
-        let size: CGFloat = focus.state != .idle ? 20 : 16
-        Circle()
-          .frame(width: size, height: size)
-        Circle()
-          .frame(width: size, height: size)
+      Group {
+        Text(focus.display.minutes)
+        VStack {
+          let size: CGFloat = focus.state != .idle ? 20 : 16
+          Circle()
+            .frame(width: size, height: size)
+          Circle()
+            .frame(width: size, height: size)
+        }
+        Text(focus.display.seconds)
       }
-      Text(focus.display.seconds)
-        .tracking(-4)
-        .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focus.state == .idle) ? 80 : 100).monospacedDigit())
+      .tracking(-4)
+      .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focus.state == .idle) ? 80 : 100).monospacedDigit())
     }
     .onTapGesture {
       Tools.haptic()
@@ -145,13 +145,12 @@ struct FocusView: View {
   
   var wheelSliderView: some View {
     VStack {
-      WheelSlider(value: Binding(
+      WheelSlider(value: .init(
         get: { CGFloat(focus.minutes) },
         set: {
           focus.minutes = Int($0)
-          //            UserDefaults.standard.set(Int($0), forKey: "minutes")
         }
-      ), config: WheelSlider.Config(
+      ), config: .init(
         count: 12,
         showIndicator: true
       ))
@@ -165,7 +164,6 @@ struct FocusView: View {
         .clipShape(Capsule())
         .onTapGesture {
           withAnimation {
-            //            self.lockSwitch = false
             self.showWheelSlider = false
           }
         }
