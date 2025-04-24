@@ -9,7 +9,7 @@ import SwiftUI
 import BackgroundTasks
 
 extension FocusKit {
-  enum State: String, CustomStringConvertible {
+  enum FocusState: String, CustomStringConvertible {
     case idle, running, paused
     var description: String { rawValue }
   }
@@ -30,48 +30,23 @@ class FocusKit {
   static let shared = FocusKit()
   var minutes: Int {
     set { UserDefaults.standard.set(newValue, forKey: "minutes") }
-    get {
-      if UserDefaults.standard.object(forKey: "minutes") == nil {
-        return 1
-      }
-      return UserDefaults.standard.integer(forKey: "minutes")
-    }
+    get { UserDefaults.standard.object(forKey: "minutes") as? Int ?? 1 }
   }
   var sessionsCount: Int {
     set { UserDefaults.standard.set(newValue, forKey: "sessionsCount") }
-    get {
-      if UserDefaults.standard.object(forKey: "sessionsCount") == nil {
-        return 4
-      }
-      return UserDefaults.standard.integer(forKey: "sessionsCount")
-    }
+    get { UserDefaults.standard.object(forKey: "sessionsCount") as? Int ?? 4 }
   }
   var sessionIndex: Int {
     set { UserDefaults.standard.set(newValue, forKey: "sessionIndex") }
-    get {
-      if UserDefaults.standard.object(forKey: "sessionIndex") == nil {
-        return 0
-      }
-      return UserDefaults.standard.integer(forKey: "sessionIndex")
-    }
+    get { UserDefaults.standard.object(forKey: "sessionIndex") as? Int ?? 0 }
   }
   var restShort: Int {
     set { UserDefaults.standard.set(newValue, forKey: "restShort") }
-    get {
-      if UserDefaults.standard.object(forKey: "restShort") == nil {
-        return 5
-      }
-      return UserDefaults.standard.integer(forKey: "restShort")
-    }
+    get { UserDefaults.standard.object(forKey: "restShort") as? Int ?? 5 }
   }
   var restLong: Int {
     set { UserDefaults.standard.set(newValue, forKey: "restLong") }
-    get {
-      if UserDefaults.standard.object(forKey: "restLong") == nil {
-        return 20
-      }
-      return UserDefaults.standard.integer(forKey: "restLong")
-    }
+    get { UserDefaults.standard.object(forKey: "restLong") as? Int ?? 20 }
   }
   
   // Timer State
@@ -81,7 +56,7 @@ class FocusKit {
   
   // Observable Properties
   var mode: Mode = .work
-  var state: State = .idle
+  var state: FocusState = .idle
   var restType: RestType = .short
   var startedAt = Date.now
   var secondsSinceStart = 0
@@ -107,9 +82,57 @@ class FocusKit {
     case .rest: (restType == .short ? restShort : restLong) * minuteInSeconds
     }
   }
-
-  init() {}
+  
+  init() {
+    //    restoreState()
+  }
 }
+
+//extension FocusKit {
+//  var persistedState: String {
+//    set { UserDefaults.standard.set(newValue, forKey: "persistedState") }
+//    get { UserDefaults.standard.string(forKey: "persistedState") ?? FocusState.idle.rawValue }
+//  }
+//  var persistedMode: String {
+//    set { UserDefaults.standard.set(newValue, forKey: "persistedMode") }
+//    get { UserDefaults.standard.string(forKey: "persistedMode") ?? Mode.work.rawValue }
+//  }
+//  var persistedStartDate: Date? {
+//    set { UserDefaults.standard.set(newValue, forKey: "persistedStartDate") }
+//    get { UserDefaults.standard.object(forKey: "persistedStartDate") as? Date }
+//  }
+//  var persistedPausedSeconds: Int {
+//    set { UserDefaults.standard.set(newValue, forKey: "persistedPausedSeconds") }
+//    get { UserDefaults.standard.integer(forKey: "persistedPausedSeconds") }
+//  }
+//
+//  func saveState() {
+//    persistedState = state.rawValue
+//    persistedMode = mode.rawValue
+//    persistedPausedSeconds = secondsOnPaused
+//    persistedStartDate = (state == .running) ? startedAt : nil
+//  }
+//
+//  func restoreState() {
+//    if let savedState = FocusState(rawValue: persistedState) {
+//      state = savedState
+//      mode = Mode(rawValue: persistedMode) ?? .work
+//      secondsOnPaused = persistedPausedSeconds
+//
+//      if state == .running, let startDate = persistedStartDate {
+//        let elapsed = Int(Date.now.timeIntervalSince(startDate))
+//        secondsSinceStart = elapsed + secondsOnPaused
+//
+//        // resume
+//        if secondsLeft > 0 {
+//          start()
+//        } else {
+//          handleTimerCompletion()
+//        }
+//      }
+//    }
+//  }
+//}
 
 // MARK - focus controls
 extension FocusKit {
@@ -119,6 +142,7 @@ extension FocusKit {
     }
   }
   func start() {
+    print("start")
     guard state != .running else { return }
     state = .running
     startedAt = .now
@@ -142,21 +166,23 @@ extension FocusKit {
   }
   
   func stop() {
+    print("stop")
     timer?.invalidate()
     state = .idle
     secondsSinceStart = 0
     percent = 0
     secondsOnPaused = 0
     backgroundTask?.setTaskCompleted(success: true)
+    //    saveState()
+    //    NotificationKit.clearPending()
   }
   
   private func tick() {
     guard state == .running else { return }
     secondsSinceStart = Int(Date.now.timeIntervalSince(startedAt)) + secondsOnPaused
-
+    
     if !isForwardMode {
       percent = Double(secondsSinceStart) / Double(duration)
-
       if secondsLeft <= 0 {
         handleTimerCompletion()
       }
@@ -164,6 +190,7 @@ extension FocusKit {
   }
   
   private func handleTimerCompletion() {
+    //    NotificationKit.clearPending()
     if mode == .work {
       sessionIndex = (sessionIndex == sessionsCount) ? 0 : sessionIndex + 1
     }
@@ -237,6 +264,7 @@ extension FocusKit {
   }
   
   @objc private func didEnterBackground() {
+    //    saveState()
     guard state == .running else { return }
     lastBackgroundDate = .now
     timer?.invalidate()
