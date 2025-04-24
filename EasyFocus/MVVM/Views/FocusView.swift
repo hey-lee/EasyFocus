@@ -21,11 +21,10 @@ struct FocusView: View {
       VStack(spacing: 0) {
         focusView
         
-        if focus.state == .running {
-          if !focus.isForwardMode {
-            sessionsView
-          }
-        } else {
+        if focus.state == .running, !focus.isForwardMode {
+          sessionsView
+        }
+        if focus.state == .idle, focus.sessionIndex == 0 {
           tagView
         }
       }
@@ -126,7 +125,7 @@ struct FocusView: View {
   
   var sessionsView: some View {
     HStack(spacing: 16) {
-      ForEach(1...focus.sessionsCount, id: \.self) { index in
+      ForEach(0...focus.sessionsCount - 1, id: \.self) { index in
         ZStack {
           Circle()
             .stroke(Color.black, lineWidth: 4)
