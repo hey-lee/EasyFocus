@@ -103,25 +103,14 @@ class FocusKit {
     case .rest: (restType == .short ? restShort : restLong) * minuteInSeconds
     }
   }
-  
-  // Lifecycle
+
   init() {
-    setupBackgroundProcessing()
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleBackground),
-      name: UIApplication.didEnterBackgroundNotification,
-      object: nil
-    )
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleForeground),
-      name: UIApplication.willEnterForegroundNotification,
-      object: nil
-    )
+    initNotification()
   }
-  
-  // Timer Control
+}
+
+// MARK - focus controls
+extension FocusKit {
   private func createTimer() {
     timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
       self?.tick()
@@ -159,8 +148,62 @@ class FocusKit {
     backgroundTask?.setTaskCompleted(success: true)
   }
   
-  // Background Handling
-  private func setupBackgroundProcessing() {
+  private func tick() {
+    guard state == .running else { return }
+    secondsSinceStart = Int(Date.now.timeIntervalSince(startedAt)) + secondsOnPaused
+    percent = Double(secondsSinceStart) / Double(duration)
+    
+    guard secondsLeft > 0 else {
+      handleTimerCompletion()
+      return
+    }
+  }
+  
+  private func handleTimerCompletion() {
+    if mode == .work {
+      sessionIndex = (sessionIndex == sessionsCount) ? 0 : sessionIndex + 1
+    }
+    mode = mode == .work ? .rest : .work
+    stop()
+  }
+  
+  func getSessionProgress(_ index: Int) -> CGFloat {
+    sessionIndex > index ? 1 : ((sessionIndex == index) && mode == .work ? percent : 0)
+  }
+  
+  func format(_ seconds: Int) -> String {
+    guard seconds > 0 else { return "00:00" }
+    return String(format: "%02d:%02d", seconds / 60, seconds % 60)
+  }
+}
+
+
+// MARK - notifications
+extension FocusKit {
+  func scheduleNotification() {
+    guard state == .running else { return }
+    NotificationKit.addNotification(TimeInterval(secondsLeft), "Timer Done!", "Your focus session is completed")
+  }
+}
+
+// MARK - background task
+extension FocusKit {
+  private func initNotification() {
+    initTaskScheduler()
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(didEnterBackground),
+      name: UIApplication.didEnterBackgroundNotification,
+      object: nil
+    )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(willEnterForeground),
+      name: UIApplication.willEnterForegroundNotification,
+      object: nil
+    )
+  }
+  private func initTaskScheduler() {
     BGTaskScheduler.shared.register(
       forTaskWithIdentifier: "co.banli.apps.easyfocus.timer",
       using: .main
@@ -189,50 +232,18 @@ class FocusKit {
     }
   }
   
-  @objc private func handleBackground() {
+  @objc private func didEnterBackground() {
     guard state == .running else { return }
     lastBackgroundDate = .now
     timer?.invalidate()
     scheduleNotification()
   }
   
-  @objc private func handleForeground() {
+  @objc private func willEnterForeground() {
     guard state == .running, let lastDate = lastBackgroundDate else { return }
     let backgroundTime = Int(Date.now.timeIntervalSince(lastDate))
     secondsSinceStart += backgroundTime
     lastBackgroundDate = nil
     createTimer()
-  }
-  func scheduleNotification() {
-    guard state == .running else { return }
-    NotificationKit.addNotification(TimeInterval(secondsLeft), "Timer Done!", "Your focus session is completed")
-  }
-  
-  private func tick() {
-    guard state == .running else { return }
-    secondsSinceStart = Int(Date.now.timeIntervalSince(startedAt)) + secondsOnPaused
-    percent = Double(secondsSinceStart) / Double(duration)
-    
-    guard secondsLeft > 0 else {
-      handleTimerCompletion()
-      return
-    }
-  }
-  
-  private func handleTimerCompletion() {
-    if mode == .work {
-      sessionIndex = (sessionIndex == sessionsCount) ? 0 : sessionIndex + 1
-    }
-    mode = mode == .work ? .rest : .work
-    stop()
-  }
-  
-  func getSessionProgress(_ index: Int) -> CGFloat {
-    sessionIndex > index ? 1 : ((sessionIndex == index) && mode == .work ? percent : 0)
-  }
-  
-  func format(_ seconds: Int) -> String {
-    guard seconds > 0 else { return "00:00" }
-    return String(format: "%02d:%02d", seconds / 60, seconds % 60)
   }
 }
