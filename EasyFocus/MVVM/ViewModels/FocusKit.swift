@@ -90,7 +90,10 @@ class FocusKit {
   let minuteInSeconds = 60
   
   // Computed Properties
-  var secondsLeft: Int { duration - secondsSinceStart }
+  var isForwardMode: Bool { mode == .work && minutes == 0 }
+  var secondsLeft: Int {
+    isForwardMode ? secondsSinceStart : (duration - secondsSinceStart)
+  }
   var isActive: Bool { state == .running || state == .paused }
   var display: (minutes: String, seconds: String) {
     let parts = format(secondsLeft).components(separatedBy: ":")
@@ -99,7 +102,7 @@ class FocusKit {
   
   private var duration: Int {
     switch mode {
-    case .work: minutes * minuteInSeconds
+    case .work: isForwardMode ? Int.max : minutes * minuteInSeconds
     case .rest: (restType == .short ? restShort : restLong) * minuteInSeconds
     }
   }
@@ -151,11 +154,13 @@ extension FocusKit {
   private func tick() {
     guard state == .running else { return }
     secondsSinceStart = Int(Date.now.timeIntervalSince(startedAt)) + secondsOnPaused
-    percent = Double(secondsSinceStart) / Double(duration)
-    
-    guard secondsLeft > 0 else {
-      handleTimerCompletion()
-      return
+
+    if !isForwardMode {
+      percent = Double(secondsSinceStart) / Double(duration)
+
+      if secondsLeft <= 0 {
+        handleTimerCompletion()
+      }
     }
   }
   

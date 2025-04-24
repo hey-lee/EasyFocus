@@ -27,7 +27,9 @@ struct FocusView: View {
         focusView
         
         if focus.state == .running {
-          sessionsView
+          if !focus.isForwardMode {
+            sessionsView
+          }
         } else {
           tagView
         }
@@ -221,8 +223,14 @@ struct FocusView: View {
             if progress <= 1 {
               progress += 0.04
             } else {
-              if self.focus.percent != 0 {
-                self.focus.stop()
+              withAnimation {
+                if focus.isForwardMode {
+                  self.focus.stop()
+                } else {
+                  if self.focus.percent != 0 {
+                    self.focus.stop()
+                  }
+                }
               }
             }
           })
