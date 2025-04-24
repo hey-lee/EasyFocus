@@ -79,10 +79,10 @@ struct WheelSlider: View {
   private func handleHaptic(by value: CGFloat) {
     let stepIncrement = CGFloat(config.multiplier) / CGFloat(config.steps)
     let currentStep = round(value / stepIncrement)
-
+    
     if currentStep != round(lastHapticValue / stepIncrement) {
-        Tools.haptic(.rigid)
-        lastHapticValue = value
+      Tools.haptic(.rigid)
+      lastHapticValue = value
     }
   }
 }
