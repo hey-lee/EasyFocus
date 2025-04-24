@@ -36,10 +36,6 @@ class FocusKit {
     set { UserDefaults.standard.set(newValue, forKey: "sessionsCount") }
     get { UserDefaults.standard.object(forKey: "sessionsCount") as? Int ?? 4 }
   }
-  var sessionIndex: Int {
-    set { UserDefaults.standard.set(newValue, forKey: "sessionIndex") }
-    get { UserDefaults.standard.object(forKey: "sessionIndex") as? Int ?? 0 }
-  }
   var restShort: Int {
     set { UserDefaults.standard.set(newValue, forKey: "restShort") }
     get { UserDefaults.standard.object(forKey: "restShort") as? Int ?? 5 }
@@ -62,6 +58,7 @@ class FocusKit {
   var secondsSinceStart = 0
   var percent: Double = 0
   var secondsOnPaused = 0
+  var sessionIndex = 0
   
   let minuteInSeconds = 60
   
@@ -142,7 +139,6 @@ extension FocusKit {
     }
   }
   func start() {
-    print("start")
     guard state != .running else { return }
     state = .running
     startedAt = .now
@@ -165,14 +161,18 @@ extension FocusKit {
     createTimer()
   }
   
-  func stop() {
-    print("stop")
+  func nextSession() {
     timer?.invalidate()
     state = .idle
-    secondsSinceStart = 0
     percent = 0
+    secondsSinceStart = 0
     secondsOnPaused = 0
     backgroundTask?.setTaskCompleted(success: true)
+  }
+  
+  func stop() {
+    nextSession()
+    sessionIndex = 0
     //    saveState()
     //    NotificationKit.clearPending()
   }
@@ -195,11 +195,13 @@ extension FocusKit {
       sessionIndex = (sessionIndex == sessionsCount) ? 0 : sessionIndex + 1
     }
     mode = mode == .work ? .rest : .work
-    stop()
+    nextSession()
   }
   
   func getSessionProgress(_ index: Int) -> CGFloat {
-    sessionIndex > index ? 1 : ((sessionIndex == index) && mode == .work ? percent : 0)
+    let progress = sessionIndex > index ? 1 : ((sessionIndex == index) && mode == .work ? percent : 0)
+    print("getSessionProgress", sessionIndex, index)
+    return progress
   }
   
   func format(_ seconds: Int) -> String {
