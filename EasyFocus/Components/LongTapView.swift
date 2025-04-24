@@ -69,7 +69,7 @@ struct LongTapView: View {
         }
       }
   }
-
+  
   @ViewBuilder
   var progressView: some View {
     if onTouching {
