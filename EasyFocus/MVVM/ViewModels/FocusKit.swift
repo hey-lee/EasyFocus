@@ -27,6 +27,7 @@ extension FocusKit {
 
 @Observable
 class FocusKit {
+  static let shared = FocusKit()
   var minutes: Int {
     set { UserDefaults.standard.set(newValue, forKey: "minutes") }
     get {
@@ -107,9 +108,7 @@ class FocusKit {
     }
   }
 
-  init() {
-    initNotification()
-  }
+  init() {}
 }
 
 // MARK - focus controls
@@ -193,7 +192,7 @@ extension FocusKit {
 
 // MARK - background task
 extension FocusKit {
-  private func initNotification() {
+  func initNotification() {
     initTaskScheduler()
     NotificationCenter.default.addObserver(
       self,

@@ -1,0 +1,18 @@
+//
+//  AppDelegate.swift
+//  Costrack
+//
+//  Created by DBL on 2024/9/19.
+//
+
+import SwiftUI
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+
+    FocusKit.shared.initNotification()
+    
+    return true
+  }
+  
+}
