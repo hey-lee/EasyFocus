@@ -15,7 +15,7 @@ struct StatsView: View {
   var focuses: [Focus] = []
 
   var body: some View {
-    ScrollView {
+    PageView {
       HStack {
         Button("Sync iCloud") {
           sync()

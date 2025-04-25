@@ -10,8 +10,9 @@ import Shimmer
 
 struct FocusView: View {
   @Environment(\.modelContext) var context
-  @Environment(FocusKit.self) var focusKit
+  @Environment(DBKit.self) var db
   @Environment(TagsKit.self) var tagsKit
+  @Environment(FocusKit.self) var focusKit
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
   @EnvironmentObject var stack: Stackit
@@ -48,7 +49,7 @@ struct FocusView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .toolbar {
-        ToolbarItem(placement: .topBarLeading) {
+        ToolbarItem(placement: .topBarTrailing) {
           Symbol("sf.chart.bar.fill")
             .onTapGesture {
               stack.settings.append("stats")
@@ -67,6 +68,22 @@ struct FocusView: View {
           StatsView()
         case "settings":
           SettingsView()
+        case "icloud":
+          PageView {
+            Text("Settings")
+            Text("iCloud: \(db.iCloudStatus)")
+            Text("iCloud sync status: \(db.iCloudSyncStatus)")
+            if let lastSyncTime = db.lastSyncTime {
+              Text("iCloud last sync time: \(Tools.format(lastSyncTime))")
+            }
+            Button("打开系统设置") {
+              if let url = URL(string: UIApplication.openSettingsURLString),
+                UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+              }
+            }
+            .buttonStyle(.borderedProminent)
+          }
         default:
           PageView()
         }
@@ -80,8 +97,9 @@ struct FocusView: View {
                 do {
                   context.insert(focus)
                   try context.save()
+                  print("focus.saved")
                 } catch let error {
-                  print("focus model save", error)
+                  print("focus model save error", error)
                 }
               }
               if focusKit.isForwardMode {
@@ -177,6 +195,7 @@ struct FocusView: View {
 
 #Preview {
   FocusView()
+    .environment(DBKit())
     .environment(TagsKit())
     .environment(FocusKit())
     .environmentObject(NavKit())
