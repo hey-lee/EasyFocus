@@ -17,7 +17,7 @@ final class SettingsKit {
       .init(key: "quick", name: "quick", icon: "rabbit-running", colors: [Color.pink300], type: .toggle),
     ]),
     (name: "Data & Security", items: [
-      .init(key: "icloud", name: "icloud", icon: "sf.icloud.and.arrow.up", colors: [Color.emerald300]),
+      .init(key: "icloud", name: "icloud", icon: "sf.icloud.and.arrow.up", colors: [Color.emerald300], trailingText: DBKit.shared.iCloudSyncStatus),
       .init(key: "clear.data", name: "clear.data", icon: "sf.paintbrush", colors: [Color.emerald300]),
     ]),
     (name: "App Settings", items: [
