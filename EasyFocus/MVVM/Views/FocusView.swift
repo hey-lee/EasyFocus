@@ -71,6 +71,13 @@ struct FocusView: View {
         case "icloud":
           PageView {
             Text("Settings")
+            Toggle(isOn: .init(get: {
+              UserDefaults.standard.bool(forKey: "enableiCloudSync")
+            }, set: { enableiCloudSync in
+              UserDefaults.standard.set(enableiCloudSync, forKey: "enableiCloudSync")
+            })) {
+              Text("iCloud Sync")
+            }
             Text("iCloud: \(db.iCloudStatus)")
             Text("iCloud sync status: \(db.iCloudSyncStatus)")
             if let lastSyncTime = db.lastSyncTime {

@@ -19,11 +19,20 @@ struct EasyFocusApp: App {
       Focus.self,
       FocusLabel.self,
     ])
-    let modelConfiguration = ModelConfiguration(
-      schema: schema,
-      isStoredInMemoryOnly: false,
-      cloudKitDatabase: .private("iCloud.co.banli.apps.easyfocus")
-    )
+    let modelConfiguration: ModelConfiguration
+    
+    if UserDefaults.standard.bool(forKey: "enableiCloudSync") {
+      modelConfiguration = ModelConfiguration(
+        schema: schema,
+        isStoredInMemoryOnly: false,
+        cloudKitDatabase: .private("iCloud.co.banli.apps.easyfocus")
+      )
+    } else {
+      modelConfiguration = ModelConfiguration(
+        schema: schema,
+        isStoredInMemoryOnly: false
+      )
+    }
     
     do {
       return try ModelContainer(for: schema, configurations: [modelConfiguration])
