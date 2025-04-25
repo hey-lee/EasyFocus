@@ -11,6 +11,7 @@ import CloudKit
 
 @main
 struct EasyFocusApp: App {
+  @AppStorage("mode") var isDark = false
   @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   
   var sharedModelContainer: ModelContainer = {
@@ -34,11 +35,13 @@ struct EasyFocusApp: App {
   var body: some Scene {
     WindowGroup {
       ContentView()
+        .preferredColorScheme(isDark ? .dark : .light)
     }
     .environment(DBKit())
     .environment(FocusKit())
     .environment(TagsKit.shared)
     .environmentObject(NavKit())
+    .environmentObject(Stackit())
     .environmentObject(ShowKit())
     .modelContainer(sharedModelContainer)
   }
