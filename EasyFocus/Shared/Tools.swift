@@ -28,6 +28,35 @@ extension Tools {
 }
 
 extension Tools {
+  static func transparentNavBar() {
+    UINavigationBar.appearance().shadowImage = UIImage()
+    //    UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
+  }
+  
+  static func transparentTabBar() {
+    let appearance = UITabBarAppearance()
+    // transparent background
+     appearance.configureWithTransparentBackground()
+    // blur effecg
+    appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+    // remove border top
+    appearance.shadowColor = .clear
+
+    // apply
+    UITabBar.appearance().standardAppearance = appearance
+
+    if #available(iOS 15.0, *) {
+      UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+  }
+  
+  static func transparentPageIndicator() {
+    UIPageControl.appearance().currentPageIndicatorTintColor = .clear
+    UIPageControl.appearance().pageIndicatorTintColor = .clear
+  }
+}
+
+extension Tools {
   @AppStorage("enableHaptic") static var enableHaptic: Bool = true
   public static func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .soft) {
     if enableHaptic {
@@ -40,6 +69,12 @@ extension Tools {
     if enableHaptic {
       let generator = UINotificationFeedbackGenerator()
       generator.notificationOccurred(type)
+    }
+  }
+  
+  static func openAppSettings() {
+    if let url = URL(string: UIApplication.openSettingsURLString) {
+      UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
   }
 }
