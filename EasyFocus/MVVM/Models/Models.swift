@@ -12,30 +12,39 @@ import Foundation
 class Focus {
   var minutes: Int = 25
   var sessionsCount: Int = 4
+  var completedSecondsCount: Int = 0
   var completedMinutesCount: Int = 0
   var completedSessionsCount: Int = 0
   var restShort: Int = 5
   var restLong: Int = 20
   var label: FocusLabel?
+  var startedAt: Date = Date()
+  var endedAt: Date = Date()
   var createdAt: Date = Date()
   
   init(
-    minutes: Int,
-    sessionsCount: Int,
-    completedMinutesCount: Int,
-    completedSessionsCount: Int,
-    restShort: Int,
-    restLong: Int,
+    minutes: Int = 25,
+    sessionsCount: Int = 4,
+    completedSecondsCount: Int = 0,
+    completedMinutesCount: Int = 0,
+    completedSessionsCount: Int = 0,
+    restShort: Int = 5,
+    restLong: Int = 20,
     label: FocusLabel?,
-    createdAt: Date
+    startedAt: Date = Date(),
+    endedAt: Date = Date(),
+    createdAt: Date = Date()
   ) {
     self.minutes = minutes
     self.sessionsCount = sessionsCount
+    self.completedSecondsCount = completedSecondsCount
     self.completedMinutesCount = completedMinutesCount
     self.completedSessionsCount = completedSessionsCount
     self.restShort = restShort
     self.restLong = restLong
     self.label = label
+    self.startedAt = startedAt
+    self.endedAt = endedAt
     self.createdAt = createdAt
   }
 }
