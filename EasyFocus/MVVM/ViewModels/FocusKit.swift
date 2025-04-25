@@ -30,7 +30,7 @@ class FocusKit {
   static let shared = FocusKit()
   var minutes: Int {
     set { UserDefaults.standard.set(newValue, forKey: "minutes") }
-    get { UserDefaults.standard.object(forKey: "minutes") as? Int ?? 1 }
+    get { UserDefaults.standard.object(forKey: "minutes") as? Int ?? 20 }
   }
   var sessionsCount: Int {
     set { UserDefaults.standard.set(newValue, forKey: "sessionsCount") }
