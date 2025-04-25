@@ -14,77 +14,104 @@ struct FocusView: View {
   @Environment(TagsKit.self) var tagsKit
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
+  @EnvironmentObject var stack: Stackit
   
   var body: some View {
-    VStack {
-      VStack(spacing: 0) {
-        focusView
+    NavigationStack(path: $stack.settings) {
+      VStack {
+        VStack(spacing: 0) {
+          focusView
+          
+          if focusKit.state == .running, !focusKit.isForwardMode {
+            sessionsView
+          }
+          if focusKit.state == .idle, focusKit.mode == .work, focusKit.sessionIndex == 0 {
+            tagView
+          }
+        }
         
-        if focusKit.state == .running, !focusKit.isForwardMode {
-          sessionsView
-        }
-        if focusKit.state == .idle, focusKit.mode == .work, focusKit.sessionIndex == 0 {
-          tagView
+        if focusKit.state == .idle {
+          Text(focusKit.mode == .work ? "Start Focus" : "Take a rest")
+            .font(.custom("Code Next ExtraBold", size: 18))
+            .foregroundStyle(.white)
+            .padding()
+            .background(.black)
+            .clipShape(Capsule())
+            .onTapGesture {
+              Tools.haptic()
+              focusKit.createFocusModel()
+              withAnimation {
+                focusKit.start()
+              }
+            }
         }
       }
-      
-      if focusKit.state == .idle {
-        Text(focusKit.mode == .work ? "Start Focus" : "Take a rest")
-          .font(.custom("Code Next ExtraBold", size: 18))
-          .foregroundStyle(.white)
-          .padding()
-          .background(.black)
-          .clipShape(Capsule())
-          .onTapGesture {
-            Tools.haptic()
-            focusKit.createFocusModel()
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .toolbar {
+        ToolbarItem(placement: .topBarLeading) {
+          Symbol("sf.chart.bar.fill")
+            .onTapGesture {
+              stack.settings.append("stats")
+            }
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+          Symbol("sf.ellipsis")
+            .onTapGesture {
+              stack.settings.append("settings")
+            }
+        }
+      }
+      .navigationDestination(for: String.self) { key in
+        switch key {
+        case "stats":
+          StatsView()
+        case "settings":
+          SettingsView()
+        default:
+          PageView()
+        }
+      }
+      .overlay {
+        if focusKit.state == .running {
+          LongTapView {
             withAnimation {
-              focusKit.start()
-            }
-          }
-      }
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .overlay {
-      if focusKit.state == .running {
-        LongTapView {
-          withAnimation {
-            focusKit.updateFocusModel()
-            if let focus = focusKit.focus {
-              do {
-                context.insert(focus)
-                try context.save()
-              } catch let error {
-                print("focus model save", error)
+              focusKit.updateFocusModel()
+              if let focus = focusKit.focus {
+                do {
+                  context.insert(focus)
+                  try context.save()
+                } catch let error {
+                  print("focus model save", error)
+                }
               }
-            }
-            if focusKit.isForwardMode {
-              self.focusKit.stop()
-            } else {
-              if self.focusKit.percent != 0 {
+              if focusKit.isForwardMode {
                 self.focusKit.stop()
+              } else {
+                if self.focusKit.percent != 0 {
+                  self.focusKit.stop()
+                }
               }
             }
           }
         }
       }
-    }
-    .overlay {
-      if show.WheelSliderView {
-        WheelSliderView()
+      .overlay {
+        if show.WheelSliderView {
+          WheelSliderView()
+        }
       }
-    }
-    .sheet(isPresented: $show.tags) {
-      TagsView()
-        .presentationDetents([
-          .medium,
-        ])
-        .presentationDragIndicator(.visible)
-        .presentationCornerRadius(32)
-    }
-    .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
-      if let label = tagsKit.modelLabel, let focus = focusKit.focus {
-        focus.label = label
+      .sheet(isPresented: $show.tags) {
+        TagsView()
+          .presentationDetents([
+            .medium,
+          ])
+          .presentationDragIndicator(.visible)
+          .presentationCornerRadius(32)
+      }
+      .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
+        if let label = tagsKit.modelLabel, let focus = focusKit.focus {
+          focus.label = label
+        }
       }
     }
   }
@@ -154,6 +181,7 @@ struct FocusView: View {
     .environment(FocusKit())
     .environmentObject(NavKit())
     .environmentObject(ShowKit())
+    .environmentObject(Stackit())
     .modelContainer(for: [
       Focus.self,
     ])
