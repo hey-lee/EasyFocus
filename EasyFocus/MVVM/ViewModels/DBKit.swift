@@ -69,11 +69,11 @@ final class DBKit {
       queue: .main
     ) { [weak self] notification in
       guard let userInfo = notification.userInfo,
-            let cloudEvent = userInfo[NSPersistentCloudKitContainer.eventNotificationUserInfoKey] as? NSPersistentCloudKitContainer.Event else {
+            let event = userInfo[NSPersistentCloudKitContainer.eventNotificationUserInfoKey] as? NSPersistentCloudKitContainer.Event else {
         return
       }
-      
-      switch cloudEvent.type {
+      print("event.type", event.type)
+      switch event.type {
       case .setup:
         self?.syncStatus = "正在设置"
       case .import:
@@ -84,10 +84,10 @@ final class DBKit {
         self?.syncStatus = "未知状态"
       }
       
-      if cloudEvent.endDate != nil {
+      if event.endDate != nil {
         self?.lastSyncTime = Date()
         
-        if let error = cloudEvent.error {
+        if let error = event.error {
           self?.syncStatus = "同步错误: \(error.localizedDescription)"
         } else {
           self?.syncStatus = "同步完成"
@@ -95,42 +95,4 @@ final class DBKit {
       }
     }
   }
-  
-//  func triggerManualSync() {
-//    guard let container = modelContext.container as? NSPersistentCloudKitContainer else {
-//      syncError = NSError(domain: "SyncError", code: 1001, userInfo: [NSLocalizedDescriptionKey: "无效的容器类型"])
-//      return
-//    }
-//    
-//    isSyncing = true
-//    syncError = nil
-//    
-//    Task {
-//      do {
-//        try await performCloudKitSync(container: container)
-//        DispatchQueue.main.async {
-//          self.lastSyncTime = Date()
-//          self.isSyncing = false
-//        }
-//      } catch {
-//        DispatchQueue.main.async {
-//          self.syncError = error
-//          self.isSyncing = false
-//        }
-//      }
-//    }
-//  }
-//  
-//  func performCloudKitSync(container: NSPersistentCloudKitContainer) async throws {
-//    return try await withCheckedThrowingContinuation { continuation in
-//      container.syncPersistentStores { _, result in
-//        switch result {
-//        case .success:
-//          continuation.resume()
-//        case .failure(let error):
-//          continuation.resume(throwing: error)
-//        }
-//      }
-//    }
-//  }
 }
