@@ -8,12 +8,16 @@
 import SwiftUI
 
 struct WheelSlider: View {
+  enum Sticky {
+    case indicator, mainIndicator
+  }
   struct Config: Equatable {
     var count: Int
     var steps: Int = 5
     var multiplier: Int = 10
     var spacing: CGFloat = 10
     var showIndicator: Bool = false
+    var sticky: Sticky = .mainIndicator
   }
   
   @Binding var value: CGFloat
@@ -57,11 +61,11 @@ struct WheelSlider: View {
       .scrollPosition(id: Binding(get: {
         isLoaded ? (Int(value) * config.steps) / config.multiplier : nil
       }, set: { newValue in
-        if let newValue {
-          value = (CGFloat(newValue) / CGFloat(config.steps)) * CGFloat(config.multiplier)
-          
-          handleHaptic(by: value)
-        }
+        guard let newValue else { return }
+
+        value = (CGFloat(newValue) / CGFloat(config.steps)) * CGFloat(config.multiplier)
+        
+        handleHaptic(by: value)
       }))
       .overlay(alignment: .center) {
         VStack {
