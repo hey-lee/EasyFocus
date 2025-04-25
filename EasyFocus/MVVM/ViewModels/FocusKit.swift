@@ -28,6 +28,7 @@ extension FocusKit {
 @Observable
 class FocusKit {
   static let shared = FocusKit()
+  var focus: Focus?
   var minutes: Int {
     set { UserDefaults.standard.set(newValue, forKey: "minutes") }
     get { UserDefaults.standard.object(forKey: "minutes") as? Int ?? 20 }
@@ -48,6 +49,27 @@ class FocusKit {
     set { UserDefaults.standard.set(newValue, forKey: "autoRun") }
     get { UserDefaults.standard.object(forKey: "autoRun") as? Bool ?? true }
   }
+
+  var completedSessionsCount: Int {
+    let completedSessions = sessionIndex
+    let currentSession = (mode == .work && percent >= 0.8) ? 1 : 0
+    
+    return max(0, completedSessions + currentSession)
+  }
+
+  var completedSecondsCount: Int {
+    let completedSessionsSeconds = sessionIndex * minutes * minuteInSeconds
+    let currentSessionSeconds = mode == .work ? secondsSinceStart : 0
+    
+    return completedSessionsSeconds + currentSessionSeconds
+  }
+
+  var completedMinutesCount: Int {
+    let completedSessionsTime = sessionIndex * minutes
+    let currentSessionTime = mode == .work ? Int(Double(minutes) * percent) : 0
+    
+    return completedSessionsTime + currentSessionTime
+  }
   
   // Timer State
   var timer: Timer?
@@ -59,6 +81,7 @@ class FocusKit {
   var state: FocusState = .idle
   var restType: RestType = .short
   var startedAt = Date.now
+  var endedAt = Date.now
   var secondsSinceStart = 0
   var percent: Double = 0
   var secondsOnPaused = 0
@@ -137,6 +160,23 @@ class FocusKit {
 
 // MARK - focus controls
 extension FocusKit {
+  func createFocusModel() {
+    self.focus = Focus(
+      minutes: minutes,
+      sessionsCount: sessionsCount,
+      restShort: restShort,
+      restLong: restLong,
+      label: TagsKit.shared.modelLabel,
+    )
+  }
+  func updateFocusModel() {
+    if let focus {
+      focus.endedAt = endedAt
+      focus.completedSecondsCount = completedSecondsCount
+      focus.completedMinutesCount = completedMinutesCount
+      focus.completedSessionsCount = completedSessionsCount
+    }
+  }
   private func createTimer() {
     timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
       self?.tick()
@@ -176,7 +216,9 @@ extension FocusKit {
   
   func stop() {
     nextSession()
+    mode = .work
     sessionIndex = 0
+    endedAt = Date()
     //    saveState()
     //    NotificationKit.clearPending()
   }

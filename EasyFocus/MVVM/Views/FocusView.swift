@@ -9,7 +9,8 @@ import SwiftUI
 import Shimmer
 
 struct FocusView: View {
-  @Environment(FocusKit.self) var focus
+  @Environment(\.modelContext) var context
+  @Environment(FocusKit.self) var focusKit
   @Environment(TagsKit.self) var tagsKit
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
@@ -19,16 +20,16 @@ struct FocusView: View {
       VStack(spacing: 0) {
         focusView
         
-        if focus.state == .running, !focus.isForwardMode {
+        if focusKit.state == .running, !focusKit.isForwardMode {
           sessionsView
         }
-        if focus.state == .idle, focus.sessionIndex == 0 {
+        if focusKit.state == .idle, focusKit.mode == .work, focusKit.sessionIndex == 0 {
           tagView
         }
       }
       
-      if focus.state == .idle {
-        Text(focus.mode == .work ? "Start Focus" : "Take a rest")
+      if focusKit.state == .idle {
+        Text(focusKit.mode == .work ? "Start Focus" : "Take a rest")
           .font(.custom("Code Next ExtraBold", size: 18))
           .foregroundStyle(.white)
           .padding()
@@ -36,22 +37,32 @@ struct FocusView: View {
           .clipShape(Capsule())
           .onTapGesture {
             Tools.haptic()
+            focusKit.createFocusModel()
             withAnimation {
-              focus.start()
+              focusKit.start()
             }
           }
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .overlay {
-      if focus.state == .running {
+      if focusKit.state == .running {
         LongTapView {
           withAnimation {
-            if focus.isForwardMode {
-              self.focus.stop()
+            focusKit.updateFocusModel()
+            if let focus = focusKit.focus {
+              do {
+                context.insert(focus)
+                try context.save()
+              } catch let error {
+                print("focus model save", error)
+              }
+            }
+            if focusKit.isForwardMode {
+              self.focusKit.stop()
             } else {
-              if self.focus.percent != 0 {
-                self.focus.stop()
+              if self.focusKit.percent != 0 {
+                self.focusKit.stop()
               }
             }
           }
@@ -71,28 +82,33 @@ struct FocusView: View {
         .presentationDragIndicator(.visible)
         .presentationCornerRadius(32)
     }
+    .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
+      if let label = tagsKit.modelLabel, let focus = focusKit.focus {
+        focus.label = label
+      }
+    }
   }
   
   var focusView: some View {
     HStack(spacing: 8) {
       Group {
-        Text(focus.display.minutes)
+        Text(focusKit.display.minutes)
         VStack {
-          let size: CGFloat = focus.state != .idle ? 20 : 16
+          let size: CGFloat = focusKit.state != .idle ? 20 : 16
           Circle()
             .frame(width: size, height: size)
           Circle()
             .frame(width: size, height: size)
         }
-        Text(focus.display.seconds)
+        Text(focusKit.display.seconds)
       }
       .tracking(-4)
-      .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focus.state == .idle) ? 80 : 100).monospacedDigit())
+      .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focusKit.state == .idle) ? 80 : 100).monospacedDigit())
     }
     .onTapGesture {
       Tools.haptic()
       withAnimation {
-        if focus.state == .idle {
+        if focusKit.state == .idle {
           show.WheelSliderView = true
         }
       }
@@ -101,7 +117,7 @@ struct FocusView: View {
   
   @ViewBuilder
   var tagView: some View {
-    if let label = tagsKit.label {
+    if let label = tagsKit.modelLabel {
       HStack {
         Text(label.name)
           .font(.custom("Code Next ExtraBold", size: 24))
@@ -115,16 +131,16 @@ struct FocusView: View {
   
   var sessionsView: some View {
     HStack(spacing: 16) {
-      ForEach(0...focus.sessionsCount - 1, id: \.self) { index in
+      ForEach(0...focusKit.sessionsCount - 1, id: \.self) { index in
         ZStack {
           Circle()
             .stroke(Color.black, lineWidth: 4)
             .frame(width: 20, height: 20)
           Circle()
-            .trim(from: 0, to: focus.getSessionProgress(index))
+            .trim(from: 0, to: focusKit.getSessionProgress(index))
             .stroke(Color.black, lineWidth: 10)
             .frame(width: 10, height: 10)
-            .animation(.linear(duration: 0.5), value: focus.percent)
+            .animation(.linear(duration: 0.5), value: focusKit.percent)
         }
       }
     }
