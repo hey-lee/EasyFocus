@@ -12,13 +12,13 @@ struct ContentView: View {
   @EnvironmentObject var nav: NavKit
   
   var body: some View {
-    TabView(selection: $nav.activeTab) {
+    TabView(selection: $nav.activeNav) {
+      StatsView()
+        .tag(NavKit.NavType.stats)
       FocusView()
-        .tag("focus")
-      VStack {
-        Text("settings")
-      }
-        .tag("settings")
+        .tag(NavKit.NavType.focus)
+      SettingsView()
+        .tag(NavKit.NavType.settings)
     }
     .tabViewStyle(.page)
   }
