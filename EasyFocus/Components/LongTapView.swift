@@ -72,8 +72,9 @@ struct LongTapView: View {
   
   @ViewBuilder
   var progressView: some View {
-    if onTouching {
-      VStack {
+    VStack {
+      Spacer()
+      if onTouching {
         ZStack(alignment: .leading) {
           let size: CGSize = CGSize(width: 200, height: 4)
           RoundedRectangle(cornerRadius: size.height / 2, style: .continuous)
@@ -84,15 +85,15 @@ struct LongTapView: View {
             .fill(.black.opacity(0.8))
             .frame(width: size.width * progress, height: size.height)
         }
-        .padding(.top, 240)
+        .padding(.bottom, 12)
       }
+      
+      Text(text)
+        .font(.body)
+        .shimmering()
+        .foregroundColor(onTouching ? Color.slate900 : Color.slate300)
+        .padding(.bottom, 60)
     }
-    
-    Text(text)
-      .font(.body)
-      .shimmering()
-      .foregroundColor(onTouching ? Color.slate900 : Color.slate300)
-      .padding(.top, 300)
   }
 }
 
