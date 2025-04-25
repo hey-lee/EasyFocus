@@ -11,10 +11,8 @@ import Shimmer
 struct FocusView: View {
   @Environment(FocusKit.self) var focus
   @Environment(TagsKit.self) var tagsKit
+  @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
-  
-  @State var showSettings = false
-  @State var showWheelSlider = false
   
   var body: some View {
     VStack {
@@ -61,16 +59,8 @@ struct FocusView: View {
       }
     }
     .overlay {
-      if showWheelSlider {
-        wheelSliderView
-      }
-    }
-    .toolbar {
-      ToolbarItem(placement: .topBarTrailing) {
-        Symbol("sf.gearshape.fill")
-          .onTapGesture {
-            self.showSettings = true
-          }
+      if show.WheelSliderView {
+        WheelSliderView()
       }
     }
     .sheet(isPresented: $show.tags) {
@@ -103,7 +93,7 @@ struct FocusView: View {
       Tools.haptic()
       withAnimation {
         if focus.state == .idle {
-          self.showWheelSlider = true
+          show.WheelSliderView = true
         }
       }
     }
@@ -140,41 +130,13 @@ struct FocusView: View {
     }
     .padding()
   }
-  
-  var wheelSliderView: some View {
-    VStack {
-      WheelSlider(value: .init(
-        get: { CGFloat(focus.minutes) },
-        set: {
-          focus.minutes = Int($0)
-        }
-      ), config: .init(
-        count: 12,
-        showIndicator: true
-      ))
-      .frame(height: 180)
-      
-      Text("Done")
-        .font(.custom("Code Next ExtraBold", size: 18))
-        .foregroundStyle(.white)
-        .padding()
-        .background(.black)
-        .clipShape(Capsule())
-        .onTapGesture {
-          withAnimation {
-            self.showWheelSlider = false
-          }
-        }
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(.white)
-  }
 }
 
 #Preview {
   FocusView()
     .environment(TagsKit())
     .environment(FocusKit())
+    .environmentObject(NavKit())
     .environmentObject(ShowKit())
     .modelContainer(for: [
       Focus.self,

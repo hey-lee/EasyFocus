@@ -10,4 +10,5 @@ import SwiftUI
 final class ShowKit: ObservableObject {
   @Published var tags: Bool = false
   @Published var lego: Bool = false
+  @Published var WheelSliderView: Bool = false
 }
