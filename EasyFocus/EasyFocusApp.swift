@@ -7,11 +7,30 @@
 
 import SwiftUI
 import SwiftData
+import CloudKit
 
 @main
 struct EasyFocusApp: App {
   @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
+  
+  var sharedModelContainer: ModelContainer = {
+    let schema = Schema([
+      Focus.self,
+      FocusLabel.self,
+    ])
+    let modelConfiguration = ModelConfiguration(
+      schema: schema,
+      isStoredInMemoryOnly: false,
+      cloudKitDatabase: .private("iCloud.co.banli.apps.easyfocus")
+    )
+    
+    do {
+      return try ModelContainer(for: schema, configurations: [modelConfiguration])
+    } catch {
+      fatalError("Could not create ModelContainer: \(error)")
+    }
+  }()
+  
   var body: some Scene {
     WindowGroup {
       ContentView()
@@ -20,8 +39,6 @@ struct EasyFocusApp: App {
     .environment(TagsKit.shared)
     .environmentObject(NavKit())
     .environmentObject(ShowKit())
-    .modelContainer(for: [
-      Focus.self,
-    ])
+    .modelContainer(sharedModelContainer)
   }
 }
