@@ -51,6 +51,8 @@ struct StatsView: View {
             Text(label.name)
               .foregroundColor(.white)
             Spacer()
+            Text(Tools.format(focus.createdAt))
+              .foregroundColor(.white)
             Text(Tools.formatSeconds(focus.completedSecondsCount))
               .foregroundColor(.white)
           }
