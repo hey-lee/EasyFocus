@@ -10,14 +10,14 @@ import Foundation
 
 @Model
 class Focus {
-  var minutes: Int
-  var sessionsCount: Int
-  var completedMinutesCount: Int
-  var completedSessionsCount: Int
-  var restShort: Int
-  var restLong: Int
-  var label: Tag
-  var createdAt: Date
+  var minutes: Int = 25
+  var sessionsCount: Int = 4
+  var completedMinutesCount: Int = 0
+  var completedSessionsCount: Int = 0
+  var restShort: Int = 5
+  var restLong: Int = 20
+  var label: FocusLabel?
+  var createdAt: Date = Date()
   
   init(
     minutes: Int,
@@ -26,8 +26,8 @@ class Focus {
     completedSessionsCount: Int,
     restShort: Int,
     restLong: Int,
-    label: Tag,
-    createdAt: Date = Date()
+    label: FocusLabel?,
+    createdAt: Date
   ) {
     self.minutes = minutes
     self.sessionsCount = sessionsCount
@@ -41,21 +41,25 @@ class Focus {
 }
 
 @Model
-class Tag {
-  var id: String
-  var name: String
-  var icon: String
-  var backgroundColor: String
+class FocusLabel {
+  var id: String = UUID().uuidString
+  var name: String = ""
+  var icon: String = ""
+  var backgroundColor: String = ""
+  @Relationship(inverse: \Focus.label)
+  var focuses: [Focus]? = []
   
   init(
     id: String = UUID().uuidString,
-    name: String,
-    icon: String,
-    backgroundColor: String = ""
+    name: String = "",
+    icon: String = "",
+    backgroundColor: String = "",
+    focuses: [Focus]? = []
   ) {
     self.id = id
     self.name = name
     self.icon = icon
     self.backgroundColor = backgroundColor
+    self.focuses = focuses
   }
 }
