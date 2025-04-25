@@ -219,6 +219,7 @@ extension FocusKit {
     mode = .work
     sessionIndex = 0
     endedAt = Date()
+    focus = nil
     //    saveState()
     //    NotificationKit.clearPending()
   }
