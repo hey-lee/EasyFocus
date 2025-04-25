@@ -10,9 +10,21 @@ import SwiftUI
 struct Tools {}
 
 extension Tools {
+  static func format(_ date: Date, _ tpl: String = "yyyy-MM-dd HH:mm:ss") -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = tpl
+    return dateFormatter.string(from: date)
+  }
+  
+  static func toDate(_ dateString: String, _ tpl: String = "yyyy-MM-dd HH:mm:ss") -> Date? {
+    let formatter = DateFormatter()
+    formatter.dateFormat = tpl
+    return formatter.date(from: dateString)
+  }
+  
   static func formatSeconds(_ seconds: Int) -> String {
     guard seconds > 0 else { return "0s" }
-
+    
     let hours = seconds / 3600
     let minutes = (seconds % 3600) / 60
     let remainingSeconds = seconds % 60
@@ -36,15 +48,15 @@ extension Tools {
   static func transparentTabBar() {
     let appearance = UITabBarAppearance()
     // transparent background
-     appearance.configureWithTransparentBackground()
+    appearance.configureWithTransparentBackground()
     // blur effecg
     appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
     // remove border top
     appearance.shadowColor = .clear
-
+    
     // apply
     UITabBar.appearance().standardAppearance = appearance
-
+    
     if #available(iOS 15.0, *) {
       UITabBar.appearance().scrollEdgeAppearance = appearance
     }
