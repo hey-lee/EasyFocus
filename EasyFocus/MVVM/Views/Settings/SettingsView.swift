@@ -28,7 +28,7 @@ struct SettingsView: View {
   @State var showAmountColorsOverlay: Bool = false
   
   init() {
-//    Tools.transparentNavBar()
+    Tools.transparentNavBar()
   }
   
   var body: some View {
