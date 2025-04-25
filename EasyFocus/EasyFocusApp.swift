@@ -35,6 +35,7 @@ struct EasyFocusApp: App {
     WindowGroup {
       ContentView()
     }
+    .environment(DBKit())
     .environment(FocusKit())
     .environment(TagsKit.shared)
     .environmentObject(NavKit())
