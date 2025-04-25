@@ -38,6 +38,7 @@ struct WheelSliderView: View {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(.white)
+    .gesture(DragGesture(minimumDistance: 0))
   }
 }
 
