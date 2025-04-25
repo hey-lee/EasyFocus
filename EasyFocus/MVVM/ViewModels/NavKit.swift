@@ -8,5 +8,8 @@
 import Foundation
 
 final class NavKit: ObservableObject {
-  @Published var activeTab: String = ""
+  enum NavType {
+    case settings, focus, stats
+  }
+  @Published var activeNav: NavType = .focus
 }
