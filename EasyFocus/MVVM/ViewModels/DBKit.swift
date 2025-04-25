@@ -14,17 +14,32 @@ import CoreData
 final class DBKit {
   static let shared = DBKit()
   
-  var iCloudStatus: String = "unknown"
+  var iCloudStatus: String {
+    set {
+      UserDefaults.standard.set(newValue, forKey: "iCloudStatus")
+    }
+    get {
+      UserDefaults.standard.string(forKey: "iCloudStatus") ?? ""
+    }
+  }
   var iCloudAuthorized: Bool = false
-  var syncStatus: String = "未同步"
+  var iCloudSyncStatus: String {
+    set {
+      UserDefaults.standard.set(newValue, forKey: "iCloudSyncStatus")
+    }
+    get {
+      UserDefaults.standard.string(forKey: "iCloudSyncStatus") ?? ""
+    }
+  }
   var lastSyncTime: Date?
   
   init() {
     checkiCloudStatus()
+    setupNotifications()
   }
   
   deinit {
-    NotificationCenter.default.removeObserver(self)
+    NotificationCenter.default.removeObserver(self, name: NSPersistentCloudKitContainer.eventChangedNotification, object: nil)
   }
   
   func checkiCloudStatus() {
@@ -72,25 +87,25 @@ final class DBKit {
             let event = userInfo[NSPersistentCloudKitContainer.eventNotificationUserInfoKey] as? NSPersistentCloudKitContainer.Event else {
         return
       }
-      print("event.type", event.type)
+
       switch event.type {
       case .setup:
-        self?.syncStatus = "正在设置"
+        self?.iCloudSyncStatus = "setup"
       case .import:
-        self?.syncStatus = "正在导入数据"
+        self?.iCloudSyncStatus = "import"
       case .export:
-        self?.syncStatus = "正在导出数据"
+        self?.iCloudSyncStatus = "export"
       @unknown default:
-        self?.syncStatus = "未知状态"
+        self?.iCloudSyncStatus = "unknown"
       }
       
       if event.endDate != nil {
         self?.lastSyncTime = Date()
         
         if let error = event.error {
-          self?.syncStatus = "同步错误: \(error.localizedDescription)"
+          self?.iCloudSyncStatus = "iCloud sync error: \(error.localizedDescription)"
         } else {
-          self?.syncStatus = "同步完成"
+          self?.iCloudSyncStatus = "success"
         }
       }
     }
