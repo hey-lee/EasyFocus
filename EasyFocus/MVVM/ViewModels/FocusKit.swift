@@ -44,6 +44,10 @@ class FocusKit {
     set { UserDefaults.standard.set(newValue, forKey: "restLong") }
     get { UserDefaults.standard.object(forKey: "restLong") as? Int ?? 20 }
   }
+  var autoRun: Bool {
+    set { UserDefaults.standard.set(newValue, forKey: "autoRun") }
+    get { UserDefaults.standard.object(forKey: "autoRun") as? Bool ?? true }
+  }
   
   // Timer State
   var timer: Timer?
@@ -195,13 +199,19 @@ extension FocusKit {
       sessionIndex = (sessionIndex == sessionsCount) ? 0 : sessionIndex + 1
     }
     mode = mode == .work ? .rest : .work
-    nextSession()
+    
+    if sessionIndex == 0 {
+      stop()
+    } else {
+      nextSession()
+      if autoRun {
+        start()
+      }
+    }
   }
   
   func getSessionProgress(_ index: Int) -> CGFloat {
-    let progress = sessionIndex > index ? 1 : ((sessionIndex == index) && mode == .work ? percent : 0)
-    print("getSessionProgress", sessionIndex, index)
-    return progress
+    sessionIndex > index ? 1 : ((sessionIndex == index) && mode == .work ? percent : 0)
   }
   
   func format(_ seconds: Int) -> String {
