@@ -1,0 +1,25 @@
+/* 
+  Localizable.strings
+  EasyFocus
+
+  Created by 大板栗 on 2025/4/26.
+  
+*/
+
+"language" = "Language";
+"theme" = "Theming";
+"app.icons" = "App Icons";
+"security" = "Security";
+"reminders" = "Reminders";
+"subscription" = "Subscription";
+"icloud" = "iCloud Sync";
+"haptic" = "Hapic Feedback";
+"tap.sound" = "Button Sound Feedback";
+"focus" = "Focus";
+"short.break" = "Short break";
+"long.break" = "Long break";
+"focus.minutes" = "Focus";
+"auto.start.short.breaks" = "Auto start short breaks";
+"auto.start.long.breaks" = "Auto start long breaks";
+"focus.sessions.per.round" = "Focus sessions per round";
+"reminder" = "Reminder";
