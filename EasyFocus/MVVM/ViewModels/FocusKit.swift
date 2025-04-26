@@ -43,7 +43,7 @@ class FocusKit {
   }
   var restLong: Int {
     set { UserDefaults.standard.set(newValue, forKey: "restLong") }
-    get { UserDefaults.standard.object(forKey: "restLong") as? Int ?? 20 }
+    get { UserDefaults.standard.object(forKey: "restLong") as? Int ?? 15 }
   }
   var autoRun: Bool {
     set { UserDefaults.standard.set(newValue, forKey: "autoRun") }
