@@ -13,7 +13,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     FocusKit.shared.initNotification()
     
     UserDefaults.standard.register(defaults: [
+      // app
+      "enableSound": true,
+      "enableHaptic": true,
+      // focus
+      "minutes": 20,
+      "sessionsCount": 4,
+      "restShort": 5,
+      "restLong": 15,
+      "enableReminder": false,
       "enableiCloudSync": false,
+      "autoStartSessions": false,
+      "autoStartShortBreaks": false,
     ])
     
     

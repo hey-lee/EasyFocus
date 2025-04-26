@@ -15,7 +15,10 @@ struct SettingsView: View {
   
   // @AppStorage
   // focus
-  @AppStorage("autoRun") var autoRun: Bool = true
+  @AppStorage("autoRun") var autoRun: Bool = false
+  @AppStorage("autoStartShortBreaks") var autoStartShortBreaks: Bool = false
+  @AppStorage("autoStartSessions") var autoStartSessions: Bool = false
+  @AppStorage("enableReminder") var enableReminder: Bool = false
   @AppStorage("minutes") var minutes: Int = 25
   @AppStorage("sessionsCount") var sessionsCount: Int = 4
   @AppStorage("restShort") var restShort: Int = 5
@@ -52,11 +55,11 @@ struct SettingsView: View {
             case .toggle:
               switch cell.key {
               case "auto.start.short.breaks":
-                CellView(cell: cell, isOn: $autoRun)
-              case "auto.start.long.breaks":
-                CellView(cell: cell, isOn: $autoRun)
+                CellView(cell: cell, isOn: $autoStartShortBreaks)
+              case "auto.start.sessions":
+                CellView(cell: cell, isOn: $autoStartSessions)
               case "focus.reminder":
-                CellView(cell: cell, isOn: $autoRun)
+                CellView(cell: cell, isOn: $enableReminder)
               case "feedback.haptic":
                 CellView(cell: cell, isOn: $enableHaptic)
               case "feedback.sound":
