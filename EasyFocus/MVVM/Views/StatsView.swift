@@ -17,6 +17,10 @@ struct StatsView: View {
   var body: some View {
     PageView {
       HStack {
+        Spacer()
+        BackButton("sf.xmark")
+      }
+      HStack {
         Button("Sync iCloud") {
           sync()
         }

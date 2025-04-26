@@ -49,17 +49,20 @@ struct FocusView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .toolbar {
-        ToolbarItem(placement: .topBarTrailing) {
-          Symbol("sf.chart.bar.fill")
-            .onTapGesture {
-              stack.settings.append("stats")
-            }
-        }
-        ToolbarItem(placement: .topBarTrailing) {
-          Symbol("sf.ellipsis")
-            .onTapGesture {
-              stack.settings.append("settings")
-            }
+        if focusKit.state == .idle {
+          ToolbarItem(placement: .topBarLeading) {
+            Symbol("sf.chart.bar.fill")
+              .onTapGesture {
+                // stack.settings.append("stats")
+                show.StatsView = true
+              }
+          }
+          ToolbarItem(placement: .topBarTrailing) {
+            Symbol("sf.ellipsis")
+              .onTapGesture {
+                stack.settings.append("settings")
+              }
+          }
         }
       }
       .navigationDestination(for: String.self) { key in
@@ -132,6 +135,9 @@ struct FocusView: View {
           ])
           .presentationDragIndicator(.visible)
           .presentationCornerRadius(32)
+      }
+      .fullScreenCover(isPresented: $show.StatsView) {
+        StatsView()
       }
       .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
         if let label = tagsKit.modelLabel, let focus = focusKit.focus {
