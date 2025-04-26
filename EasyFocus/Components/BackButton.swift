@@ -16,7 +16,7 @@ struct BackButton: View {
   }
 
   var body: some View {
-    Symbol(iconName, size: 44, colors: [Color.white])
+    Symbol(iconName, size: 36, colors: [Color.white], contentSize: .small)
       .onTapGesture {
         dismiss()
         Tools.haptic()
