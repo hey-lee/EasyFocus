@@ -15,7 +15,6 @@ struct SettingsView: View {
   
   // @AppStorage
   // focus
-  @AppStorage("autoRun") var autoRun: Bool = false
   @AppStorage("autoStartShortBreaks") var autoStartShortBreaks: Bool = false
   @AppStorage("autoStartSessions") var autoStartSessions: Bool = false
   @AppStorage("enableReminder") var enableReminder: Bool = false
