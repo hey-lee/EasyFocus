@@ -201,7 +201,8 @@ extension FocusKit {
       stop()
     } else {
       nextSession()
-      if autoStartShortBreaks {
+      let shouldAutoStart = mode == .work ? autoStartSessions : autoStartShortBreaks
+      if shouldAutoStart {
         start()
       }
     }
