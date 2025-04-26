@@ -37,7 +37,7 @@ struct WheelSliderView: View {
         }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(.white)
+    .background(ThemeKit.theme.backgroundColor.ignoresSafeArea())
     .gesture(DragGesture(minimumDistance: 0))
   }
 }
