@@ -37,15 +37,15 @@ struct SettingsView: View {
   var body: some View {
     PageView {
       ForEach(Array(zip(SettingsKit.shared.sections.indices, SettingsKit.shared.sections)), id: \.0) { index, section in
-        VStack {
-          HStack {
-            Text(section.name)
-              .textCase(.uppercase)
-              .font(.title2.weight(.heavy))
-              .foregroundColor(ThemeKit.theme.foregroundColor)
-            Spacer()
-          }
-        }
+//        VStack {
+//          HStack {
+//            Text(section.name)
+//              .textCase(.uppercase)
+//              .font(.title2.weight(.heavy))
+//              .foregroundColor(ThemeKit.theme.foregroundColor)
+//            Spacer()
+//          }
+//        }
         LazyVStack(spacing: 0) {
           ForEach(section.items) { cell in
             switch cell.type {
