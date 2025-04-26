@@ -20,6 +20,6 @@
 "long.break" = "Long break";
 "focus.minutes" = "Focus";
 "auto.start.short.breaks" = "Auto start short breaks";
-"auto.start.long.breaks" = "Auto start long breaks";
+"auto.start.sessions" = "Auto start sessions";
 "focus.sessions.per.round" = "Focus sessions per round";
 "reminder" = "Reminder";
