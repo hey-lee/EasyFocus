@@ -14,13 +14,16 @@ struct SettingsView: View {
   @Environment(\.dismiss) var dismiss
   
   // @AppStorage
+  // focus
+  @AppStorage("autoRun") var autoRun: Bool = true
+  @AppStorage("minutes") var minutes: Int = 25
+  @AppStorage("sessionsCount") var sessionsCount: Int = 4
+  @AppStorage("restShort") var restShort: Int = 5
+  @AppStorage("restLong") var restLong: Int = 15
+  // app settings
   @AppStorage("mode") var isDark = false
-  @AppStorage("isAuth") var isAuth: Bool = true
-  @AppStorage("quickMode") var quickMode: Bool = true
   @AppStorage("enableSound") var enableSound = true
   @AppStorage("enableHapic") var enableHaptic = true
-  @AppStorage("amountColorIndex") var amountColorIndex = 0
-  @AppStorage("enableInactiveBlur") var enableInactiveBlur = false
   
   // @State
   @State var isTouched = false
@@ -48,22 +51,32 @@ struct SettingsView: View {
             switch cell.type {
             case .toggle:
               switch cell.key {
-              case "quick":
-                CellView(cell: cell, isOn: $quickMode)
+              case "auto.start.short.breaks":
+                CellView(cell: cell, isOn: $autoRun)
+              case "auto.start.long.breaks":
+                CellView(cell: cell, isOn: $autoRun)
+              case "focus.reminder":
+                CellView(cell: cell, isOn: $autoRun)
               case "feedback.haptic":
                 CellView(cell: cell, isOn: $enableHaptic)
               case "feedback.sound":
                 CellView(cell: cell, isOn: $enableSound)
-              case "inactive.blur":
-                CellView(cell: cell, isOn: $enableInactiveBlur)
               default:
                 EmptyView()
               }
               
             case .sheet:
               switch cell.key {
+              case "focus.minutes":
+                CellView(cell: cell, trailingText: "\(minutes.description)m")
+              case "focus.short.breaks":
+                CellView(cell: cell, trailingText: "\(restShort.description)m")
+              case "focus.long.breaks":
+                CellView(cell: cell, trailingText: "\(restLong.description)m")
+              case "focus.sessions.per.round":
+                CellView(cell: cell, trailingText: sessionsCount.description)
               default:
-                EmptyView()
+                CellView(cell: cell)
               }
               
             default:
@@ -98,9 +111,6 @@ struct SettingsView: View {
       }
     }
     .toolbar(.hidden, for: .tabBar)
-    .onChange(of: quickMode, { _, _ in
-      UserDefaults.standard.set(quickMode, forKey: "quickMode")
-    })
     .onChange(of: enableHaptic, { _, enableHaptic in
       UserDefaults.standard.set(enableHaptic, forKey: "enableHaptic")
     })
