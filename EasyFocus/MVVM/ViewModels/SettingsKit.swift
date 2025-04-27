@@ -13,16 +13,17 @@ final class SettingsKit {
   
   var sections: [(name: String, items: [CellView.Cell])] = [
     (name: "Preferences", items: [
-      .init(key: "focus.short.breaks", name: "short.breaks", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),
-      .init(key: "focus.long.breaks", name: "long.breaks", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),
+      .init(key: "focus.short.breaks", name: "short.break", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),
+      .init(key: "focus.long.breaks", name: "long.break", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),
       .init(key: "focus.sessions.per.round", name: "focus.sessions.per.round", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),
       .init(key: "auto.start.short.breaks", name: "auto.start.short.breaks", icon: "calendar-day", colors: [Color.fuchsia300], type: .toggle),
       .init(key: "auto.start.sessions", name: "auto.start.sessions", icon: "calendar-day", colors: [Color.fuchsia300], type: .toggle),
       .init(key: "focus.reminder", name: "reminder", icon: "sound", colors: [Color.lime300], type: .toggle),
     ]),
     (name: "Data & Security", items: [
-      .init(key: "icloud", name: "icloud", icon: "sf.icloud.and.arrow.up", colors: [Color.emerald300], trailingText: DBKit.shared.iCloudSyncStatus),
+      .init(key: "icloud.sync", name: "icloud.sync", icon: "sf.icloud.and.arrow.up", colors: [Color.emerald300], trailingText: DBKit.shared.iCloudSyncStatus),
       .init(key: "calendar.sync", name: "calendar.sync", icon: "sf.icloud.and.arrow.up", colors: [Color.lime300], type: .toggle),
+      .init(key: "app.whitelist", name: "app.whitelist", icon: "sf.icloud.and.arrow.up", colors: [Color.lime300], type: .toggle),
     ]),
     (name: "App Settings", items: [
       .init(key: "theme", name: "theme", icon: "palette", colors: [Color.yellow300]),

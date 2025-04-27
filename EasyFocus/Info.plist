@@ -17,5 +17,7 @@
 	</array>
   <key>NSCalendarsUsageDescription</key>
   <string>We need access to your calendar to generate focus data for you</string>
+  <key>NSHealthUpdateUsageDescription</key>
+  <string>We need access to your Screen Time data to manage the Focus Mode whitelist.</string>
 </dict>
 </plist>

@@ -16,4 +16,6 @@ final class ShowKit: ObservableObject {
   @Published var shortBreakSheetView: Bool = false
   @Published var longBreakSheetView: Bool = false
   @Published var sessionsCountSheetView: Bool = false
+  // settings
+  @Published var FamilyActivityPicker: Bool = false
 }

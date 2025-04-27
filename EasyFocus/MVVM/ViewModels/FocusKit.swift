@@ -174,6 +174,7 @@ extension FocusKit {
     mode = .work
     sessionIndex = 0
     focus = nil
+    AppControlsKit.shared.stopAppShield()
   }
   
   private func tick() {

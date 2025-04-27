@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import FamilyControls
 
 struct SettingsView: View {
   @Query var focuses: [Focus]
@@ -18,23 +19,25 @@ struct SettingsView: View {
   
   // @AppStorage
   // focus
-  @AppStorage("autoStartShortBreaks") var autoStartShortBreaks: Bool = false
-  @AppStorage("autoStartSessions") var autoStartSessions: Bool = false
   @AppStorage("enableReminder") var enableReminder: Bool = false
+  @AppStorage("autoStartSessions") var autoStartSessions: Bool = false
   @AppStorage("enableCalendarSync") var enableCalendarSync: Bool = false
+  @AppStorage("autoStartShortBreaks") var autoStartShortBreaks: Bool = false
   @AppStorage("minutes") var minutes: Int = 25
-  @AppStorage("sessionsCount") var sessionsCount: Int = 4
   @AppStorage("restShort") var restShort: Int = 5
   @AppStorage("restLong") var restLong: Int = 15
+  @AppStorage("sessionsCount") var sessionsCount: Int = 4
   // app settings
   @AppStorage("mode") var isDark = false
   @AppStorage("enableSound") var enableSound = true
   @AppStorage("enableHapic") var enableHaptic = true
+  @AppStorage("enableAppWhitelist") var enableAppWhitelist = true
   
   // @State
   @State var isTouched = false
   @State var touchingKey: String = ""
   @State var showAmountColorsOverlay: Bool = false
+  @State var selection = FamilyActivitySelection()
   
   init() {
     Tools.transparentNavBar()
@@ -69,6 +72,8 @@ struct SettingsView: View {
                 CellView(cell: cell, isOn: $enableSound)
               case "calendar.sync":
                 CellView(cell: cell, isOn: $enableCalendarSync)
+              case "app.whitelist":
+                CellView(cell: cell, isOn: $enableAppWhitelist)
               default:
                 EmptyView()
               }
@@ -153,6 +158,19 @@ struct SettingsView: View {
         .height(320),
       ])
     }
+    .familyActivityPicker(isPresented: $show.FamilyActivityPicker, selection: $selection)
+    .onChange(of: selection, { _, selection in
+      AppControlsKit.shared.updateWhitelist(selection.applicationTokens)
+    })
+    .onChange(of: enableAppWhitelist, { _, enableAppWhitelist in
+      if enableAppWhitelist {
+        AppControlsKit.shared.requestAuthorization {
+          show.FamilyActivityPicker = $0
+        }
+      } else {
+        AppControlsKit.shared.stopAppShield()
+      }
+    })
     .onChange(of: enableHaptic, { _, enableHaptic in
       UserDefaults.standard.set(enableHaptic, forKey: "enableHaptic")
     })
