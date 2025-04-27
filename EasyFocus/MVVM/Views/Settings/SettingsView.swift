@@ -83,7 +83,6 @@ struct SettingsView: View {
                       (key: "loose", name: "Loose Mode"),
                     ])
                     .animation(.snappy, value: whitelistMode)
-                    .border(.black)
                   }
                 }
               default:
