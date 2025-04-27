@@ -12,13 +12,14 @@
 "security" = "Security";
 "reminders" = "Reminders";
 "subscription" = "Subscription";
-"icloud" = "iCloud Sync";
+"icloud.sync" = "Sync with iCloud";
+"calendar.sync" = "Sync to Calendar";
+"app.whitelist" = "App Whitelist";
 "haptic" = "Hapic Feedback";
 "tap.sound" = "Button Sound Feedback";
 "focus" = "Focus";
 "short.break" = "Short break";
 "long.break" = "Long break";
-"focus.minutes" = "Focus";
 "auto.start.short.breaks" = "Auto start short breaks";
 "auto.start.sessions" = "Auto start sessions";
 "focus.sessions.per.round" = "Focus sessions per round";

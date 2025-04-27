@@ -7,3 +7,4 @@
 */
 
 NSCalendarsUsageDescription = "我们需要访问您的日历，以便为您生成专注数据";
+NSHealthUpdateUsageDescription = "需要访问您的屏幕使用时间数据来管理专注模式白名单";

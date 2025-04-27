@@ -6,3 +6,4 @@
   
 */
 NSCalendarsUsageDescription = "We need access to your calendar to generate focus data for you";
+NSHealthUpdateUsageDescription = "We need access to your Screen Time data to manage the Focus Mode whitelist.";
