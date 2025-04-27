@@ -23,6 +23,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
       "restLong": 15,
       "enableReminder": false,
       "enableiCloudSync": false,
+      "enableCalendarSync": false,
       "autoStartSessions": false,
       "autoStartShortBreaks": false,
     ])

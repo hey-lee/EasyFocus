@@ -17,6 +17,8 @@ class Focus {
   var completedSessionsCount: Int = 0
   var restShort: Int = 5
   var restLong: Int = 20
+  var notes: String = ""
+  var calendarEventID: String = ""
   var label: FocusLabel?
   var startedAt: Date = Date()
   var endedAt: Date = Date()
@@ -30,6 +32,8 @@ class Focus {
     completedSessionsCount: Int = 0,
     restShort: Int = 5,
     restLong: Int = 20,
+    notes: String = "",
+    calendarEventID: String = "",
     label: FocusLabel?,
     startedAt: Date = Date(),
     endedAt: Date = Date(),
@@ -42,6 +46,8 @@ class Focus {
     self.completedSessionsCount = completedSessionsCount
     self.restShort = restShort
     self.restLong = restLong
+    self.notes = notes
+    self.calendarEventID = calendarEventID
     self.label = label
     self.startedAt = startedAt
     self.endedAt = endedAt

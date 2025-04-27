@@ -6,19 +6,22 @@
 //
 
 import SwiftUI
-
-import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
+  @Query var focuses: [Focus]
+  
+  @Environment(\.modelContext) var context
+  @Environment(\.dismiss) var dismiss
   @EnvironmentObject var show: ShowKit
   @EnvironmentObject var stack: Stackit
-  @Environment(\.dismiss) var dismiss
   
   // @AppStorage
   // focus
   @AppStorage("autoStartShortBreaks") var autoStartShortBreaks: Bool = false
   @AppStorage("autoStartSessions") var autoStartSessions: Bool = false
   @AppStorage("enableReminder") var enableReminder: Bool = false
+  @AppStorage("enableCalendarSync") var enableCalendarSync: Bool = false
   @AppStorage("minutes") var minutes: Int = 25
   @AppStorage("sessionsCount") var sessionsCount: Int = 4
   @AppStorage("restShort") var restShort: Int = 5
@@ -40,15 +43,15 @@ struct SettingsView: View {
   var body: some View {
     PageView {
       ForEach(Array(zip(SettingsKit.shared.sections.indices, SettingsKit.shared.sections)), id: \.0) { index, section in
-//        VStack {
-//          HStack {
-//            Text(section.name)
-//              .textCase(.uppercase)
-//              .font(.title2.weight(.heavy))
-//              .foregroundColor(ThemeKit.theme.foregroundColor)
-//            Spacer()
-//          }
-//        }
+        //        VStack {
+        //          HStack {
+        //            Text(section.name)
+        //              .textCase(.uppercase)
+        //              .font(.title2.weight(.heavy))
+        //              .foregroundColor(ThemeKit.theme.foregroundColor)
+        //            Spacer()
+        //          }
+        //        }
         LazyVStack(spacing: 0) {
           ForEach(section.items) { cell in
             switch cell.type {
@@ -64,6 +67,8 @@ struct SettingsView: View {
                 CellView(cell: cell, isOn: $enableHaptic)
               case "feedback.sound":
                 CellView(cell: cell, isOn: $enableSound)
+              case "calendar.sync":
+                CellView(cell: cell, isOn: $enableCalendarSync)
               default:
                 EmptyView()
               }
@@ -126,7 +131,7 @@ struct SettingsView: View {
         Text(restShort.description)
       }
       .presentationDetents([
-//        .medium,
+        //        .medium,
         .height(320),
       ])
     }
@@ -135,7 +140,7 @@ struct SettingsView: View {
         Text(restLong.description)
       }
       .presentationDetents([
-//        .medium,
+        //        .medium,
         .height(320),
       ])
     }
@@ -144,14 +149,40 @@ struct SettingsView: View {
         Text(sessionsCount.description)
       }
       .presentationDetents([
-//        .medium,
+        //        .medium,
         .height(320),
       ])
     }
     .onChange(of: enableHaptic, { _, enableHaptic in
       UserDefaults.standard.set(enableHaptic, forKey: "enableHaptic")
     })
+    .onChange(of: enableCalendarSync, { _, enableCalendarSync in
+      if enableCalendarSync {
+        Task {
+          await syncToCalendar()
+        }
+      }
+    })
     .navigationTitle("Settings")
+  }
+  
+  func syncToCalendar() async {
+    do {
+      let granted = try await CalendarKit.shared.requestAccess()
+      guard granted else {
+        return
+      }
+      
+      for focus in focuses {
+        if focus.calendarEventID.isEmpty {
+          let id = try await CalendarKit.shared.addFocusToCalendar(focus)
+          focus.calendarEventID = id
+          try context.save()
+        }
+      }
+    } catch {
+      print("syncToCalendar error:", error.localizedDescription)
+    }
   }
 }
 

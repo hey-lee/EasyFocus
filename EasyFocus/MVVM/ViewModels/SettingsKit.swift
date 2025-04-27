@@ -22,6 +22,7 @@ final class SettingsKit {
     ]),
     (name: "Data & Security", items: [
       .init(key: "icloud", name: "icloud", icon: "sf.icloud.and.arrow.up", colors: [Color.emerald300], trailingText: DBKit.shared.iCloudSyncStatus),
+      .init(key: "calendar.sync", name: "calendar.sync", icon: "sf.icloud.and.arrow.up", colors: [Color.lime300], type: .toggle),
     ]),
     (name: "App Settings", items: [
       .init(key: "theme", name: "theme", icon: "palette", colors: [Color.yellow300]),

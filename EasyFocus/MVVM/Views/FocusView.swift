@@ -17,6 +17,8 @@ struct FocusView: View {
   @EnvironmentObject var show: ShowKit
   @EnvironmentObject var stack: Stackit
   
+  @AppStorage("enableCalendarSync") var enableCalendarSync = false
+  
   var body: some View {
     NavigationStack(path: $stack.settings) {
       VStack {
@@ -104,12 +106,17 @@ struct FocusView: View {
             withAnimation {
               focusKit.updateFocusModel()
               if let focus = focusKit.focus {
-                do {
-                  context.insert(focus)
-                  try context.save()
-                  print("focus.saved")
-                } catch let error {
-                  print("focus model save error", error)
+                Task {
+                  do {
+                    if enableCalendarSync {
+                      focus.calendarEventID = try await CalendarKit.shared.addFocusToCalendar(focus)
+                    }
+                    context.insert(focus)
+                    try context.save()
+                    print("focus.saved")
+                  } catch let error {
+                    print("focus model save error", error)
+                  }
                 }
               }
               if focusKit.isForwardMode {

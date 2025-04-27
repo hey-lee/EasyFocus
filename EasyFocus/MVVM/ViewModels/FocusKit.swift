@@ -85,7 +85,6 @@ class FocusKit {
   var state: FocusState = .idle
   var restType: RestType = .short
   var startedAt = Date.now
-  var endedAt = Date.now
   var secondsSinceStart = 0
   var percent: Double = 0
   var secondsOnPaused = 0
@@ -127,7 +126,7 @@ extension FocusKit {
   }
   func updateFocusModel() {
     if let focus {
-      focus.endedAt = endedAt
+      focus.endedAt = Date()
       focus.completedSecondsCount = completedSecondsCount
       focus.completedMinutesCount = completedMinutesCount
       focus.completedSessionsCount = completedSessionsCount
@@ -174,7 +173,6 @@ extension FocusKit {
     nextSession()
     mode = .work
     sessionIndex = 0
-    endedAt = Date()
     focus = nil
   }
   
