@@ -1,0 +1,9 @@
+/* 
+  InfoPlist.strings
+  EasyFocus
+
+  Created by DBL on 2025/4/27.
+  
+*/
+
+NSCalendarsUsageDescription = "我们需要访问您的日历，以便为您生成专注数据";

@@ -15,5 +15,7 @@
 		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
+  <key>NSCalendarsUsageDescription</key>
+  <string>We need access to your calendar to generate focus data for you</string>
 </dict>
 </plist>

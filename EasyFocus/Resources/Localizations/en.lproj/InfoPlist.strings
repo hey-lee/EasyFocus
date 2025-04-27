@@ -1,0 +1,8 @@
+/* 
+  InfoPlist.strings
+  EasyFocus
+
+  Created by DBL on 2025/4/27.
+  
+*/
+NSCalendarsUsageDescription = "We need access to your calendar to generate focus data for you";
