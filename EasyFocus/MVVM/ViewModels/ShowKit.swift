@@ -12,4 +12,8 @@ final class ShowKit: ObservableObject {
   @Published var lego: Bool = false
   @Published var StatsView: Bool = false
   @Published var WheelSliderView: Bool = false
+  // focus
+  @Published var shortBreakSheetView: Bool = false
+  @Published var longBreakSheetView: Bool = false
+  @Published var sessionsCountSheetView: Bool = false
 }

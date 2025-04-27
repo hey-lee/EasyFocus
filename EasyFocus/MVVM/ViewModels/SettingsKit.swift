@@ -13,7 +13,6 @@ final class SettingsKit {
   
   var sections: [(name: String, items: [CellView.Cell])] = [
     (name: "Preferences", items: [
-      .init(key: "focus.minutes", name: "focus.minutes", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),
       .init(key: "focus.short.breaks", name: "short.breaks", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),
       .init(key: "focus.long.breaks", name: "long.breaks", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),
       .init(key: "focus.sessions.per.round", name: "focus.sessions.per.round", icon: "calendar-day", colors: [Color.fuchsia300], type: .sheet),

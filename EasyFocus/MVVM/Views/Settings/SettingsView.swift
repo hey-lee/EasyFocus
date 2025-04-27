@@ -10,6 +10,7 @@ import SwiftUI
 import SwiftUI
 
 struct SettingsView: View {
+  @EnvironmentObject var show: ShowKit
   @EnvironmentObject var stack: Stackit
   @Environment(\.dismiss) var dismiss
   
@@ -69,14 +70,21 @@ struct SettingsView: View {
               
             case .sheet:
               switch cell.key {
-              case "focus.minutes":
-                CellView(cell: cell, trailingText: "\(minutes.description)m")
               case "focus.short.breaks":
                 CellView(cell: cell, trailingText: "\(restShort.description)m")
+                  .onTapGesture {
+                    show.shortBreakSheetView = true
+                  }
               case "focus.long.breaks":
                 CellView(cell: cell, trailingText: "\(restLong.description)m")
+                  .onTapGesture {
+                    show.longBreakSheetView = true
+                  }
               case "focus.sessions.per.round":
                 CellView(cell: cell, trailingText: sessionsCount.description)
+                  .onTapGesture {
+                    show.sessionsCountSheetView = true
+                  }
               default:
                 CellView(cell: cell)
               }
@@ -113,6 +121,33 @@ struct SettingsView: View {
       }
     }
     .toolbar(.hidden, for: .tabBar)
+    .sheet(isPresented: $show.shortBreakSheetView) {
+      VStack {
+        Text(restShort.description)
+      }
+      .presentationDetents([
+//        .medium,
+        .height(320),
+      ])
+    }
+    .sheet(isPresented: $show.longBreakSheetView) {
+      VStack {
+        Text(restLong.description)
+      }
+      .presentationDetents([
+//        .medium,
+        .height(320),
+      ])
+    }
+    .sheet(isPresented: $show.sessionsCountSheetView) {
+      VStack {
+        Text(sessionsCount.description)
+      }
+      .presentationDetents([
+//        .medium,
+        .height(320),
+      ])
+    }
     .onChange(of: enableHaptic, { _, enableHaptic in
       UserDefaults.standard.set(enableHaptic, forKey: "enableHaptic")
     })
@@ -123,5 +158,6 @@ struct SettingsView: View {
 #Preview {
   SettingsView()
     .environment(DBKit())
+    .environmentObject(ShowKit())
     .environmentObject(Stackit())
 }
