@@ -16,7 +16,7 @@ struct FocusView: View {
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
   @EnvironmentObject var stack: Stackit
-  
+
   @AppStorage("enableCalendarSync") var enableCalendarSync = false
   
   var body: some View {
@@ -45,6 +45,7 @@ struct FocusView: View {
               focusKit.createFocusModel()
               withAnimation {
                 focusKit.start()
+                AppControlsKit.shared.startAppShield()
               }
             }
         }
@@ -65,39 +66,6 @@ struct FocusView: View {
                 stack.settings.append("settings")
               }
           }
-        }
-      }
-      .navigationDestination(for: String.self) { key in
-        switch key {
-        case "stats":
-          StatsView()
-        case "settings":
-          SettingsView()
-        case "icloud":
-          PageView {
-            Text("Settings")
-            Toggle(isOn: .init(get: {
-              UserDefaults.standard.bool(forKey: "enableiCloudSync")
-            }, set: { enableiCloudSync in
-              UserDefaults.standard.set(enableiCloudSync, forKey: "enableiCloudSync")
-            })) {
-              Text("iCloud Sync")
-            }
-            Text("iCloud: \(db.iCloudStatus)")
-            Text("iCloud sync status: \(db.iCloudSyncStatus)")
-            if let lastSyncTime = db.lastSyncTime {
-              Text("iCloud last sync time: \(Tools.format(lastSyncTime))")
-            }
-            Button("打开系统设置") {
-              if let url = URL(string: UIApplication.openSettingsURLString),
-                UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url)
-              }
-            }
-            .buttonStyle(.borderedProminent)
-          }
-        default:
-          PageView()
         }
       }
       .overlay {
@@ -149,6 +117,39 @@ struct FocusView: View {
       .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
         if let label = tagsKit.modelLabel, let focus = focusKit.focus {
           focus.label = label
+        }
+      }
+      .navigationDestination(for: String.self) { key in
+        switch key {
+        case "stats":
+          StatsView()
+        case "settings":
+          SettingsView()
+        case "icloud":
+          PageView {
+            Text("Settings")
+            Toggle(isOn: .init(get: {
+              UserDefaults.standard.bool(forKey: "enableiCloudSync")
+            }, set: { enableiCloudSync in
+              UserDefaults.standard.set(enableiCloudSync, forKey: "enableiCloudSync")
+            })) {
+              Text("iCloud Sync")
+            }
+            Text("iCloud: \(db.iCloudStatus)")
+            Text("iCloud sync status: \(db.iCloudSyncStatus)")
+            if let lastSyncTime = db.lastSyncTime {
+              Text("iCloud last sync time: \(Tools.format(lastSyncTime))")
+            }
+            Button("打开系统设置") {
+              if let url = URL(string: UIApplication.openSettingsURLString),
+                UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+              }
+            }
+            .buttonStyle(.borderedProminent)
+          }
+        default:
+          PageView()
         }
       }
     }

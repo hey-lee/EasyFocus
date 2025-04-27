@@ -13,17 +13,8 @@ import ManagedSettings
 final class AppControlsKit {
   static let shared = AppControlsKit()
   
-  let store = ManagedSettingsStore()
-  var observer: Task<Void, Never>?
-  var selectedApps = [ApplicationToken]()
-  var selection = [FamilyActivitySelection]()
-  
-  init() {
-    if let data = UserDefaults.standard.data(forKey: "whitelist"),
-       let apps = try? JSONDecoder().decode([ApplicationToken].self, from: data) {
-      selectedApps = apps
-    }
-  }
+  private let store = ManagedSettingsStore()
+  private var applicationTokens: Set<Token<Application>> = []
   
   func requestAuthorization(_ completion: @escaping (Bool) -> Void = { _ in }) {
     Task {
@@ -49,5 +40,22 @@ extension AppControlsKit {
   
   func stopAppShield() {
     store.clearAllSettings()
+  }
+  
+  func startAppShield() {
+    let whitelistMode = UserDefaults.standard.string(forKey: "whitelistMode")
+    if whitelistMode == "strict" {
+      updateWhitelist([])
+    }
+    if whitelistMode == "whitelist" {
+      updateWhitelist(applicationTokens)
+    }
+    if whitelistMode == "loose" {
+      stopAppShield()
+    }
+  }
+  
+  func updateApplicationTokens(_ tokens: Set<Token<Application>>) {
+    applicationTokens = tokens
   }
 }

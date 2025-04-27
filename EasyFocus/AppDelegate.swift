@@ -16,6 +16,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
       // app
       "enableSound": true,
       "enableHaptic": true,
+      "whitelistMode": "loose",
+      "enableAppWhitelist": false,
       // focus
       "minutes": 20,
       "sessionsCount": 4,
@@ -23,7 +25,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
       "restLong": 15,
       "enableReminder": false,
       "enableiCloudSync": false,
-      "enableAppWhitelist": false,
       "enableCalendarSync": false,
       "autoStartSessions": false,
       "autoStartShortBreaks": false,

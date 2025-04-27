@@ -31,6 +31,7 @@ struct SettingsView: View {
   @AppStorage("mode") var isDark = false
   @AppStorage("enableSound") var enableSound = true
   @AppStorage("enableHapic") var enableHaptic = true
+  @AppStorage("whitelistMode") var whitelistMode = "loose"
   @AppStorage("enableAppWhitelist") var enableAppWhitelist = true
   
   // @State
@@ -73,7 +74,18 @@ struct SettingsView: View {
               case "calendar.sync":
                 CellView(cell: cell, isOn: $enableCalendarSync)
               case "app.whitelist":
-                CellView(cell: cell, isOn: $enableAppWhitelist)
+                VStack {
+                  CellView(cell: cell, isOn: $enableAppWhitelist)
+                  if enableAppWhitelist {
+                    SegmentedView(selection: $whitelistMode, segments: [
+                      (key: "strict", name: "Strict Mode"),
+                      (key: "whitelist", name: "Whitelist Mode"),
+                      (key: "loose", name: "Loose Mode"),
+                    ])
+                    .animation(.snappy, value: whitelistMode)
+                    .border(.black)
+                  }
+                }
               default:
                 EmptyView()
               }
@@ -160,15 +172,18 @@ struct SettingsView: View {
     }
     .familyActivityPicker(isPresented: $show.FamilyActivityPicker, selection: $selection)
     .onChange(of: selection, { _, selection in
-      AppControlsKit.shared.updateWhitelist(selection.applicationTokens)
+      AppControlsKit.shared.updateApplicationTokens(selection.applicationTokens)
     })
     .onChange(of: enableAppWhitelist, { _, enableAppWhitelist in
       if enableAppWhitelist {
-        AppControlsKit.shared.requestAuthorization {
-          show.FamilyActivityPicker = $0
-        }
+        AppControlsKit.shared.requestAuthorization()
       } else {
         AppControlsKit.shared.stopAppShield()
+      }
+    })
+    .onChange(of: whitelistMode, { _, whitelistMode in
+      if whitelistMode == "whitelist" {
+        show.FamilyActivityPicker = true
       }
     })
     .onChange(of: enableHaptic, { _, enableHaptic in
