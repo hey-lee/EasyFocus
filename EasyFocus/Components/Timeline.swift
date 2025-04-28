@@ -19,6 +19,11 @@ struct Timeline: View {
       VStack(spacing: 0) {
         ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
           TimelineItem(event, isLast: index == events.count - 1)
+            .transition(.asymmetric(
+              insertion: .offset(y: 30).combined(with: .opacity),
+              removal: .opacity
+            ))
+            .animation(.easeInOut(duration: 0.5).delay(Double(index) * 0.05))
         }
       }
       .padding()
