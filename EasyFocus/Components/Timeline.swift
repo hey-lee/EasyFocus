@@ -15,18 +15,23 @@ struct Timeline: View {
   }
   
   var body: some View {
-    ScrollView {
-      VStack(spacing: 0) {
-        ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
-          TimelineItem(event, isLast: index == events.count - 1)
-            .transition(.asymmetric(
-              insertion: .offset(y: 30).combined(with: .opacity),
-              removal: .opacity
-            ))
-            .animation(.easeInOut(duration: 0.5).delay(Double(index) * 0.05))
+    GeometryReader {
+      let size = $0.size
+      ScrollView {
+        VStack(spacing: 0) {
+          ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
+            TimelineItem(event, isLast: index == events.count - 1)
+              .transition(.asymmetric(
+                insertion: .offset(y: 30).combined(with: .opacity),
+                removal: .opacity
+              ))
+              .animation(.easeOut(duration: 0.5).delay(Double(index) * 0.05))
+              .frame(width: size.width - 32, height: 160)
+              .frame(maxWidth: .infinity)
+          }
         }
+        .padding()
       }
-      .padding()
     }
   }
 }
@@ -98,9 +103,9 @@ struct TimelineItem: View {
           .background(Color.slate50)
           .cornerRadius(16)
         }
-        
-        Spacer()
-          .frame(height: 40)
+//        
+//        Spacer()
+//          .frame(height: 40)
       }
     }
   }
