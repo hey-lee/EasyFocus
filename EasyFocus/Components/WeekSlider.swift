@@ -20,7 +20,6 @@ struct WeekSlider: View {
     VStack(alignment: .leading, spacing: 0) {
       HeaderView()
     }
-    .vLayout(.top)
     .onAppear {
       if weekSlider.isEmpty {
         let currentWeek = Date().fetchWeek()
@@ -42,19 +41,19 @@ struct WeekSlider: View {
   @ViewBuilder
   func HeaderView() -> some View {
     VStack(alignment: .leading, spacing: 8) {
-      HStack {
-        Text(date.format("MMMM"))
-          .foregroundStyle(.blue)
-        Text(date.format("YYYY"))
-          .foregroundStyle(.gray)
-      }
-      .font(.title.bold())
+//      HStack {
+//        Text(date.format("MMMM"))
+//          .foregroundStyle(.blue)
+//        Text(date.format("YYYY"))
+//          .foregroundStyle(.gray)
+//      }
+//      .font(.title.bold())
       
-      Text(date.formatted(date: .complete, time: .omitted))
-        .font(.callout)
-        .fontWeight(.semibold)
-        .textScale(.secondary)
-        .foregroundStyle(.gray)
+//      Text(date.formatted(date: .complete, time: .omitted))
+//        .font(.callout)
+//        .fontWeight(.semibold)
+//        .textScale(.secondary)
+//        .foregroundStyle(.gray)
       
       TabView(selection: $currentWeekIndex) {
         ForEach(weekSlider.indices, id: \.self) { index in
@@ -68,7 +67,7 @@ struct WeekSlider: View {
       .tabViewStyle(.page(indexDisplayMode: .never))
       .frame(height: 100)
     }
-    .padding()
+    .padding(.horizontal)
     .hLayout(.leading)
     .background(.white)
     .onChange(of: currentWeekIndex) { oldValue, newValue in
@@ -154,7 +153,7 @@ struct WeekSlider: View {
   }
 }
 
-#Preview {
+#Preview("WeekSlider") {
   struct PreviewView: View {
     @State var date: Date = Date()
     
