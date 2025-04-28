@@ -60,6 +60,13 @@ struct FocusView: View {
                 show.StatsView = true
               }
           }
+          ToolbarItem(placement: .topBarLeading) {
+            Symbol("sf.calendar")
+              .onTapGesture {
+                // stack.settings.append("stats")
+                show.TimelineView = true
+              }
+          }
           ToolbarItem(placement: .topBarTrailing) {
             Symbol("sf.ellipsis")
               .onTapGesture {
@@ -113,6 +120,9 @@ struct FocusView: View {
       }
       .fullScreenCover(isPresented: $show.StatsView) {
         StatsView()
+      }
+      .fullScreenCover(isPresented: $show.TimelineView) {
+        TimelineView()
       }
       .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
         if let label = tagsKit.modelLabel, let focus = focusKit.focus {
