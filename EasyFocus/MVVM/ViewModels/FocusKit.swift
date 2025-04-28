@@ -90,7 +90,7 @@ class FocusKit {
   var secondsOnPaused = 0
   var sessionIndex = 0
   
-  let minuteInSeconds = 60
+  let minuteInSeconds: Int = 60
   
   // Computed Properties
   var isForwardMode: Bool { mode == .work && minutes == 0 }
