@@ -113,7 +113,7 @@ class FocusKit {
   init() {}
 }
 
-// MARK - focus controls
+// MARK - focus storage
 extension FocusKit {
   func createFocusModel() {
     self.focus = Focus(
@@ -124,6 +124,7 @@ extension FocusKit {
       label: TagsKit.shared.modelLabel,
     )
   }
+
   func updateFocusModel() {
     if let focus {
       focus.endedAt = Date()
@@ -132,6 +133,10 @@ extension FocusKit {
       focus.completedSessionsCount = completedSessionsCount
     }
   }
+}
+
+// MARK - focus controls
+extension FocusKit {
   private func createTimer() {
     timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
       self?.tick()
