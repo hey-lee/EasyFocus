@@ -26,7 +26,7 @@ struct Timeline: View {
                 removal: .opacity
               ))
               .animation(.easeOut(duration: 0.5).delay(Double(index) * 0.05))
-              .frame(width: size.width - 32, height: 160)
+              .frame(width: max(size.width - 32, 0), height: 160)
               .frame(maxWidth: .infinity)
           }
         }
@@ -50,7 +50,7 @@ struct TimelineItem: View {
       VStack(spacing: 0) {
         let ringSize: CGFloat = 12
         Circle()
-          .stroke(event.completedSecondsCount == event.minutes * FocusKit.shared.minuteInSeconds ? .black : .red, lineWidth: 2)
+          .stroke(event.completedSecondsCount == FocusKit.shared.totalSeconds ? .black : .red, lineWidth: 2)
           .frame(width: ringSize, height: ringSize)
           .zIndex(1)
         

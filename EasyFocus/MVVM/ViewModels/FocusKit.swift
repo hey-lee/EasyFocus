@@ -75,6 +75,10 @@ class FocusKit {
     return completedSessionsTime + currentSessionTime
   }
   
+  var totalSeconds: Int {
+    minutes * minuteInSeconds * sessionsCount
+  }
+  
   // Timer State
   var timer: Timer?
   var backgroundTask: BGTask?
