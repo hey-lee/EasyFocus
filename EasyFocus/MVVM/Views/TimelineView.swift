@@ -44,7 +44,10 @@ struct TimelineView: View {
     let predicate = #Predicate<Focus> {
       $0.createdAt >= startOfDay && $0.createdAt < endOfDay
     }
-    let descriptor = FetchDescriptor<Focus>(predicate: predicate)
+    let descriptor = FetchDescriptor<Focus>(
+      predicate: predicate,
+      sortBy: [SortDescriptor(\Focus.createdAt, order: .reverse)]
+    )
     
     do {
       events = try context.fetch(descriptor)
