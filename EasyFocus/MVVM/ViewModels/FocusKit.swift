@@ -164,106 +164,75 @@ extension FocusKit {
     }
   }
   func start() {
-    onStateChange(.init(
-      state: state,
-      stage: .beforeStart,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+    updateStage(.beforeStart)
+
     guard state != .running else { return }
     state = .running
     startedAt = .now
     createTimer()
     scheduleBackgroundTask()
-    onStateChange(.init(
-      state: state,
-      stage: .start,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+
+    updateStage(.start)
   }
   
   func pause() {
-    onStateChange(.init(
-      state: state,
-      stage: .beforePause,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+    updateStage(.beforePause)
+
     guard state == .running else { return }
     state = .paused
     secondsOnPaused = secondsSinceStart
     timer?.invalidate()
-    onStateChange(.init(
-      state: state,
-      stage: .pause,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+    
+    updateStage(.pause)
   }
   
   func resume() {
-    onStateChange(.init(
-      state: state,
-      stage: .beforeResume,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+    updateStage(.beforeResume)
+
     guard state == .paused else { return }
     state = .running
     startedAt = .now
     createTimer()
     scheduleBackgroundTask()
-    onStateChange(.init(
-      state: state,
-      stage: .resume,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+
+    updateStage(.resume)
   }
   
   func nextSession() {
-    onStateChange(.init(
-      state: state,
-      stage: .beforeNextSession,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+    updateStage(.beforeNextSession)
+
     timer?.invalidate()
     state = .idle
     percent = 0
     secondsSinceStart = 0
     secondsOnPaused = 0
     backgroundTask?.setTaskCompleted(success: true)
-    onStateChange(.init(
-      state: state,
-      stage: .nextSession,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+
+    updateStage(.nextSession)
   }
   
   func stop() {
-    onStateChange(.init(
-      state: state,
-      stage: .beforeStop,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+    updateStage(.beforeStop)
+
     nextSession()
     mode = .work
     sessionIndex = 0
     focus = nil
-    onStateChange(.init(
-      state: state,
-      stage: .stop,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+
+    updateStage(.stop)
   }
   
   func onStateChange(_ onStateChange: @escaping (OnChangeState) -> () = { _ in }) {
     self.onStateChange = onStateChange
+  }
+  
+  func updateStage(_ stage: Stage) {
+    onStateChange(.init(
+      state: state,
+      stage: stage,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
   }
   
   private func tick() {
