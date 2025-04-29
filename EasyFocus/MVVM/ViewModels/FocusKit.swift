@@ -62,11 +62,11 @@ class FocusKit {
   }
   var autoStartSessions: Bool {
     set { UserDefaults.standard.set(newValue, forKey: "autoStartSessions") }
-    get { UserDefaults.standard.object(forKey: "autoStartSessions") as? Bool ?? false }
+    get { UserDefaults.standard.bool(forKey: "autoStartSessions") }
   }
   var autoStartShortBreaks: Bool {
     set { UserDefaults.standard.set(newValue, forKey: "autoStartShortBreaks") }
-    get { UserDefaults.standard.object(forKey: "autoStartShortBreaks") as? Bool ?? false }
+    get { UserDefaults.standard.bool(forKey: "autoStartShortBreaks") }
   }
 
   var completedSessionsCount: Int {
