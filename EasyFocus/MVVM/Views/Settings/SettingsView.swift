@@ -146,28 +146,38 @@ struct SettingsView: View {
     .toolbar(.hidden, for: .tabBar)
     .sheet(isPresented: $show.shortBreakSheetView) {
       VStack {
-        Text(restShort.description)
+        Picker("", selection: $restShort) {
+          ForEach(1...10, id: \.self) { Text("\($0)") }
+        }
+        .pickerStyle(.wheel)
+        .frame(maxWidth: .infinity)
       }
       .presentationDetents([
-        //        .medium,
         .height(320),
       ])
     }
     .sheet(isPresented: $show.longBreakSheetView) {
       VStack {
-        Text(restLong.description)
+        Picker("", selection: $restLong) {
+          ForEach(15...30, id: \.self) { Text("\($0)") }
+        }
+        .pickerStyle(.wheel)
+        .frame(maxWidth: .infinity)
       }
       .presentationDetents([
-        //        .medium,
         .height(320),
       ])
     }
     .sheet(isPresented: $show.sessionsCountSheetView) {
       VStack {
         Text(sessionsCount.description)
+        Picker("", selection: $sessionsCount) {
+          ForEach(1...8, id: \.self) { Text("\($0)") }
+        }
+        .pickerStyle(.wheel)
+        .frame(maxWidth: .infinity)
       }
       .presentationDetents([
-        //        .medium,
         .height(320),
       ])
     }
