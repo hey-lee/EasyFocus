@@ -13,45 +13,56 @@ struct StatsView: View {
   @Environment(\.modelContext) var context
   @Query(sort: \Focus.createdAt, order: .reverse)
   var focuses: [Focus] = []
-
+  let segments: [(key: String, name: String)] = [
+    (key: "day", name: "Day"),
+    (key: "week", name: "Week"),
+    (key: "month", name: "Month"),
+    (key: "year", name: "Year"),
+  ]
+  
+  @State var rangeType: String = ""
+  @State var chunkedEvents: [Focus] = []
+  
   var body: some View {
     PageView {
       HStack {
         Spacer()
         BackButton("sf.xmark")
       }
-      HStack {
-        Button("Clear All") {
-          Task {
-            focuses.forEach { context.delete($0) }
-          }
-        }
-      }
+      
+      SegmentedView(selection: $rangeType, segments: segments, .init(animationDuration: 0.2))
+      
       VStack {
-        ForEach(focuses.filter { $0.label != nil }) { focus in
-          CardView(focus)
-        }
+        BarChart()
+        Text("count: \(StoreKit.shared.rangedEvents.count)")
+//        ForEach(StoreKit.shared.rangedEvents.filter { $0.label != nil }) { focus in
+//          CardView(focus)
+//        }
       }
       .padding()
+    }
+    .onAppear {
+      StoreKit.shared.focusEvents = focuses
+    }
+    .onChange(of: focuses) { oldValue, newValue in
+      StoreKit.shared.focusEvents = focuses
+    }
+    .onChange(of: rangeType) { oldValue, newValue in
+      StoreKit.shared.rangeType = rangeType
     }
   }
   
   func getDynamicHeight(_ seconds: Int) -> CGFloat{
     let minutes = seconds / 60
-    if minutes < 5 {
-      return 48
-    } else if (5..<10).contains(minutes) {
-      return 60
-    } else if (10..<25).contains(minutes) {
-      return 80
-    } else if (25..<50).contains(minutes) {
-      return 100
-    } else if (50..<100).contains(minutes) {
-      return 120
-    } else {
-      return 140
-    }
+    let ranges: [(Range<Int>, CGFloat)] = [
+      (0..<5, 48),
+      (5..<10, 60),
+      (10..<25, 80),
+      (25..<50, 100),
+      (50..<100, 120)
+    ]
     
+    return ranges.first { $0.0.contains(minutes) }?.1 ?? 140
   }
   
   @ViewBuilder
@@ -77,4 +88,8 @@ struct StatsView: View {
         }
     }
   }
+}
+
+#Preview {
+  StatsView()
 }
