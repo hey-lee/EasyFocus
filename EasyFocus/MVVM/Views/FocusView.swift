@@ -129,6 +129,13 @@ struct FocusView: View {
           focus.label = label
         }
       }
+      .task {
+        focusKit.onStateChange { focus in
+          if focus.stage == .stop {
+            AppControlsKit.shared.stopShield()
+          }
+        }
+      }
       .navigationDestination(for: String.self) { key in
         switch key {
         case "stats":
