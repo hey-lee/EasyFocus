@@ -23,11 +23,24 @@ extension FocusKit {
     case work, rest
     var description: String { rawValue }
   }
+
+  enum Stage: String, CustomStringConvertible {
+    case beforeStart, start, beforePause, pause, beforeResume, resume, beforeStop, stop, beforeNextSession, nextSession
+    var description: String { rawValue }
+  }
+  
+  struct OnChangeState {
+    var state: FocusState
+    var stage: Stage
+  }
 }
 
 @Observable
 class FocusKit {
   static let shared = FocusKit()
+  
+  var onStateChange: (OnChangeState) -> ()
+  
   var focus: Focus?
   var minutes: Int {
     set { UserDefaults.standard.set(newValue, forKey: "minutes") }
@@ -114,7 +127,9 @@ class FocusKit {
     }
   }
   
-  init() {}
+  init(_ onStateChange: @escaping (OnChangeState) -> () = { _ in }) {
+    self.onStateChange = onStateChange
+  }
 }
 
 // MARK - focus storage
@@ -147,43 +162,57 @@ extension FocusKit {
     }
   }
   func start() {
+    onStateChange(.init(state: state, stage: .beforeStart))
     guard state != .running else { return }
     state = .running
     startedAt = .now
     scheduleBackgroundTask()
     createTimer()
+    onStateChange(.init(state: state, stage: .start))
   }
   
   func pause() {
+    onStateChange(.init(state: state, stage: .beforePause))
     guard state == .running else { return }
     state = .paused
     secondsOnPaused = secondsSinceStart
     timer?.invalidate()
+    onStateChange(.init(state: state, stage: .pause))
   }
   
   func resume() {
+    onStateChange(.init(state: state, stage: .beforeResume))
     guard state == .paused else { return }
     state = .running
     startedAt = .now
     scheduleBackgroundTask()
     createTimer()
+    onStateChange(.init(state: state, stage: .resume))
   }
   
   func nextSession() {
+    onStateChange(.init(state: state, stage: .beforeNextSession))
     timer?.invalidate()
     state = .idle
     percent = 0
     secondsSinceStart = 0
     secondsOnPaused = 0
     backgroundTask?.setTaskCompleted(success: true)
+    onStateChange(.init(state: state, stage: .nextSession))
   }
   
   func stop() {
+    onStateChange(.init(state: state, stage: .beforeStop))
     nextSession()
     mode = .work
     sessionIndex = 0
     focus = nil
     AppControlsKit.shared.stopAppShield()
+    onStateChange(.init(state: state, stage: .stop))
+  }
+  
+  func onStateChange(_ onStateChange: @escaping (OnChangeState) -> () = { _ in }) {
+    self.onStateChange = onStateChange
   }
   
   private func tick() {
