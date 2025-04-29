@@ -32,6 +32,8 @@ extension FocusKit {
   struct OnChangeState {
     var state: FocusState
     var stage: Stage
+    var secondsLeft: Int
+    var completedSecondsCount: Int
   }
 }
 
@@ -162,53 +164,102 @@ extension FocusKit {
     }
   }
   func start() {
-    onStateChange(.init(state: state, stage: .beforeStart))
+    onStateChange(.init(
+      state: state,
+      stage: .beforeStart,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
     guard state != .running else { return }
     state = .running
     startedAt = .now
-    scheduleBackgroundTask()
     createTimer()
-    onStateChange(.init(state: state, stage: .start))
+    scheduleBackgroundTask()
+    onStateChange(.init(
+      state: state,
+      stage: .start,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
   }
   
   func pause() {
-    onStateChange(.init(state: state, stage: .beforePause))
+    onStateChange(.init(
+      state: state,
+      stage: .beforePause,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
     guard state == .running else { return }
     state = .paused
     secondsOnPaused = secondsSinceStart
     timer?.invalidate()
-    onStateChange(.init(state: state, stage: .pause))
+    onStateChange(.init(
+      state: state,
+      stage: .pause,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
   }
   
   func resume() {
-    onStateChange(.init(state: state, stage: .beforeResume))
+    onStateChange(.init(
+      state: state,
+      stage: .beforeResume,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
     guard state == .paused else { return }
     state = .running
     startedAt = .now
-    scheduleBackgroundTask()
     createTimer()
-    onStateChange(.init(state: state, stage: .resume))
+    scheduleBackgroundTask()
+    onStateChange(.init(
+      state: state,
+      stage: .resume,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
   }
   
   func nextSession() {
-    onStateChange(.init(state: state, stage: .beforeNextSession))
+    onStateChange(.init(
+      state: state,
+      stage: .beforeNextSession,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
     timer?.invalidate()
     state = .idle
     percent = 0
     secondsSinceStart = 0
     secondsOnPaused = 0
     backgroundTask?.setTaskCompleted(success: true)
-    onStateChange(.init(state: state, stage: .nextSession))
+    onStateChange(.init(
+      state: state,
+      stage: .nextSession,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
   }
   
   func stop() {
-    onStateChange(.init(state: state, stage: .beforeStop))
+    onStateChange(.init(
+      state: state,
+      stage: .beforeStop,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
     nextSession()
     mode = .work
     sessionIndex = 0
     focus = nil
-    AppControlsKit.shared.stopAppShield()
-    onStateChange(.init(state: state, stage: .stop))
+    onStateChange(.init(
+      state: state,
+      stage: .stop,
+      secondsLeft: secondsLeft,
+      completedSecondsCount: completedSecondsCount
+    ))
   }
   
   func onStateChange(_ onStateChange: @escaping (OnChangeState) -> () = { _ in }) {
