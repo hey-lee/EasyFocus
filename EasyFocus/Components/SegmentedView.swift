@@ -12,9 +12,10 @@ struct SegmentedView<T: Equatable>: View {
     var spacing: CGFloat = 8
     var fontSize: CGFloat = 14
     var cornerRadius: CGFloat = 12
-    var color: Color
-    var activeColor: Color
-    var activeBackgroundColor: Color
+    var animationDuration: TimeInterval = 0.3
+    var color: Color = .slate300
+    var activeColor: Color = .slate700
+    var activeBackgroundColor: Color = .white
   }
   
   @Namespace var animation
@@ -26,11 +27,7 @@ struct SegmentedView<T: Equatable>: View {
   init(
     selection: Binding<T>,
     segments: [(key: T, name: String)],
-    config: Config = .init(
-      color: .slate300,
-      activeColor: .slate700,
-      activeBackgroundColor: .white
-    )
+    _ config: Config = .init()
   ) {
     self._selection = selection
     self.segments = segments
@@ -56,7 +53,7 @@ struct SegmentedView<T: Equatable>: View {
               }
             )
             .onTapGesture {
-              withAnimation(.easeInOut) {
+              withAnimation(.easeInOut(duration: config.animationDuration)) {
                 selection = segment.key
               }
             }
