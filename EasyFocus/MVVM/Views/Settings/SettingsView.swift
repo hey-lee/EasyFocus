@@ -170,7 +170,6 @@ struct SettingsView: View {
     }
     .sheet(isPresented: $show.sessionsCountSheetView) {
       VStack {
-        Text(sessionsCount.description)
         Picker("", selection: $sessionsCount) {
           ForEach(1...8, id: \.self) { Text("\($0)") }
         }
