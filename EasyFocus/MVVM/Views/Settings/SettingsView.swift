@@ -83,6 +83,8 @@ struct SettingsView: View {
                       (key: "loose", name: "Loose Mode"),
                     ])
                     .animation(.snappy, value: whitelistMode)
+                    .background(ThemeKit.theme.backgroundColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                   }
                 }
               default:
