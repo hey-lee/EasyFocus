@@ -8,24 +8,49 @@
 import SwiftUI
 
 struct SegmentedView<T: Equatable>: View {
-  @Binding var selection: T
-  let segments: [(key: T, name: String)]
+  struct Config {
+    var spacing: CGFloat = 8
+    var fontSize: CGFloat = 14
+    var cornerRadius: CGFloat = 12
+    var color: Color
+    var activeColor: Color
+    var activeBackgroundColor: Color
+  }
+  
   @Namespace var animation
+  @Binding var selection: T
+  
+  var segments: [(key: T, name: String)]
+  var config: Config
+  
+  init(
+    selection: Binding<T>,
+    segments: [(key: T, name: String)],
+    config: Config = .init(
+      color: .slate300,
+      activeColor: .slate700,
+      activeBackgroundColor: .white
+    )
+  ) {
+    self._selection = selection
+    self.segments = segments
+    self.config = config
+  }
   
   var body: some View {
     VStack {
-      HStack(spacing: 8) {
+      HStack(spacing: config.spacing) {
         ForEach(Array(zip(segments.indices, segments)), id: \.0) { index, segment in
           Text(segment.name)
-            .font(.system(size: 14))
+            .font(.system(size: config.fontSize))
             .fontWeight(.bold)
-            .foregroundColor(isActive(segment.key) ? .slate700 : .slate300)
+            .foregroundColor(isActive(segment.key) ? config.activeColor : config.color)
             .padding(12)
             .background(
               ZStack {
                 if isActive(segment.key) {
-                  Color.slate50
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                  config.activeBackgroundColor
+                    .clipShape(RoundedRectangle(cornerRadius: config.cornerRadius, style: .continuous))
                     .matchedGeometryEffect(id: "SegmentedView", in: animation)
                 }
               }
@@ -37,6 +62,7 @@ struct SegmentedView<T: Equatable>: View {
             }
         }
       }
+      .padding(4)
     }
     .onAppear {
       selection = segments[0].key
@@ -51,10 +77,10 @@ struct SegmentedView<T: Equatable>: View {
 #Preview {
   struct PreviewView: View {
     @State var selection: String = ""
-    
+
     var body: some View {
       VStack {
-        SegmentedView<String>(selection: $selection, segments: [
+        SegmentedView(selection: $selection, segments: [
           (key: "strict", name: "Strict Mode"),
           (key: "whitelist", name: "Whitelist Mode"),
           (key: "loose", name: "Loose Mode"),
