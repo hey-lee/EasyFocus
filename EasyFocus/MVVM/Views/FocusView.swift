@@ -79,21 +79,6 @@ struct FocusView: View {
         if focusKit.state == .running {
           LongTapView {
             withAnimation {
-              focusKit.updateFocusModel()
-              if let focus = focusKit.focus {
-                Task {
-                  do {
-                    if enableCalendarSync {
-                      focus.calendarEventID = try await CalendarKit.shared.addFocusToCalendar(focus)
-                    }
-                    context.insert(focus)
-                    try context.save()
-                    print("focus.saved")
-                  } catch let error {
-                    print("focus model save error", error)
-                  }
-                }
-              }
               if focusKit.isForwardMode {
                 self.focusKit.stop()
               } else {
@@ -131,6 +116,23 @@ struct FocusView: View {
       }
       .task {
         focusKit.onStateChange { state, stage, stats in
+          if stage == .beforeStop {
+            focusKit.updateFocusModel()
+            if let focus = focusKit.focus {
+              Task {
+                do {
+                  if enableCalendarSync {
+                    focus.calendarEventID = try await CalendarKit.shared.addFocusToCalendar(focus)
+                  }
+                  context.insert(focus)
+                  try context.save()
+                  print("focus.saved")
+                } catch let error {
+                  print("focus model save error", error)
+                }
+              }
+            }
+          }
           if stage == .stop {
             AppControlsKit.shared.stopShield()
           }
