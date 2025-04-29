@@ -130,8 +130,8 @@ struct FocusView: View {
         }
       }
       .task {
-        focusKit.onStateChange { focus in
-          if focus.stage == .stop {
+        focusKit.onStateChange { state, stage, stats in
+          if stage == .stop {
             AppControlsKit.shared.stopShield()
           }
         }

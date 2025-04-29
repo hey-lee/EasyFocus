@@ -9,7 +9,7 @@ import SwiftUI
 import BackgroundTasks
 
 extension FocusKit {
-  enum FocusState: String, CustomStringConvertible {
+  enum State: String, CustomStringConvertible {
     case idle, running, paused
     var description: String { rawValue }
   }
@@ -25,15 +25,19 @@ extension FocusKit {
   }
 
   enum Stage: String, CustomStringConvertible {
-    case beforeStart, start, beforePause, pause, beforeResume, resume, beforeStop, stop, beforeNextSession, nextSession
+    case beforeStart, start, beforePause, pause, beforeResume, resume, beforeStop, stop, beforeNextSession, nextSession, completion
     var description: String { rawValue }
   }
   
-  struct OnChangeState {
-    var state: FocusState
-    var stage: Stage
+  struct Stats {
     var secondsLeft: Int
     var completedSecondsCount: Int
+  }
+  
+  struct OnChangeState {
+    var state: FocusKit.State
+    var stage: Stage
+    var stats: Stats
   }
 }
 
@@ -41,7 +45,7 @@ extension FocusKit {
 class FocusKit {
   static let shared = FocusKit()
   
-  var onStateChange: (OnChangeState) -> ()
+  var onStateChange: (FocusKit.State, FocusKit.Stage, FocusKit.Stats) -> ()
   
   var focus: Focus?
   var minutes: Int {
@@ -105,7 +109,7 @@ class FocusKit {
   
   // Observable Properties
   var mode: Mode = .work
-  var state: FocusState = .idle
+  var state: FocusKit.State = .idle
   var restType: RestType = .short
   var startedAt = Date.now
   var secondsSinceStart = 0
@@ -133,7 +137,7 @@ class FocusKit {
     }
   }
   
-  init(_ onStateChange: @escaping (OnChangeState) -> () = { _ in }) {
+  init(_ onStateChange: @escaping (FocusKit.State, FocusKit.Stage, FocusKit.Stats) -> () = { _, _, _ in }) {
     self.onStateChange = onStateChange
   }
 }
@@ -226,17 +230,12 @@ extension FocusKit {
     updateStage(.stop)
   }
   
-  func onStateChange(_ onStateChange: @escaping (OnChangeState) -> () = { _ in }) {
+  func onStateChange(_ onStateChange: @escaping (FocusKit.State, FocusKit.Stage, FocusKit.Stats) -> () = { _, _, _ in }) {
     self.onStateChange = onStateChange
   }
   
   func updateStage(_ stage: Stage) {
-    onStateChange(.init(
-      state: state,
-      stage: stage,
-      secondsLeft: secondsLeft,
-      completedSecondsCount: completedSecondsCount
-    ))
+    onStateChange(state, stage, .init(secondsLeft: secondsLeft, completedSecondsCount: completedSecondsCount))
   }
   
   private func tick() {
@@ -263,6 +262,7 @@ extension FocusKit {
     } else {
       nextSession()
 
+      updateStage(.completion)
       if shouldAutoStart {
         start()
       }
