@@ -94,6 +94,10 @@ class FocusKit {
     minutes * minuteInSeconds * sessionsCount
   }
   
+  var shouldAutoStart: Bool {
+    mode == .work ? autoStartSessions : autoStartShortBreaks
+  }
+  
   // Timer State
   var timer: Timer?
   var backgroundTask: BGTask?
@@ -258,7 +262,7 @@ extension FocusKit {
       stop()
     } else {
       nextSession()
-      let shouldAutoStart = mode == .work ? autoStartSessions : autoStartShortBreaks
+
       if shouldAutoStart {
         start()
       }
