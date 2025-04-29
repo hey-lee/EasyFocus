@@ -177,7 +177,7 @@ struct SettingsView: View {
       if enableAppWhitelist {
         AppControlsKit.shared.requestAuthorization()
       } else {
-        AppControlsKit.shared.stopAppShield()
+        AppControlsKit.shared.stopShield()
       }
     })
     .onChange(of: whitelistMode, { _, whitelistMode in

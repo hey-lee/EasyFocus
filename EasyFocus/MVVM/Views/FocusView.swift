@@ -45,7 +45,7 @@ struct FocusView: View {
               focusKit.createFocusModel()
               withAnimation {
                 focusKit.start()
-                AppControlsKit.shared.startAppShield()
+                AppControlsKit.shared.startShield()
               }
             }
         }

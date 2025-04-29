@@ -38,11 +38,11 @@ extension AppControlsKit {
     store.shield.applicationCategories = .all(except: tokens)
   }
   
-  func stopAppShield() {
+  func stopShield() {
     store.clearAllSettings()
   }
   
-  func startAppShield() {
+  func startShield() {
     let whitelistMode = UserDefaults.standard.string(forKey: "whitelistMode")
     if whitelistMode == "strict" {
       updateWhitelist([])
@@ -51,7 +51,7 @@ extension AppControlsKit {
       updateWhitelist(applicationTokens)
     }
     if whitelistMode == "loose" {
-      stopAppShield()
+      stopShield()
     }
   }
   
