@@ -33,13 +33,9 @@ struct StatsView: View {
       SegmentedView(selection: $rangeType, segments: segments, .init(animationDuration: 0.2))
       
       VStack {
-        BarChart()
+        ChartsView()
         Text("count: \(StoreKit.shared.rangedEvents.count)")
-//        ForEach(StoreKit.shared.rangedEvents.filter { $0.label != nil }) { focus in
-//          CardView(focus)
-//        }
       }
-      .padding()
     }
     .onAppear {
       StoreKit.shared.focusEvents = focuses
