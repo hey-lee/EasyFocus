@@ -9,9 +9,9 @@ import SwiftUI
 import Charts
 
 struct BarChart: View {
-  @State var events: [FocusEvent] = []
+  @State var events: [ChartEntity] = []
   
-  init(_ events: [FocusEvent] = []) {
+  init(_ events: [ChartEntity] = []) {
     self.events = events
   }
   
@@ -19,17 +19,17 @@ struct BarChart: View {
     Chart {
       ForEach(events) { event in
         BarMark(
-          x: .value("Focus", event.isAnimated ?  event.completedMinutes : 0),
+          x: .value("Focus", event.isAnimated ?  event.value : 0),
           y: .value("Week", event.day)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .annotation(position: .trailing) {
-          Text("\(event.completedMinutes.description)m")
+          Text("\(event.value.description)m")
             .font(.caption)
         }
         .annotation(position: .overlay) {
           HStack {
-            Text("\(event.completedMinutes.description)m")
+            Text("\(event.value.description)m")
               .font(.caption)
               .foregroundColor(.white)
             

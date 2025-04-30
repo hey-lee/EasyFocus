@@ -14,9 +14,9 @@ import SwiftUI
 import Charts
 
 struct PieChart: View {
-  @State var events: [FocusEvent] = []
+  @State var events: [ChartEntity] = []
   
-  init(_ events: [FocusEvent] = []) {
+  init(_ events: [ChartEntity] = []) {
     self.events = events
   }
   
@@ -24,7 +24,7 @@ struct PieChart: View {
     Chart {
       ForEach(events) { event in
         SectorMark(
-          angle: .value("Focus", event.isAnimated ?  event.completedMinutes : 0),
+          angle: .value("Focus", event.isAnimated ?  event.value : 0),
           innerRadius: .ratio(0.6),
           angularInset: 4
         )

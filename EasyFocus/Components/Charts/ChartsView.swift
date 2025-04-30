@@ -9,9 +9,11 @@ import SwiftUI
 import SwiftData
 import Charts
 
-struct FocusEvent: Identifiable, Equatable {
+struct ChartEntity: Identifiable, Equatable {
   var id: String = UUID().uuidString
-  var completedSeconds: Int = 0
+  var label: String = ""
+  var value: Int = 0
+  var percent: Int = 0
   var createdAt: Date = Date()
   var isAnimated: Bool = false
   
@@ -21,70 +23,74 @@ struct FocusEvent: Identifiable, Equatable {
     return formatter.string(from: createdAt)
   }
   
-  var completedMinutes: Int {
-    Int(Double(completedSeconds / 60).rounded())
-  }
-  
-  static func == (lhs: FocusEvent, rhs: FocusEvent) -> Bool {
+  static func == (lhs: ChartEntity, rhs: ChartEntity) -> Bool {
     lhs.id == rhs.id &&
-    lhs.completedSeconds == rhs.completedSeconds &&
+    lhs.label == rhs.label &&
+    lhs.value == rhs.value &&
     lhs.createdAt == rhs.createdAt &&
     lhs.isAnimated == rhs.isAnimated
   }
 }
 
 struct ChartsView: View {
-  @State var events: [FocusEvent] = []
+  @State var events: [ChartEntity] = []
   @State var isAnimated: Bool = false
   @State var trigger: Bool = false
   
   var body: some View {
     Group {
       VStack {
-        Chart {
-          ForEach(events) { event in
-            BarMark(
-              x: .value("Focus", event.isAnimated ?  event.completedMinutes : 0),
-              y: .value("Week", event.day)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .annotation(position: .trailing) {
-              Text("\(event.completedMinutes.description)m")
-                .font(.caption)
-            }
-            .annotation(position: .overlay) {
+        Chart(events) { event in
+          BarMark(
+            x: .value("Focus", event.isAnimated ?  event.value : 0),
+            y: .value("Week", event.label)
+          )
+          .clipShape(RoundedRectangle(cornerRadius: 8))
+          .annotation(position: .trailing) {
+            VStack {
+              Text(event.label)
               HStack {
-                Text("\(event.completedMinutes.description)m")
+                Text("\(event.value.description)m")
                   .font(.caption)
-                  .foregroundColor(.white)
-                
                 Spacer()
               }
             }
-            .foregroundStyle(.black.gradient)
-            .opacity(event.isAnimated ? 1 : 0)
           }
+          .annotation(position: .overlay) {
+            HStack {
+              Text("\(event.percent.description)%")
+                .font(.caption)
+                .foregroundColor(.white)
+              
+              Spacer()
+            }
+          }
+          .foregroundStyle(.black.gradient)
+          .opacity(event.isAnimated ? 1 : 0)
         }
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)
         .frame(height: 280)
         .padding()
         .background(.background, in: .rect(cornerRadius: 16))
-//        BarChart(events)
-//          .frame(height: 280)
-//        PieChart(events)
-//          .frame(height: 280)
         
-        Chart {
-          ForEach(events) { event in
-            SectorMark(
-              angle: .value("Focus", event.isAnimated ?  event.completedMinutes : 0),
-              innerRadius: .ratio(0.6),
-              angularInset: 4
-            )
-            .foregroundStyle(by: .value("Week", event.day))
-            .opacity(event.isAnimated ? 1 : 0)
-            .cornerRadius(8)
+        Chart(events, id: \.label) { event in
+          SectorMark(
+            angle: .value("Focus", event.isAnimated ?  event.value : 0),
+            innerRadius: .ratio(0.6),
+            angularInset: 4
+          )
+          .foregroundStyle(by: .value("Week", event.label))
+          .opacity(event.isAnimated ? 1 : 0)
+          .cornerRadius(8)
+        }
+        .chartBackground { chartProxy in
+          GeometryReader { geometry in
+            if let anchor = chartProxy.plotFrame {
+              let frame = geometry[anchor]
+              Text("Study")
+                .position(x: frame.midX, y: frame.midY)
+            }
           }
         }
         .frame(height: 280)
@@ -108,15 +114,17 @@ struct ChartsView: View {
   }
   
   private func updateEvents() {
-    events = StoreKit.shared.eventsWeekMap.reduce(into: [FocusEvent]()) { array, entry in
-      let (date, focuses) = entry
-      let totalSeconds = focuses.reduce(0) { $0 + $1.completedSecondsCount }
-      array.append(FocusEvent(
-        completedSeconds: totalSeconds,
-        createdAt: focuses.first?.createdAt ?? Date(),
-        isAnimated: true
-      ))
-    }
+    events = StoreKit.shared.labelValueMap.reduce(into: [ChartEntity](), { array, item in
+      array.append(
+        ChartEntity(
+          label: item.key,
+          value: StoreKit.shared.toMinutes(item.value),
+          percent: StoreKit.shared.percent(item.value)
+        )
+      )
+    })
+    .filter { $0.percent > 0 }
+    .sorted { $0.value > $1.value }
   }
   
   private func animateChart() {
