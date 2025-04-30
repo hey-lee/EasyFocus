@@ -34,8 +34,8 @@ struct ChartEntity: Identifiable, Equatable {
 
 struct ChartsView: View {
   @State var events: [ChartEntity] = []
-  @State var isAnimated: Bool = false
   @State var trigger: Bool = false
+  @State var isAnimated: Bool = false
   
   var body: some View {
     Group {
@@ -80,7 +80,7 @@ struct ChartsView: View {
             innerRadius: .ratio(0.6),
             angularInset: 4
           )
-          .foregroundStyle(by: .value("Week", event.label))
+          .foregroundStyle(by: .value("Label", event.label))
           .opacity(event.isAnimated ? 1 : 0)
           .cornerRadius(8)
         }
