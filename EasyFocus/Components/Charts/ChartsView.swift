@@ -86,6 +86,20 @@ struct ChartsView: View {
           .foregroundStyle(by: .value("Label", event.label))
           .opacity(event.isAnimated ? 1 : 0)
           .cornerRadius(8)
+          .annotation(position: .overlay) {
+            VStack {
+              Text("\(event.value)m")
+                .font(.title3)
+                .fontWeight(.bold)
+              HStack {
+                Text(event.label)
+                  .font(.caption)
+                  .fontWeight(.semibold)
+                Spacer()
+              }
+            }
+            .foregroundColor(.white)
+          }
         }
         .chartBackground { chartProxy in
           GeometryReader { geometry in
