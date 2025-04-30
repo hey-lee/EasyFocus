@@ -81,7 +81,7 @@ struct ChartsView: View {
           SectorMark(
             angle: .value("Focus", event.isAnimated ?  event.value : 0),
             innerRadius: .ratio(pieChartRatio),
-            angularInset: 4
+            angularInset: 2
           )
           .foregroundStyle(by: .value("Label", event.label))
           .opacity(event.isAnimated ? 1 : 0)
@@ -91,8 +91,17 @@ struct ChartsView: View {
           GeometryReader { geometry in
             if let anchor = chartProxy.plotFrame {
               let frame = geometry[anchor]
-              Text("Study")
+              if let entity = selectedEntity {
+                VStack {
+                  Text(entity.label)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                  Text("\(entity.percent)%")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                }
                 .position(x: frame.midX, y: frame.midY)
+              }
             }
           }
         }
@@ -104,7 +113,9 @@ struct ChartsView: View {
                 .contentShape(Rectangle())
                 .onTapGesture { location in
                   let angle = getAngle(at: location, in: frame)
-                  selectedEntity = getSelection(by: angle)
+                  withAnimation(.snappy) {
+                    selectedEntity = getSelection(by: angle)
+                  }
                 }
             }
           }
@@ -162,7 +173,7 @@ struct ChartsView: View {
     if let angle = angle {
       let total = events.reduce(0) { $0 + $1.value }
       var startAngle: Double = 0
-
+      
       for item in events {
         let sliceAngle = Double(item.value) / Double(total) * 360
         let endAngle = startAngle + sliceAngle
