@@ -40,6 +40,10 @@ struct TimelineItem: View {
   let event: Focus
   var isLast: Bool = false
   
+  @State private var showInput = false
+  @State private var notes: String = ""
+  @FocusState private var isFocused: Bool
+  
   init(_ event: Focus, isLast: Bool) {
     self.event = event
     self.isLast = isLast
@@ -87,10 +91,48 @@ struct TimelineItem: View {
               Spacer()
               
               Button() {
-                //
+                notes = event.notes
+                showInput = true
               } label: {
                 Image(systemName: "square.and.pencil")
                   .foregroundColor(.gray)
+              }
+              .modalView(isPresented: $showInput) {
+                ModalView(
+                  style: .init(
+                    content: "",
+                    cornerRadius: 28,
+                    foregroundColor: .gray,
+                    backgroundColor: .white
+                  ),
+                  confirm: .init(
+                    content: "Save",
+                    cornerRadius: 16,
+                    foregroundColor: .white,
+                    backgroundColor: .black,
+                    action: {
+                      event.notes = notes
+                      showInput = false
+                    }
+                  )
+                ) {
+                  TextEditor(text: $notes)
+                    .focused($isFocused)
+                    .frame(height: 240)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.slate50)
+                    .cornerRadius(20)
+                    .onAppear {
+                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        isFocused = true
+                      }
+                    }
+                    .onDisappear {
+                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        isFocused = false
+                      }
+                    }
+                }
               }
             }
             
@@ -99,14 +141,14 @@ struct TimelineItem: View {
               .font(.system(size: 16))
           }
           .padding(12)
-          //          .background(Color(hex: label.backgroundColor))
+          // .background(Color(hex: label.backgroundColor))
           .background(Color.slate50)
           .cornerRadius(16)
         }
-//        
-//        Spacer()
-//          .frame(height: 40)
       }
+    }
+    .onAppear {
+      notes = event.notes
     }
   }
 }
