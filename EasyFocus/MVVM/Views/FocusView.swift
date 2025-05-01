@@ -34,17 +34,6 @@ struct FocusView: View {
           }
         }
         
-        Button("alert") {
-          modalKit.showModal(title: "title", content: "content") { action in
-            switch action {
-            case .confirm:
-              print("confirm")
-            case .cancel:
-              modalKit.show = false
-            }
-          }
-        }
-        
         if focusKit.state == .idle {
           Text(focusKit.mode == .work ? "Start Focus" : "Take a rest")
             .font(.custom("Code Next ExtraBold", size: 18))
