@@ -9,40 +9,59 @@ import SwiftUI
 import Charts
 
 struct BarChart: View {
-  @State var events: [ChartEntity] = []
+  struct Options {
+    var barWidth: CGFloat = 40
+    var barGap: CGFloat = 12
+  }
+  var events: [ChartEntity]
+  var options: Options
   
-  init(_ events: [ChartEntity] = []) {
+  init(
+    _ events: [ChartEntity] = [],
+    _ options: Options = .init()
+  ) {
     self.events = events
+    self.options = options
   }
   
   var body: some View {
-    Chart {
-      ForEach(events) { event in
-        BarMark(
-          x: .value("Focus", event.isAnimated ?  event.value : 0),
-          y: .value("Week", event.day)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .annotation(position: .trailing) {
-          Text("\(event.value.description)m")
-            .font(.caption)
-        }
-        .annotation(position: .overlay) {
+    Chart(events) { event in
+      BarMark(
+        x: .value("Focus", event.value),
+        y: .value("Week", event.label),
+        height: .fixed(options.barWidth)
+      )
+      .clipShape(RoundedRectangle(cornerRadius: 8))
+      .annotation(position: .trailing) {
+        VStack(spacing: 0) {
+          Text(event.label)
+            .font(.callout)
           HStack {
             Text("\(event.value.description)m")
               .font(.caption)
-              .foregroundColor(.white)
-            
             Spacer()
           }
         }
-        .foregroundStyle(.black.gradient)
-        .opacity(event.isAnimated ? 1 : 0)
       }
+      .annotation(position: .overlay) {
+        HStack {
+          Text("\(event.percent.description)%")
+            .font(.caption)
+            .foregroundColor(.white)
+          
+          Spacer()
+        }
+      }
+      .foregroundStyle(.black.gradient)
     }
+    .frame(height: dynamicHeight())
     .chartXAxis(.hidden)
     .chartYAxis(.hidden)
     .padding()
+  }
+  
+  private func dynamicHeight() -> CGFloat {
+    max(0, CGFloat(events.count) * options.barWidth + CGFloat(events.count - 1) * options.barGap)
   }
 }
 
