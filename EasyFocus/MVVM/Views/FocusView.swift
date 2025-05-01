@@ -13,6 +13,7 @@ struct FocusView: View {
   @Environment(DBKit.self) var db
   @Environment(TagsKit.self) var tagsKit
   @Environment(FocusKit.self) var focusKit
+  @Environment(ModalKit.self.self) var modalKit
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
   @EnvironmentObject var stack: Stackit
@@ -30,6 +31,17 @@ struct FocusView: View {
           }
           if focusKit.state == .idle, focusKit.mode == .work, focusKit.sessionIndex == 0 {
             tagView
+          }
+        }
+        
+        Button("alert") {
+          modalKit.showModal(title: "title", content: "content") { action in
+            switch action {
+            case .confirm:
+              print("confirm")
+            case .cancel:
+              modalKit.show = false
+            }
           }
         }
         
@@ -238,6 +250,7 @@ struct FocusView: View {
     .environment(DBKit())
     .environment(TagsKit())
     .environment(FocusKit())
+    .environment(ModalKit.shared)
     .environmentObject(NavKit())
     .environmentObject(ShowKit())
     .environmentObject(Stackit())

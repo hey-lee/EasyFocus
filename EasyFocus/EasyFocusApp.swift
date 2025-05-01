@@ -44,11 +44,19 @@ struct EasyFocusApp: App {
   var body: some Scene {
     WindowGroup {
       ContentView()
+        .modalView(isPresented: .init(get: {
+          ModalKit.shared.show
+        }, set: { show in
+          ModalKit.shared.show = show
+        })) {
+          ModalKit.shared.modelView()
+        }
         .preferredColorScheme(isDark ? .dark : .light)
     }
     .environment(DBKit())
     .environment(FocusKit())
     .environment(TagsKit.shared)
+    .environment(ModalKit.shared)
     .environment(StoreKit.shared)
     .environmentObject(NavKit())
     .environmentObject(Stackit())

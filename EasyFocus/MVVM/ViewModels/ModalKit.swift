@@ -15,9 +15,35 @@ final class ModalKit {
     case confirm, cancel
   }
   
-  static func defaultModalView(
-    title: String = "",
-    content: String = "",
+  enum Style {}
+  
+  var show: Bool = false
+  var title: String = ""
+  var content: String = ""
+  var style: Style?
+  var onAction: (ActionType) -> () = { _ in }
+  
+  func showModal(
+    title: String,
+    content: String,
+    style: Style? = nil,
+    _ onAction: @escaping (ActionType) -> () = { _ in }
+  ) {
+    self.title = title
+    self.content = content
+    self.style = style
+    self.onAction = onAction
+    show = true
+  }
+
+  func modelView(style: Style? = nil) -> some View {
+    switch style {
+    default:
+      defaultModalView(onAction)
+    }
+  }
+  
+  func defaultModalView(
     _ onAction: @escaping (ActionType) -> () = { _ in }
   ) -> some View {
     ModalView(
@@ -37,7 +63,7 @@ final class ModalKit {
 //        backgroundColor: .green
 //      ),
       confirm: .init(
-        content: "Save Folder",cornerRadius: 16,
+        content: "Confirm",cornerRadius: 16,
         foregroundColor: .white,
         backgroundColor: .black,
         action: {
@@ -45,7 +71,7 @@ final class ModalKit {
         }
       ),
       cancel: .init(
-        content: "Canecl",cornerRadius: 16,
+        content: "Cancel",cornerRadius: 16,
         foregroundColor: .white,
         backgroundColor: .red,
         action: {
