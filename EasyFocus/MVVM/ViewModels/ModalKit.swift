@@ -18,14 +18,14 @@ final class ModalKit {
   enum Style {}
   
   var show: Bool = false
-  var title: String = ""
-  var content: String = ""
+  var title: String?
+  var content: String?
   var style: Style?
   var onAction: (ActionType) -> () = { _ in }
   
   func showModal(
-    title: String,
-    content: String,
+    title: String? = nil,
+    content: String? = nil,
     style: Style? = nil,
     _ onAction: @escaping (ActionType) -> () = { _ in }
   ) {
@@ -39,13 +39,11 @@ final class ModalKit {
   func modelView(style: Style? = nil) -> some View {
     switch style {
     default:
-      defaultModalView(onAction)
+      defaultModalView()
     }
   }
   
-  func defaultModalView(
-    _ onAction: @escaping (ActionType) -> () = { _ in }
-  ) -> some View {
+  func defaultModalView() -> some View {
     ModalView(
       title: title,
       content: content,
@@ -67,7 +65,7 @@ final class ModalKit {
         foregroundColor: .white,
         backgroundColor: .black,
         action: {
-          onAction(.confirm)
+          self.onAction(.confirm)
         }
       ),
       cancel: .init(
@@ -75,7 +73,7 @@ final class ModalKit {
         foregroundColor: .white,
         backgroundColor: .red,
         action: {
-          onAction(.cancel)
+          self.onAction(.cancel)
         }
       )
     )
