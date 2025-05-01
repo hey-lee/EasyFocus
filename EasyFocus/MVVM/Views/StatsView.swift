@@ -11,6 +11,7 @@ import CoreData
 
 struct StatsView: View {
   @Environment(\.modelContext) var context
+  @Environment(StoreKit.self) var storeKit
   @Query(sort: \Focus.createdAt, order: .reverse)
   var focuses: [Focus] = []
   let segments: [(key: String, name: String)] = [
@@ -34,17 +35,17 @@ struct StatsView: View {
       
       VStack {
         ChartsView()
-        Text("count: \(StoreKit.shared.rangedEvents.count)")
+        Text("count: \(storeKit.chartEntities.count)")
       }
     }
-    .onAppear {
-      StoreKit.shared.focusEvents = focuses
-    }
-    .onChange(of: focuses) { oldValue, newValue in
-      StoreKit.shared.focusEvents = focuses
-    }
+//    .onAppear {
+//      storeKit.focusEvents = focuses
+//    }
+//    .onChange(of: focuses) { oldValue, newValue in
+//      storeKit.focusEvents = focuses
+//    }
     .onChange(of: rangeType) { oldValue, newValue in
-      StoreKit.shared.rangeType = rangeType
+      storeKit.rangeType = rangeType
     }
   }
   
@@ -88,4 +89,5 @@ struct StatsView: View {
 
 #Preview {
   StatsView()
+    .environment(StoreKit.shared)
 }
