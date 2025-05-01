@@ -33,9 +33,12 @@ struct ChartEntity: Identifiable, Equatable {
 }
 
 struct ChartsView: View {
+  @Environment(StoreKit.self) var storeKit
+  
   @State var events: [ChartEntity] = []
   @State var trigger: Bool = false
   @State var isAnimated: Bool = false
+  @State private var animationProgress: CGFloat = 0
   @State var selectedAngle: Double?
   @State var pieChartRatio: Double = 0.6
   @State var selectedEntity: ChartEntity?
@@ -45,7 +48,7 @@ struct ChartsView: View {
       VStack {
         Chart(events) { event in
           BarMark(
-            x: .value("Focus", event.isAnimated ?  event.value : 0),
+            x: .value("Focus", event.value),
             y: .value("Week", event.label)
           )
           .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -69,7 +72,6 @@ struct ChartsView: View {
             }
           }
           .foregroundStyle(.black.gradient)
-          .opacity(event.isAnimated ? 1 : 0)
         }
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)
@@ -79,12 +81,11 @@ struct ChartsView: View {
         
         Chart(events, id: \.label) { event in
           SectorMark(
-            angle: .value("Focus", event.isAnimated ?  event.value : 0),
+            angle: .value("Focus", event.value),
             innerRadius: .ratio(pieChartRatio),
             angularInset: 2
           )
           .foregroundStyle(by: .value("Label", event.label))
-          .opacity(event.isAnimated ? 1 : 0)
           .cornerRadius(8)
           .annotation(position: .overlay) {
             VStack {
@@ -143,14 +144,12 @@ struct ChartsView: View {
     }
     .onAppear {
       updateEvents()
-      animateChart()
     }
-    .onChange(of: trigger, initial: false) { oldValue, newValue in
-      resetChartAnimation()
-      animateChart()
-    }
-    .onChange(of: StoreKit.shared.eventsWeekMap) { oldValue, newValue in
+    .onChange(of: storeKit.rangeType) { oldValue, newValue in
       updateEvents()
+    }
+    .onChange(of: storeKit.chartEntities) { oldValue, newValue in
+      print("chartEntities", storeKit.chartEntities)
     }
     .onChange(of: selectedEntity) { oldValue, newValue in
       if let entity = selectedEntity {
@@ -203,45 +202,11 @@ struct ChartsView: View {
   }
   
   private func updateEvents() {
-    events = StoreKit.shared.labelValueMap.reduce(into: [ChartEntity](), { array, item in
-      array.append(
-        ChartEntity(
-          label: item.key,
-          value: StoreKit.shared.toMinutes(item.value),
-          percent: StoreKit.shared.percent(item.value)
-        )
-      )
-    })
-    .filter { $0.percent > 0 }
-    .sorted { $0.value > $1.value }
-  }
-  
-  private func animateChart() {
-    guard !isAnimated else { return }
-    isAnimated = true
-    
-    $events.enumerated().forEach { index, event in
-      if index > 7 {
-        event.wrappedValue.isAnimated = true
-      } else {
-        let delay = Double(index) * 0.05
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-          withAnimation(.smooth) {
-            event.wrappedValue.isAnimated = true
-          }
-        }
-      }
-    }
-  }
-  
-  private func resetChartAnimation() {
-    $events.forEach { event in
-      event.wrappedValue.isAnimated = false
-    }
-    isAnimated = false
+    events = storeKit.chartEntities
   }
 }
 
 #Preview {
   ChartsView()
+    .environment(StoreKit.shared)
 }
