@@ -94,19 +94,26 @@ struct PreviewView: View {
   var body: some View {
     VStack {
       Button("alert") {
-        show = true
-      }
-      .modalView(isPresented: $show) {
-        ModalKit.defaultModalView(title: "Folder Name", content: "Enter a file Name") { action in
+        ModalKit.shared.showModal(title: "title", content: "content") { action in
           switch action {
           case .confirm:
             print("confirm")
           case .cancel:
-            show = false
+            ModalKit.shared.show = false
           }
         }
       }
+      .modalView(isPresented: .init(get: {
+        ModalKit.shared.show
+      }, set: { show in
+        ModalKit.shared.show = show
+      })) {
+        ModalKit.shared.modelView()
+      }
     }
+    .onChange(of: ModalKit.shared.show, { oldValue, newValue in
+      print(ModalKit.shared.show)
+    })
     .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }

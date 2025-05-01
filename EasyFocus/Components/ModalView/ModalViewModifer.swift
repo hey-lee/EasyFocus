@@ -37,6 +37,8 @@ fileprivate struct ModalViewModifer<AlertContent: View, Background: View>: ViewM
   @State var animatedValue: Bool = false
   @State var allowsInteraction: Bool = false
   
+  let duration: Double = 0.1
+  
   func body(content: Content) -> some View {
     content
       .fullScreenCover(isPresented: $showFullScreenCover) {
@@ -59,11 +61,11 @@ fileprivate struct ModalViewModifer<AlertContent: View, Background: View>: ViewM
         }
         .task {
           try? await Task.sleep(for: .seconds(0.05))
-          withAnimation(.easeInOut(duration: 0.3)) {
+          withAnimation(.easeInOut(duration: duration)) {
             animatedValue = true
           }
           
-          try? await Task.sleep(for: .seconds(0.3))
+          try? await Task.sleep(for: .seconds(duration))
           allowsInteraction = true
         }
       }
