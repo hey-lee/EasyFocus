@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ModalView: View {
+struct ModalView<Content: View>: View {
   struct Style {
     var content: String
     var width: CGFloat = 0
@@ -29,6 +29,26 @@ struct ModalView: View {
   var confirm: Style
   var cancel: Style?
   
+  @ViewBuilder var contentView: () -> Content
+  
+  init(
+    title: String? = nil,
+    content: String? = nil,
+    style: Style,
+    image: Style? = nil,
+    confirm: Style,
+    cancel: Style? = nil,
+    @ViewBuilder contentView: @escaping () -> Content = { EmptyView() }
+  ) {
+    self.title = title
+    self.content = content
+    self.style = style
+    self.image = image
+    self.confirm = confirm
+    self.cancel = cancel
+    self.contentView = contentView
+  }
+  
   var body: some View {
     VStack(spacing: 16) {
       if let title = title {
@@ -42,6 +62,8 @@ struct ModalView: View {
           .multilineTextAlignment(.center)
           .foregroundStyle(style.foregroundColor)
       }
+      
+      contentView()
       
       HStack {
         if let cancel {
