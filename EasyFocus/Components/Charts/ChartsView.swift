@@ -38,9 +38,10 @@ struct ChartsView: View {
   @State var events: [ChartEntity] = []
   @State var trigger: Bool = false
   @State var isAnimated: Bool = false
-  @State private var animationProgress: CGFloat = 0
   @State var selectedAngle: Double?
   @State var pieChartRatio: Double = 0.6
+  @State var barWidth: CGFloat = 40
+  @State var barGap: CGFloat = 12
   @State var selectedEntity: ChartEntity?
   
   var body: some View {
@@ -49,12 +50,14 @@ struct ChartsView: View {
         Chart(events) { event in
           BarMark(
             x: .value("Focus", event.value),
-            y: .value("Week", event.label)
+            y: .value("Week", event.label),
+            height: .fixed(barWidth)
           )
           .clipShape(RoundedRectangle(cornerRadius: 8))
           .annotation(position: .trailing) {
-            VStack {
+            VStack(spacing: 0) {
               Text(event.label)
+                .font(.callout)
               HStack {
                 Text("\(event.value.description)m")
                   .font(.caption)
@@ -73,9 +76,9 @@ struct ChartsView: View {
           }
           .foregroundStyle(.black.gradient)
         }
+        .frame(height: max(0, CGFloat(events.count) * barWidth + CGFloat(events.count - 1) * barGap))
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)
-        .frame(height: 280)
         .padding()
         .background(.background, in: .rect(cornerRadius: 16))
         
@@ -90,8 +93,6 @@ struct ChartsView: View {
           .annotation(position: .overlay) {
             VStack {
               Text("\(event.value)m")
-                .font(.title3)
-                .fontWeight(.bold)
               HStack {
                 Text(event.label)
                   .font(.caption)
