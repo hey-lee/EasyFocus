@@ -1,5 +1,5 @@
 //
-//  AlertViewModifer.swift
+//  ModalViewModifer.swift
 //  EasyFocus
 //
 //  Created by DBL on 2025/4/29.
@@ -9,28 +9,28 @@ import SwiftUI
 
 extension View {
   @ViewBuilder
-  func alertView<Content: View, Background: View>(
+  func modalView<Content: View, Background: View>(
     isPresented: Binding<Bool>,
-    @ViewBuilder content: @escaping () -> Content,
     @ViewBuilder background: @escaping () -> Background = {
       Rectangle()
         .fill(.primary.opacity(0.35))
-    }
+    },
+    @ViewBuilder content: @escaping () -> Content
   ) -> some View {
     self
       .modifier(
-        AlertViewModifer(
+        ModalViewModifer(
           isPresented: isPresented,
-          alertContet: content,
+          modalContent: content,
           background: background
         )
       )
   }
 }
 
-fileprivate struct AlertViewModifer<AlertContent: View, Background: View>: ViewModifier {
+fileprivate struct ModalViewModifer<AlertContent: View, Background: View>: ViewModifier {
   @Binding var isPresented: Bool
-  @ViewBuilder var alertContet: AlertContent
+  @ViewBuilder var modalContent: AlertContent
   @ViewBuilder var background: Background
   
   @State var showFullScreenCover: Bool = false
@@ -42,7 +42,7 @@ fileprivate struct AlertViewModifer<AlertContent: View, Background: View>: ViewM
       .fullScreenCover(isPresented: $showFullScreenCover) {
         ZStack {
           if animatedValue {
-            alertContet
+            modalContent
               .allowsHitTesting(allowsInteraction)
               .transition(
                 .asymmetric(
