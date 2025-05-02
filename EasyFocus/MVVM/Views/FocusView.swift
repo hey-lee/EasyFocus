@@ -13,12 +13,14 @@ struct FocusView: View {
   @Environment(DBKit.self) var db
   @Environment(TagsKit.self) var tagsKit
   @Environment(FocusKit.self) var focusKit
-  @Environment(ModalKit.self.self) var modalKit
+  @Environment(ModalKit.self) var modalKit
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
   @EnvironmentObject var stack: Stackit
 
   @AppStorage("enableCalendarSync") var enableCalendarSync = false
+  
+  @State var showModalView: Bool = false
   
   var body: some View {
     NavigationStack(path: $stack.settings) {
@@ -26,8 +28,14 @@ struct FocusView: View {
         VStack(spacing: 0) {
           focusView
           
-          if focusKit.state == .running, !focusKit.isForwardMode {
-            sessionsView
+          if focusKit.state == .running {
+            if focusKit.mode == .rest {
+              Symbol("sf.cup.and.saucer")
+            } else {
+              if !focusKit.isForwardMode {
+                sessionsView
+              }
+            }
           }
           if focusKit.state == .idle, focusKit.mode == .work, focusKit.sessionIndex == 0 {
             tagView
@@ -35,20 +43,32 @@ struct FocusView: View {
         }
         
         if focusKit.state == .idle {
-          Text(focusKit.mode == .work ? "Start Focus" : "Take a rest")
-            .font(.custom("Code Next ExtraBold", size: 18))
-            .foregroundStyle(.white)
-            .padding()
-            .background(.black)
-            .clipShape(Capsule())
-            .onTapGesture {
-              Tools.haptic()
-              focusKit.createFocusModel()
-              withAnimation {
-                focusKit.start()
-                AppControlsKit.shared.startShield()
-              }
+          Group {
+            if focusKit.sessionIndex == 0 {
+              Text("Start Focus")
+                .onTapGesture {
+                  Tools.haptic()
+                  focusKit.createFocusModel()
+                  AppControlsKit.shared.startShield()
+                  withAnimation {
+                    focusKit.start()
+                  }
+                }
+            } else {
+              Text(focusKit.mode == .work ? "Continue" : "Take a rest")
+                .onTapGesture {
+                  withAnimation {
+                    focusKit.start()
+                    Tools.haptic()
+                  }
+                }
             }
+          }
+          .font(.custom("Code Next ExtraBold", size: 18))
+          .foregroundStyle(.white)
+          .padding()
+          .background(.black)
+          .clipShape(Capsule())
         }
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -138,6 +158,30 @@ struct FocusView: View {
             AppControlsKit.shared.stopShield()
           }
         }
+      }
+      .onChange(of: focusKit.mode, { oldValue, newValue in
+//        showModalView = focusKit.mode == .rest
+      })
+      .modalView(isPresented: $showModalView) {
+        ModalView(
+          title: "Congrets",
+          style: .init(
+            content: "",
+            cornerRadius: 28,
+            foregroundColor: .gray,
+            backgroundColor: .white
+          ),
+          confirm: .init(
+            content: "Take a break",cornerRadius: 16,
+            foregroundColor: .white,
+            backgroundColor: .black,
+            action: {
+              print("take a break")
+              focusKit.start()
+              showModalView = false
+            }
+          )
+        )
       }
       .navigationDestination(for: String.self) { key in
         switch key {
