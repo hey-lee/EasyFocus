@@ -23,7 +23,7 @@ extension FocusKit {
     case work, rest
     var description: String { rawValue }
   }
-
+  
   enum Stage: String, CustomStringConvertible {
     case beforeStart, start, beforePause, pause, beforeResume, resume, beforeStop, stop, beforeNextSession, nextSession, completion
     var description: String { rawValue }
@@ -31,6 +31,7 @@ extension FocusKit {
   
   struct Stats {
     var secondsLeft: Int
+    var sessionIndex: Int
     var completedSecondsCount: Int
   }
   
@@ -45,95 +46,87 @@ extension FocusKit {
 class FocusKit {
   static let shared = FocusKit()
   
-  var onStateChange: (FocusKit.State, FocusKit.Stage, FocusKit.Stats) -> ()
+  private var onStateChange: (FocusKit.State, FocusKit.Stage, FocusKit.Stats) -> ()
   
-  var focus: Focus?
-  var minutes: Int {
+  public var focus: Focus?
+  public var minutes: Int {
     set { UserDefaults.standard.set(newValue, forKey: "minutes") }
     get { UserDefaults.standard.object(forKey: "minutes") as? Int ?? 20 }
   }
-  var sessionsCount: Int {
+  public var sessionsCount: Int {
     set { UserDefaults.standard.set(newValue, forKey: "sessionsCount") }
     get { UserDefaults.standard.object(forKey: "sessionsCount") as? Int ?? 4 }
   }
-  var restShort: Int {
+  public var restShort: Int {
     set { UserDefaults.standard.set(newValue, forKey: "restShort") }
     get { UserDefaults.standard.object(forKey: "restShort") as? Int ?? 5 }
   }
-  var restLong: Int {
+  public var restLong: Int {
     set { UserDefaults.standard.set(newValue, forKey: "restLong") }
     get { UserDefaults.standard.object(forKey: "restLong") as? Int ?? 15 }
   }
-  var autoStartSessions: Bool {
+  public var autoStartSessions: Bool {
     set { UserDefaults.standard.set(newValue, forKey: "autoStartSessions") }
     get { UserDefaults.standard.bool(forKey: "autoStartSessions") }
   }
-  var autoStartShortBreaks: Bool {
+  public var autoStartShortBreaks: Bool {
     set { UserDefaults.standard.set(newValue, forKey: "autoStartShortBreaks") }
     get { UserDefaults.standard.bool(forKey: "autoStartShortBreaks") }
   }
-
-  var completedSessionsCount: Int {
+  
+  public var completedSessionsCount: Int {
     let completedSessions = sessionIndex
     let currentSession = (mode == .work && percent >= 0.8) ? 1 : 0
     
     return max(0, completedSessions + currentSession)
   }
-
-  var completedSecondsCount: Int {
-    let completedSessionsSeconds = sessionIndex * minutes * minuteInSeconds
-    let currentSessionSeconds = mode == .work ? secondsSinceStart : 0
-    
+  
+  public var completedSecondsCount: Int {
+    let completedSessionsSeconds = max(0, sessionIndex) * minutes * ONE_MINUTE_IN_SECONDS
+    let currentSessionSeconds = mode == .work ? min(secondsSinceStart, minutes * ONE_MINUTE_IN_SECONDS) : 0
     return completedSessionsSeconds + currentSessionSeconds
   }
-
-  var completedMinutesCount: Int {
-    let completedSessionsTime = sessionIndex * minutes
-    let currentSessionTime = mode == .work ? Int(Double(minutes) * percent) : 0
-    
-    return completedSessionsTime + currentSessionTime
+  
+  public var totalSeconds: Int {
+    sessionsCount * minutes * ONE_MINUTE_IN_SECONDS
   }
   
-  var totalSeconds: Int {
-    minutes * minuteInSeconds * sessionsCount
-  }
-  
-  var shouldAutoStart: Bool {
+  private var shouldAutoStart: Bool {
     mode == .work ? autoStartSessions : autoStartShortBreaks
   }
   
   // Timer State
-  var timer: Timer?
-  var backgroundTask: BGTask?
-  var lastBackgroundDate: Date?
+  private var timer: Timer?
+  private var backgroundTask: BGTask?
+  private var lastBackgroundDate: Date?
   
   // Observable Properties
-  var mode: Mode = .work
-  var state: FocusKit.State = .idle
-  var restType: RestType = .short
-  var startedAt = Date.now
-  var secondsSinceStart = 0
-  var percent: Double = 0
-  var secondsOnPaused = 0
-  var sessionIndex = 0
+  public var mode: Mode = .work
+  public var state: FocusKit.State = .idle
+  private var restType: RestType { (sessionIndex % 4 == 0) ? .long : .short }
+  private var startedAt = Date.now
+  private var secondsSinceStart = 0
+  public var percent: Double = 0
+  private var secondsOnPaused = 0
+  public var sessionIndex = 0
   
-  let minuteInSeconds: Int = 60
-  
+  private let ONE_MINUTE_IN_SECONDS: Int = 60
+
   // Computed Properties
-  var isForwardMode: Bool { mode == .work && minutes == 0 }
-  var secondsLeft: Int {
+  public var isForwardMode: Bool { mode == .work && minutes == 0 }
+  private var secondsLeft: Int {
     isForwardMode ? secondsSinceStart : (duration - secondsSinceStart)
   }
-  var isActive: Bool { state == .running || state == .paused }
-  var display: (minutes: String, seconds: String) {
+  public var isActive: Bool { state == .running || state == .paused }
+  public var display: (minutes: String, seconds: String) {
     let parts = format(secondsLeft).components(separatedBy: ":")
     return (minutes: parts[0], seconds: parts[1])
   }
   
   private var duration: Int {
     switch mode {
-    case .work: isForwardMode ? Int.max : minutes * minuteInSeconds
-    case .rest: (restType == .short ? restShort : restLong) * minuteInSeconds
+    case .work: isForwardMode ? Int.max : minutes * ONE_MINUTE_IN_SECONDS
+    case .rest: (restType == .short ? restShort : restLong) * ONE_MINUTE_IN_SECONDS
     }
   }
   
@@ -144,7 +137,7 @@ class FocusKit {
 
 // MARK - focus storage
 extension FocusKit {
-  func createFocusModel() {
+  public func createFocusModel() {
     self.focus = Focus(
       minutes: minutes,
       sessionsCount: sessionsCount,
@@ -153,12 +146,11 @@ extension FocusKit {
       label: TagsKit.shared.modelLabel,
     )
   }
-
-  func updateFocusModel() {
+  
+  public func updateFocusModel() {
     if let focus {
       focus.endedAt = Date()
       focus.completedSecondsCount = completedSecondsCount
-      focus.completedMinutesCount = completedMinutesCount
       focus.completedSessionsCount = completedSessionsCount
     }
   }
@@ -171,21 +163,22 @@ extension FocusKit {
       self?.tick()
     }
   }
-  func start() {
+  
+  public func start() {
     updateStage(.beforeStart)
-
+    
     guard state != .running else { return }
     state = .running
     startedAt = .now
     createTimer()
     scheduleBackgroundTask()
-
+    
     updateStage(.start)
   }
   
-  func pause() {
+  public func pause() {
     updateStage(.beforePause)
-
+    
     guard state == .running else { return }
     state = .paused
     secondsOnPaused = secondsSinceStart
@@ -194,48 +187,52 @@ extension FocusKit {
     updateStage(.pause)
   }
   
-  func resume() {
+  public func resume() {
     updateStage(.beforeResume)
-
+    
     guard state == .paused else { return }
     state = .running
     startedAt = .now
     createTimer()
     scheduleBackgroundTask()
-
+    
     updateStage(.resume)
   }
   
-  func nextSession() {
+  private func nextSession() {
     updateStage(.beforeNextSession)
-
+    
     timer?.invalidate()
     state = .idle
     percent = 0
     secondsSinceStart = 0
     secondsOnPaused = 0
     backgroundTask?.setTaskCompleted(success: true)
-
+    
     updateStage(.nextSession)
   }
   
-  func stop() {
+  public func stop() {
     updateStage(.beforeStop)
-
+    
     nextSession()
     mode = .work
     sessionIndex = 0
     focus = nil
-
+    
     updateStage(.stop)
   }
   
-  func onStateChange(_ onStateChange: @escaping (FocusKit.State, FocusKit.Stage, FocusKit.Stats) -> () = { _, _, _ in }) {
+  public func onStateChange(_ onStateChange: @escaping (FocusKit.State, FocusKit.Stage, FocusKit.Stats) -> () = { _, _, _ in }) {
     self.onStateChange = onStateChange
   }
   
-  func updateStage(_ stage: Stage) {
-    onStateChange(state, stage, .init(secondsLeft: secondsLeft, completedSecondsCount: completedSecondsCount))
+  private func updateStage(_ stage: Stage) {
+    onStateChange(state, stage, .init(
+      secondsLeft: secondsLeft,
+      sessionIndex: sessionIndex,
+      completedSecondsCount: completedSecondsCount)
+    )
   }
   
   private func tick() {
@@ -251,29 +248,49 @@ extension FocusKit {
   }
   
   private func handleTimerCompletion() {
-    if mode == .work {
-      sessionIndex = (sessionIndex == sessionsCount) ? 0 : sessionIndex + 1
+    updateStage(.completion)
+    switch mode {
+    case .work:
+      handleWorkCompletion()
+    case .rest:
+      handleRestCompletion()
     }
-
-    mode = mode == .work ? .rest : .work
+  }
+  
+  private func handleWorkCompletion() {
+    sessionIndex += 1
     
-    if sessionIndex == 0 {
+    if sessionIndex > sessionsCount {
+      // Save state before stopping
+      stop()
+      return
+    }
+    
+    nextSession()
+    mode = .rest
+    
+    if autoStartShortBreaks {
+      start()
+    }
+  }
+  
+  private func handleRestCompletion() {
+    if sessionIndex >= sessionsCount {
       stop()
     } else {
       nextSession()
-
-      updateStage(.completion)
-      if shouldAutoStart {
+      mode = .work
+      if autoStartSessions {
         start()
       }
     }
   }
   
-  func getSessionProgress(_ index: Int) -> CGFloat {
+  public func getSessionProgress(_ index: Int) -> CGFloat {
     sessionIndex > index ? 1 : ((sessionIndex == index) && mode == .work ? percent : 0)
   }
   
-  func format(_ seconds: Int) -> String {
+  public func format(_ seconds: Int) -> String {
     guard seconds > 0 else { return "00:00" }
     return String(format: "%02d:%02d", seconds / 60, seconds % 60)
   }
@@ -282,7 +299,7 @@ extension FocusKit {
 
 // MARK - notifications
 extension FocusKit {
-  func scheduleNotification() {
+  private func scheduleNotification() {
     guard state == .running else { return }
     NotificationKit.addNotification(TimeInterval(secondsLeft), "Timer Done!", "Your focus session is completed")
   }
@@ -290,7 +307,7 @@ extension FocusKit {
 
 // MARK - background task
 extension FocusKit {
-  func initNotification() {
+  public func initNotification() {
     initTaskScheduler()
     NotificationCenter.default.addObserver(
       self,
@@ -315,6 +332,7 @@ extension FocusKit {
   }
   
   private func scheduleBackgroundTask() {
+    guard state == .running else { return }
     let request = BGProcessingTaskRequest(identifier: "co.banli.apps.easyfocus.timer")
     request.requiresNetworkConnectivity = false
     request.requiresExternalPower = false
@@ -344,8 +362,17 @@ extension FocusKit {
   @objc private func willEnterForeground() {
     guard state == .running, let lastDate = lastBackgroundDate else { return }
     let backgroundTime = Int(Date.now.timeIntervalSince(lastDate))
-    secondsSinceStart += backgroundTime
+    
+    if backgroundTime >= secondsLeft {
+      // Timer would have completed - handle completion
+      secondsSinceStart = duration
+      handleTimerCompletion()
+    } else {
+      // Timer still running - adjust time
+      secondsSinceStart += backgroundTime
+      createTimer()
+    }
+    
     lastBackgroundDate = nil
-    createTimer()
   }
 }
