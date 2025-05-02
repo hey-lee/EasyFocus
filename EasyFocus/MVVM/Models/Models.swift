@@ -13,7 +13,6 @@ class Focus {
   var minutes: Int = 25
   var sessionsCount: Int = 4
   var completedSecondsCount: Int = 0
-  var completedMinutesCount: Int = 0
   var completedSessionsCount: Int = 0
   var restShort: Int = 5
   var restLong: Int = 20
@@ -23,12 +22,27 @@ class Focus {
   var startedAt: Date = Date()
   var endedAt: Date = Date()
   var createdAt: Date = Date()
+  var description: String {
+"""
+Focus(
+  minutes: \(minutes),
+  sessionsCount: \(sessionsCount),
+  completedSecondsCount: \(completedSecondsCount),
+  completedSessionsCount: \(completedSessionsCount),
+  label: \(label?.name ?? ""),
+  notes: \(notes),
+  calendarEventID: \(calendarEventID),
+  startedAt: \(startedAt.format()),
+  endedAt: \(endedAt.format()),
+  createdAt: \(createdAt.format()),
+)
+"""
+  }
   
   init(
     minutes: Int = 25,
     sessionsCount: Int = 4,
     completedSecondsCount: Int = 0,
-    completedMinutesCount: Int = 0,
     completedSessionsCount: Int = 0,
     restShort: Int = 5,
     restLong: Int = 20,
@@ -42,7 +56,6 @@ class Focus {
     self.minutes = minutes
     self.sessionsCount = sessionsCount
     self.completedSecondsCount = completedSecondsCount
-    self.completedMinutesCount = completedMinutesCount
     self.completedSessionsCount = completedSessionsCount
     self.restShort = restShort
     self.restLong = restLong

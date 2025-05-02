@@ -33,6 +33,11 @@ struct Timeline: View {
         .padding()
       }
     }
+    .onAppear {
+      events.forEach {
+        print($0.description)
+      }
+    }
   }
 }
 
