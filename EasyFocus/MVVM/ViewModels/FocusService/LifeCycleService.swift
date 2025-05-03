@@ -18,9 +18,10 @@ protocol LifeCycleServiceDelegate {
 
 
 final class LifeCycleService: LifeCycleServiceDelegate {
+  static let shared = LifeCycleService()
   private var listeners = NSHashTable<AnyObject>.weakObjects()
 
-  static public func setupObservers() {
+  public func setupObservers() {
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(didEnterBackground),
