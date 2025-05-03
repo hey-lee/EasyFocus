@@ -59,6 +59,7 @@ final class StateMachine {
       transition(to: .running(mode))
       return true
     default:
+      print("invalid action \(event) on state \(state)")
       return false
     }
   }
