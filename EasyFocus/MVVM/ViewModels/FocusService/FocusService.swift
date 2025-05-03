@@ -71,6 +71,51 @@ final class FocusService {
   }
 }
 
+// MARK - Core Controls
+extension FocusService {
+  func start(_ mode: Mode) {
+    timer.duration = duration
+    _ = stateMachine.send(.start(mode))
+  }
+  
+  func pause() {
+    _ = stateMachine.send(.pause)
+  }
+  
+  func resume() {
+    _ = stateMachine.send(.resume)
+  }
+  
+  func stop() {
+    _ = stateMachine.send(.stop)
+  }
+}
+
+// MARK - State Machine
+extension FocusService {
+  private func onStateChange(_ oldState: FocusService.State, _ newState: FocusService.State) {
+    updateStage(.willTransition(from: oldState, to: newState))
+    
+    switch (oldState, newState) {
+    case (.idle, .running):
+      timer.start()
+    case (.running, .paused):
+      timer.pause()
+    case (.paused, .running):
+      timer.resume()
+    case (_, .idle):
+      timer.stop()
+    default: break
+    }
+    updateStage(.didTransition(to: newState))
+  }
+  
+  private func updateStage(_ stage: TransitionStage) {
+    // print("stage", stage)
+  }
+}
+
+// MARK - Timer Service Delegate
 extension FocusService: TimerServiceDelegate {
   func onTick(elapsedSeconds: Int) {
     onElapsedUpdated(elapsedSeconds)
@@ -101,50 +146,6 @@ extension FocusService: TimerServiceDelegate {
     if timer.mode == .countdown {
       progress = Double(elapsedSeconds) / Double(duration)
     }
-  }
-}
-
-// MARK - Core Controls
-extension FocusService {
-  func start(_ mode: Mode) {
-    timer.duration = duration
-    _ = stateMachine.send(.start(mode))
-  }
-  
-  func pause() {
-    _ = stateMachine.send(.pause)
-  }
-  
-  func resume() {
-    _ = stateMachine.send(.resume)
-  }
-  
-  func stop() {
-    _ = stateMachine.send(.stop)
-  }
-}
-
-// MARK - StateMachine
-extension FocusService {
-  private func onStateChange(_ oldState: FocusService.State, _ newState: FocusService.State) {
-    updateStage(.willTransition(from: oldState, to: newState))
-    
-    switch (oldState, newState) {
-    case (.idle, .running):
-      timer.start()
-    case (.running, .paused):
-      timer.pause()
-    case (.paused, .running):
-      timer.resume()
-    case (_, .idle):
-      timer.stop()
-    default: break
-    }
-    updateStage(.didTransition(to: newState))
-  }
-  
-  private func updateStage(_ stage: TransitionStage) {
-    // print("stage", stage)
   }
 }
 
