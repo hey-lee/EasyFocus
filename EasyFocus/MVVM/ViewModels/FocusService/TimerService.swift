@@ -104,11 +104,7 @@ private extension TimerService {
       remainingSeconds = elapsed
     }
     
-    if mode == .countdown, elapsed >= duration {
-      stop(type: .finish)
-    } else {
-      delegate?.onTick(elapsedSeconds: elapsed)
-    }
+    delegate?.onTick(elapsedSeconds: elapsed)
   }
   
   func computeElapsed() -> Int {
