@@ -55,13 +55,14 @@ final class FocusService {
     (sessionIndex % 4 == 0) ? .long : .short
   }
   public var display: (minutes: String, seconds: String) {
-    timer.display
+    let parts = format(timer.remainingSeconds).components(separatedBy: ":")
+    return (minutes: parts[0], seconds: parts[1])
+    
   }
   public var progress: Double = 0
   public var sessionIndex: Int = 0
   
   init() {
-    timer.minutes = settings.minutes
     timer.duration = duration
     timer.delegate = self
     notify.delegate = self
@@ -97,10 +98,29 @@ extension FocusService: TimerServiceDelegate {
   func onBreakComplete() {}
   
   func onElapsedUpdated(_ elapsedSeconds: Int) {
-    print(timer.duration, timer.remainingSeconds)
     if timer.mode == .countdown {
       progress = Double(elapsedSeconds) / Double(duration)
     }
+  }
+}
+
+// MARK - Core Controls
+extension FocusService {
+  func start(_ mode: Mode) {
+    timer.duration = duration
+    _ = stateMachine.send(.start(mode))
+  }
+  
+  func pause() {
+    _ = stateMachine.send(.pause)
+  }
+  
+  func resume() {
+    _ = stateMachine.send(.resume)
+  }
+  
+  func stop() {
+    _ = stateMachine.send(.stop)
   }
 }
 
@@ -128,23 +148,11 @@ extension FocusService {
   }
 }
 
-// MARK - Core Controls
+// MARK - Helpers
 extension FocusService {
-  @MainActor
-  func start(_ mode: Mode) {
-    _ = stateMachine.send(.start(mode))
-  }
-  
-  func pause() {
-    _ = stateMachine.send(.pause)
-  }
-  
-  func resume() {
-    _ = stateMachine.send(.resume)
-  }
-  
-  func stop() {
-    _ = stateMachine.send(.stop)
+  public func format(_ seconds: Int) -> String {
+    guard seconds > 0 else { return "00:00" }
+    return String(format: "%02d:%02d", seconds / 60, seconds % 60)
   }
 }
 

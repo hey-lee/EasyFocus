@@ -24,18 +24,9 @@ final class TimerService {
   enum Mode {
     case countdown, forward
   }
-  struct Configuration {
-    let minutes: Int
-    let duration: Int
-  }
-  
-  public var minutes: Int = 0
+
   public var duration: Int = 0
   public var remainingSeconds: Int = 0
-  public var display: (minutes: String, seconds: String) {
-    let parts = format(remainingSeconds).components(separatedBy: ":")
-    return (minutes: parts[0], seconds: parts[1])
-  }
   
   // MARK - Internal properties
   private var timer: Timer?
@@ -45,7 +36,7 @@ final class TimerService {
   
   // MARK - External properties
   var mode: Mode {
-    minutes == 0 ? .forward : .countdown
+    duration == 0 ? .forward : .countdown
   }
   weak var delegate: TimerServiceDelegate?
   
@@ -85,6 +76,7 @@ extension TimerService {
     timer?.invalidate()
     startedAt = nil
     elapsedBeforePause = 0
+    remainingSeconds = 0
     delegate?.onTimerComplete(type: type)
   }
 }
@@ -102,7 +94,15 @@ private extension TimerService {
   func onTick() {
     let elapsed = computeElapsed()
     
-    remainingSeconds = max(duration - elapsed, 0)
+    switch mode {
+    case .countdown:
+      remainingSeconds = max(duration - elapsed, 0)
+      if elapsed >= duration {
+        stop(type: .finish)
+      }
+    case .forward:
+      remainingSeconds = elapsed
+    }
     
     if mode == .countdown, elapsed >= duration {
       stop(type: .finish)
@@ -114,13 +114,6 @@ private extension TimerService {
   func computeElapsed() -> Int {
     guard let startedAt else { return elapsedBeforePause }
     return Int(Date().timeIntervalSince(startedAt)) + elapsedBeforePause
-  }
-}
-
-extension TimerService {
-  public func format(_ seconds: Int) -> String {
-    guard seconds > 0 else { return "00:00" }
-    return String(format: "%02d:%02d", seconds / 60, seconds % 60)
   }
 }
 
