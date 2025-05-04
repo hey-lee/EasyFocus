@@ -29,6 +29,7 @@ final class StateMachine {
   public var onStateChanged: ((FocusService.State, FocusService.State) -> Void)?
   
   func emit(_ event: FocusEvent) -> Bool {
+    print("state machine emit \(event)")
     switch (state, event) {
       // start
     case (.idle, .start(let mode)):
@@ -58,7 +59,7 @@ final class StateMachine {
       transition(to: .running(mode))
       return true
     default:
-      print("invalid action \(event) on state \(state)")
+      print("invalid event \(event) on state \(state)")
       return false
     }
   }
