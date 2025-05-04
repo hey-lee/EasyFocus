@@ -11,7 +11,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     
 //    FocusKit.shared.initNotification()
-    LifeCycleService.shared.setupObservers()
+    AppLifeCycleService.shared.setupObservers()
     BackgroundTaskService.shared.registerTask()
     
     UserDefaults.standard.register(defaults: [
