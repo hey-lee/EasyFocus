@@ -35,7 +35,6 @@ final class FocusService {
   
   var sm: StateMachine = .init()
   var notification: NotificationService = .init()
-  var backgroundTaskService: BackgroundTaskService = BackgroundTaskService.shared
   
   public var state: FocusService.State = .idle
   
@@ -47,8 +46,6 @@ final class FocusService {
     case .rest: (breakType == .short ? settings.shortBreak : settings.longBreak) * ONE_MINUTE_IN_SECONDS
     }
   }
-  
-  private var lastBackgroundDate: Date?
   
   public var mode: FocusService.Mode = .work
   public var breakType: FocusService.BreakType {
@@ -66,7 +63,6 @@ final class FocusService {
     timer.duration = duration
     timer.delegate = self
     notification.delegate = self
-    backgroundTaskService.delegate = self
     sm.onStateChanged = onStateChange
     AppLifeCycleService.shared.addListener(self)
   }
@@ -165,28 +161,10 @@ extension FocusService {
   }
 }
 
-// MARK - Background Task
-extension FocusService: BackgroundTaskServiceDelegate {
-  func onTaskExpiration() {
-    _ = sm.emit(.pause)
-  }
-  
-  func onTaskComplete() {}
-  
-  func scheduleBackgroundTask() {
-    guard case .running = sm.state else { return }
-    backgroundTaskService.scheduleTask(seconds: timer.remainingSeconds)
-  }
-}
-
 // MARK - Notification
 extension FocusService: NotificationServiceDelegate {
   func didReceive(_ response: UNNotificationResponse) {
-    print("notificationDidTrigger", notification)
-  }
-  
-  private func cancelNotifications() {
-    notification.cancelAll()
+    print("didReceive", notification)
   }
 }
 
@@ -204,5 +182,6 @@ extension FocusService: AppLifeCycleServiceDelegate {
   
   func willEnterForeground() {
     _ = sm.emit(.foreground)
+    notification.clearAll()
   }
 }
