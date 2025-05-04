@@ -26,32 +26,35 @@ enum TransitionStage {
 final class StateMachine {
   private(set) var state: FocusService.State = .idle
   
-  var shouldStop: Bool = false
-  var onStateChanged: ((FocusService.State, FocusService.State) -> Void)?
+  public var onStateChanged: ((FocusService.State, FocusService.State) -> Void)?
   
-  func send(_ event: FocusEvent) -> Bool {
+  func emit(_ event: FocusEvent) -> Bool {
     switch (state, event) {
-    // start
+      // start
     case (.idle, .start(let mode)):
       transition(to: .running(mode))
       return true
-    // pause
+      // pause
     case (.running(let mode), .pause):
       transition(to: .paused(mode))
       return true
-    // resume
+      // resume
     case (.paused(let mode), .resume):
       transition(to: .running(mode))
       return true
-    // count down finished
+    // loop mode (.running(.work) -> .running(.rest)) -> .running(.work)
+   case (.running, .start(let mode)):
+     transition(to: .running(mode))
+     return true
+      // count down finished
     case (.running, .finish):
       transition(to: .idle)
       return true
-    // stop manually
+      // stop manually
     case (.running, .stop), (.paused, .stop):
       transition(to: .idle)
       return true
-    // handle background & foreground events
+      // handle background & foreground events
     case (.running(let mode), .background):
       transition(to: .paused(mode))
       return true
