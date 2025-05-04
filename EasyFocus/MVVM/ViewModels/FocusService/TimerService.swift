@@ -51,6 +51,7 @@ final class TimerService {
 // MARK - External Controls
 extension TimerService {
   public func start() {
+    timer?.invalidate()
     startedAt = .now
     fireTimer()
   }
