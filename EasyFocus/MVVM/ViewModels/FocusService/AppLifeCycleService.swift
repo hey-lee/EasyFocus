@@ -6,19 +6,13 @@
 //
 
 import SwiftUI
-protocol LifeCycleServiceListener: AnyObject {
+protocol AppLifeCycleServiceDelegate: AnyObject {
   func didEnterBackground()
   func willEnterForeground()
 }
 
-protocol LifeCycleServiceDelegate {
-  func addListener(_ listener: LifeCycleServiceListener)
-  func removeListener(_ listener: LifeCycleServiceListener)
-}
-
-
-final class LifeCycleService: LifeCycleServiceDelegate {
-  static let shared = LifeCycleService()
+final class AppLifeCycleService {
+  static let shared = AppLifeCycleService()
   private var listeners = NSHashTable<AnyObject>.weakObjects()
 
   public func setupObservers() {
@@ -38,21 +32,21 @@ final class LifeCycleService: LifeCycleServiceDelegate {
   
   @objc private func didEnterBackground() {
     listeners.allObjects.forEach {
-      ($0 as? LifeCycleServiceListener)?.didEnterBackground()
+      ($0 as? AppLifeCycleServiceDelegate)?.didEnterBackground()
     }
   }
   
   @objc private func willEnterForeground() {
     listeners.allObjects.forEach {
-      ($0 as? LifeCycleServiceListener)?.willEnterForeground()
+      ($0 as? AppLifeCycleServiceDelegate)?.willEnterForeground()
     }
   }
   
-  func addListener(_ listener: LifeCycleServiceListener) {
+  func addListener(_ listener: AppLifeCycleServiceDelegate) {
     listeners.add(listener)
   }
   
-  func removeListener(_ listener: LifeCycleServiceListener) {
+  func removeListener(_ listener: AppLifeCycleServiceDelegate) {
     listeners.remove(listener)
   }
 }
