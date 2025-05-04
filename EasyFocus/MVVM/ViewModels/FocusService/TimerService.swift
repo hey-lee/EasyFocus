@@ -9,10 +9,7 @@ import SwiftUI
 
 protocol TimerServiceDelegate: AnyObject {
   func onTick(_ secondsSinceStart: Int)
-}
-
-extension TimerServiceDelegate {
-  func onTimerComplete(type: TimerCompletionType) {}
+  func onTimerComplete(type: TimerCompletionType)
 }
 
 enum TimerCompletionType {
@@ -27,9 +24,9 @@ final class TimerService {
   
   // MARK - External properties
   public var duration: Int = 0
-  public var mode: Mode { duration == 0 ? .forward : .countdown }
+  public var mode: Mode = .countdown
   public var remainingSeconds: Int {
-    mode == .forward ? secondsSinceStart : max(duration - secondsSinceStart, 0)
+   mode == .forward ? secondsSinceStart : max(duration - secondsSinceStart, 0)
   }
   
   // MARK - Internal properties
@@ -40,15 +37,13 @@ final class TimerService {
   private var backgroundEnterTime: Date?
   weak var delegate: TimerServiceDelegate?
   
-  private var lifeCycle: LifeCycleService = .init()
-  
   init() {
-    lifeCycle.addListener(self)
+    AppLifeCycleService.shared.addListener(self)
   }
   
   deinit {
     timer?.invalidate()
-    lifeCycle.removeListener(self)
+    AppLifeCycleService.shared.removeListener(self)
     NotificationCenter.default.removeObserver(self)
   }
 }
@@ -56,7 +51,6 @@ final class TimerService {
 // MARK - External Controls
 extension TimerService {
   public func start() {
-    stop()
     startedAt = .now
     fireTimer()
   }
@@ -76,7 +70,7 @@ extension TimerService {
     timer?.invalidate()
     startedAt = nil
     secondsOnPaused = 0
-    delegate?.onTimerComplete(type: type)
+    secondsSinceStart = 0
   }
 }
 
@@ -92,11 +86,11 @@ private extension TimerService {
   func onTick() {
     secondsSinceStart = computeSecondsSinceStart()
     
-    if mode == .countdown, secondsSinceStart >= duration {
-      stop(type: .finish)
-    }
-
     delegate?.onTick(secondsSinceStart)
+    
+    if mode == .countdown, secondsSinceStart >= duration {
+      delegate?.onTimerComplete(type: .finish)
+    }
   }
   
   func computeSecondsSinceStart() -> Int {
@@ -106,7 +100,7 @@ private extension TimerService {
 }
 
 // MARK - Background time compensation
-extension TimerService: LifeCycleServiceListener {
+extension TimerService: AppLifeCycleServiceDelegate {
   func didEnterBackground() {
     backgroundEnterTime = .now
     timer?.invalidate()
