@@ -33,13 +33,13 @@ final class FocusService {
   
   public var timer: TimerService = .init()
   
-  var stateMachine: StateMachine = .init()
+  var sm: StateMachine = .init()
   var notify: NotificationService = .init(["timer.done", "reminder.rest"])
   var backgroundTaskService: BackgroundTaskService = BackgroundTaskService.shared
   
   public var state: FocusService.State = .idle
   
-  var settings: SettingsService = SettingsService.shared
+  var settings: FocusSettings = FocusSettings.shared
   
   private var duration: Int {
     switch mode {
@@ -50,9 +50,9 @@ final class FocusService {
   
   private var lastBackgroundDate: Date?
   
-  public var mode: FocusService.Mode = .rest
+  public var mode: FocusService.Mode = .work
   public var breakType: FocusService.BreakType {
-    (sessionIndex % 4 == 0) ? .long : .short
+    (completedSessionsCount % 4 == 0) ? .long : .short
   }
   public var display: (minutes: String, seconds: String) {
     let parts = format(timer.remainingSeconds).components(separatedBy: ":")
@@ -60,34 +60,35 @@ final class FocusService {
     
   }
   public var progress: Double = 0
-  public var sessionIndex: Int = 0
+  public var completedSessionsCount: Int = 0
   
   init() {
     timer.duration = duration
     timer.delegate = self
     notify.delegate = self
     backgroundTaskService.delegate = self
-    stateMachine.onStateChanged = onStateChange
+    sm.onStateChanged = onStateChange
+    AppLifeCycleService.shared.addListener(self)
   }
 }
 
 // MARK - Core Controls
 extension FocusService {
-  func start(_ mode: Mode) {
+  func start() {
     timer.duration = duration
-    _ = stateMachine.send(.start(mode))
+    _ = sm.emit(.start(mode))
   }
   
   func pause() {
-    _ = stateMachine.send(.pause)
+    _ = sm.emit(.pause)
   }
   
   func resume() {
-    _ = stateMachine.send(.resume)
+    _ = sm.emit(.resume)
   }
   
   func stop() {
-    _ = stateMachine.send(.stop)
+    _ = sm.emit(.stop)
   }
 }
 
@@ -95,6 +96,7 @@ extension FocusService {
 extension FocusService {
   private func onStateChange(_ oldState: FocusService.State, _ newState: FocusService.State) {
     updateStage(.willTransition(from: oldState, to: newState))
+    print("state changed from \(oldState) to \(newState)")
     
     switch (oldState, newState) {
     case (.idle, .running):
@@ -103,8 +105,13 @@ extension FocusService {
       timer.pause()
     case (.paused, .running):
       timer.resume()
+    case (.running, .running):
+      mode = mode == .work ? .rest : .work
+      timer.duration = duration
+      timer.start()
     case (_, .idle):
-      timer.stop()
+      print("timer.stop")
+      timer.stop(type: .finish)
     default: break
     }
     updateStage(.didTransition(to: newState))
@@ -118,32 +125,35 @@ extension FocusService {
 // MARK - Timer Service Delegate
 extension FocusService: TimerServiceDelegate {
   func onTick(_ secondsSinceStart: Int) {
+    print(timer.remainingSeconds)
     if timer.mode == .countdown {
       progress = Double(secondsSinceStart) / Double(duration)
     }
   }
   
-  func onTimerComplete() {
+  func onTimerComplete(type: TimerCompletionType) {
+    _ = sm.emit(.finish)
+    
     switch mode {
     case .work:
-      onWorkComplete()
+      onWorkTimerComplete()
     case .rest:
-      onBreakComplete()
+      onBreakTimerComplete()
     }
   }
   
-  func onWorkComplete() {
+  func onWorkTimerComplete() {
     if settings.autoStartShortBreaks {
-      _ = stateMachine.send(.start(.rest))
+      _ = sm.emit(.start(.rest))
     }
   }
   
-  func onBreakComplete() {
-    sessionIndex += 1
-    if sessionIndex >= settings.sessionsCount {
-      _ = stateMachine.send(.finish)
+  func onBreakTimerComplete() {
+    completedSessionsCount += 1
+    if completedSessionsCount >= settings.sessionsCount, state != .idle {
+      _ = sm.emit(.finish)
     } else {
-      _ = stateMachine.send(.start(.work))
+      _ = sm.emit(.start(.work))
     }
   }
 }
@@ -159,13 +169,13 @@ extension FocusService {
 // MARK - Background Task
 extension FocusService: BackgroundTaskServiceDelegate {
   func onTaskExpiration() {
-    _ = stateMachine.send(.pause)
+    _ = sm.emit(.pause)
   }
   
   func onTaskComplete() {}
   
   func scheduleBackgroundTask() {
-    guard case .running = stateMachine.state else { return }
+    guard case .running = sm.state else { return }
     backgroundTaskService.scheduleTask(seconds: timer.remainingSeconds)
   }
 }
@@ -175,7 +185,7 @@ extension FocusService: NotificationServiceDelegate {
   func notificationDidTrigger(for type: NotificationType) {
     switch type {
     case .timerDone:
-      _ = stateMachine.send(.finish)
+      _ = sm.emit(.finish)
     case .restReminder:
       print()
     }
@@ -187,5 +197,16 @@ extension FocusService: NotificationServiceDelegate {
   
   private func cancelNotifications() {
     notify.cancelAll()
+  }
+}
+
+extension FocusService: AppLifeCycleServiceDelegate {
+  func didEnterBackground() {
+    _ = sm.emit(.background)
+  }
+  
+  func willEnterForeground() {
+    _ = sm.emit(.foreground)
+    notify.schedule(.timerDone(seconds: timer.remainingSeconds))
   }
 }
