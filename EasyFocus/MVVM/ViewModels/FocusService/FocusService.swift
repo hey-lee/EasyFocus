@@ -117,8 +117,10 @@ extension FocusService {
 
 // MARK - Timer Service Delegate
 extension FocusService: TimerServiceDelegate {
-  func onTick(elapsedSeconds: Int) {
-    onElapsedUpdated(elapsedSeconds)
+  func onTick(_ secondsSinceStart: Int) {
+    if timer.mode == .countdown {
+      progress = Double(secondsSinceStart) / Double(duration)
+    }
   }
   
   func onTimerComplete() {
@@ -131,20 +133,17 @@ extension FocusService: TimerServiceDelegate {
   }
   
   func onWorkComplete() {
-    sessionIndex += 1
-    if sessionIndex >= settings.sessionsCount {
-      _ = stateMachine.send(.finish)
-    } else {
-      mode = .rest
+    if settings.autoStartShortBreaks {
       _ = stateMachine.send(.start(.rest))
     }
   }
   
-  func onBreakComplete() {}
-  
-  func onElapsedUpdated(_ elapsedSeconds: Int) {
-    if timer.mode == .countdown {
-      progress = Double(elapsedSeconds) / Double(duration)
+  func onBreakComplete() {
+    sessionIndex += 1
+    if sessionIndex >= settings.sessionsCount {
+      _ = stateMachine.send(.finish)
+    } else {
+      _ = stateMachine.send(.start(.work))
     }
   }
 }
