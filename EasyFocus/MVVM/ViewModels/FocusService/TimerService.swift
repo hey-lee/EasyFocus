@@ -66,7 +66,7 @@ extension TimerService {
   
   public func pause() {
     timer?.invalidate()
-    secondsOnPaused = computeElapsed()
+    secondsOnPaused = computeSecondsSinceStart()
     startedAt = nil
   }
   
