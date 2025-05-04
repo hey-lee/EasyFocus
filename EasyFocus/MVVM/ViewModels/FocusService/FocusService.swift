@@ -148,7 +148,9 @@ extension FocusService: TimerServiceDelegate {
     if completedSessionsCount >= settings.sessionsCount, state != .idle {
       _ = sm.emit(.finish)
     } else {
-      _ = sm.emit(.start(.work))
+      if settings.autoStartSessions {
+        _ = sm.emit(.start(.work))
+      }
     }
   }
 }
