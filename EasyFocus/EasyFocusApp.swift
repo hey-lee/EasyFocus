@@ -58,6 +58,7 @@ struct EasyFocusApp: App {
     .environment(TagsKit.shared)
     .environment(ModalKit.shared)
     .environment(StoreKit.shared)
+    .environment(FocusService())
     .environmentObject(NavKit())
     .environmentObject(Stackit())
     .environmentObject(ShowKit())
