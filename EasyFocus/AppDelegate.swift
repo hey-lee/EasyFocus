@@ -9,8 +9,7 @@ import SwiftUI
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    
-//    FocusKit.shared.initNotification()
+
     AppLifeCycleService.shared.setupObservers()
     BackgroundTaskService.shared.registerTask()
     
