@@ -8,7 +8,7 @@
 import SwiftUI
 
 protocol TimerServiceDelegate: AnyObject {
-  func onTick(elapsedSeconds: Int)
+  func onTick(_ secondsSinceStart: Int)
 }
 
 extension TimerServiceDelegate {
@@ -26,12 +26,15 @@ final class TimerService {
   }
 
   public var duration: Int = 0
-  public var remainingSeconds: Int = 0
+  public var remainingSeconds: Int {
+    mode == .forward ? secondsSinceStart : max(duration - secondsSinceStart, 0)
+  }
   
   // MARK - Internal properties
   private var timer: Timer?
   private var startedAt: Date?
-  private var elapsedBeforePause: Int = 0
+  private var secondsSinceStart: Int = 0
+  private var secondsOnPaused: Int = 0
   private var backgroundEnterTime: Date?
   
   // MARK - External properties
@@ -63,7 +66,7 @@ extension TimerService {
   
   public func pause() {
     timer?.invalidate()
-    elapsedBeforePause = computeElapsed()
+    secondsOnPaused = computeElapsed()
     startedAt = nil
   }
   
@@ -75,8 +78,7 @@ extension TimerService {
   public func stop(type: TimerCompletionType = .stop) {
     timer?.invalidate()
     startedAt = nil
-    elapsedBeforePause = 0
-    remainingSeconds = 0
+    secondsOnPaused = 0
     delegate?.onTimerComplete(type: type)
   }
 }
@@ -92,24 +94,18 @@ private extension TimerService {
   }
   
   func onTick() {
-    let elapsed = computeElapsed()
+    secondsSinceStart = computeSecondsSinceStart()
     
-    switch mode {
-    case .countdown:
-      remainingSeconds = max(duration - elapsed, 0)
-      if elapsed >= duration {
-        stop(type: .finish)
-      }
-    case .forward:
-      remainingSeconds = elapsed
+    if mode == .countdown, secondsSinceStart >= duration {
+      stop(type: .finish)
     }
-    
-    delegate?.onTick(elapsedSeconds: elapsed)
+
+    delegate?.onTick(secondsSinceStart)
   }
   
-  func computeElapsed() -> Int {
-    guard let startedAt else { return elapsedBeforePause }
-    return Int(Date().timeIntervalSince(startedAt)) + elapsedBeforePause
+  func computeSecondsSinceStart() -> Int {
+    guard let startedAt else { return secondsOnPaused }
+    return Int(Date().timeIntervalSince(startedAt)) + secondsOnPaused
   }
 }
 
@@ -124,7 +120,7 @@ extension TimerService: LifeCycleServiceListener {
     guard let backgroundEnterTime else { return }
     
     let backgroundTime = Int(Date().timeIntervalSince(backgroundEnterTime))
-    elapsedBeforePause += backgroundTime
+    secondsOnPaused += backgroundTime
     self.backgroundEnterTime = nil
     
     if startedAt != nil {
