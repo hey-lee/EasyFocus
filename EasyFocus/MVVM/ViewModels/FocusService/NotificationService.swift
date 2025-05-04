@@ -80,7 +80,7 @@ extension NotificationService {
     UNUserNotificationCenter.current().add(request)
   }
   
-  func cancelAll() {
+  func clearAll() {
     UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
   }
 }
