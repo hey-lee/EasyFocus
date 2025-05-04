@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct SettingsService {
-  static let shared = SettingsService()
+struct FocusSettings {
+  static let shared = FocusSettings()
 
   @AppStorage("minutes") var minutes: Int = 20
   @AppStorage("sessionsCount") var sessionsCount: Int = 4
