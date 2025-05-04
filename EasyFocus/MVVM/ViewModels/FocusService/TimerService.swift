@@ -24,8 +24,10 @@ final class TimerService {
   enum Mode {
     case countdown, forward
   }
-
+  
+  // MARK - External properties
   public var duration: Int = 0
+  public var mode: Mode { duration == 0 ? .forward : .countdown }
   public var remainingSeconds: Int {
     mode == .forward ? secondsSinceStart : max(duration - secondsSinceStart, 0)
   }
@@ -36,11 +38,6 @@ final class TimerService {
   private var secondsSinceStart: Int = 0
   private var secondsOnPaused: Int = 0
   private var backgroundEnterTime: Date?
-  
-  // MARK - External properties
-  var mode: Mode {
-    duration == 0 ? .forward : .countdown
-  }
   weak var delegate: TimerServiceDelegate?
   
   private var lifeCycle: LifeCycleService = .init()
@@ -89,7 +86,6 @@ private extension TimerService {
     timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
       self?.onTick()
     }
-    // fire immediately
     timer?.fire()
   }
   
