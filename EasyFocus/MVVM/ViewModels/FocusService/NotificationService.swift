@@ -93,7 +93,6 @@ extension NotificationService: UNUserNotificationCenterDelegate {
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
     completionHandler()
-    print("Notification.didReceive")
     delegate?.didReceive(response)
   }
 }
