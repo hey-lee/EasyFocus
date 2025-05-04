@@ -43,9 +43,9 @@ final class StateMachine {
     case (.paused(let mode), .resume):
       transition(to: .running(mode))
       return true
-    // count down completed
-    case (.running(let mode), .finish):
-      onModeComplete(mode)
+    // count down finished
+    case (.running, .finish):
+      transition(to: .idle)
       return true
     // stop manually
     case (.running, .stop), (.paused, .stop):
@@ -69,20 +69,5 @@ final class StateMachine {
     state = newState
     
     onStateChanged?(oldState, newState)
-  }
-  
-  private func onModeComplete(_ mode: FocusService.Mode) {
-    switch mode {
-    case .work:
-      // transition state from work to rest
-      transition(to: .running(.rest))
-    case .rest:
-      // TODO - check if completed sessions
-      if shouldStop {
-        transition(to: .idle)
-      } else {
-        transition(to: .running(.work))
-      }
-    }
   }
 }
