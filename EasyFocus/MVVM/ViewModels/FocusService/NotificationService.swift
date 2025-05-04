@@ -8,16 +8,21 @@
 import Foundation
 import UserNotifications
 
-enum NotificationType {
-  case timerDone(seconds: Int)
-  case restReminder
+struct NotificationEntity {
+  var title: String
+  var subtitle: String?
+  var body: String
+  var symbol: String?
+  var timeInterval: Int
+  var repeats: Bool = false
 }
 
 protocol NotificationServiceDelegate: AnyObject {
-  func notificationDidTrigger(for type: NotificationType)
+  func didReceive(_ response: UNNotificationResponse)
 }
 
 final class NotificationService: NSObject {
+  static let shared = NotificationService()
   weak var delegate: NotificationServiceDelegate?
   
   init(_ identifiers: Set<String> = []) {
@@ -50,19 +55,21 @@ extension NotificationService {
 
 // MARK - Schedule Notification
 extension NotificationService {
-  func schedule(_ type: NotificationType) {
+  func schedule(_ entity: NotificationEntity) {
+    guard entity.timeInterval > 0 else {
+      print("notification schedule failed: time interval must be greater than 0")
+      return
+    }
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(entity.timeInterval), repeats: entity.repeats)
     let content = UNMutableNotificationContent()
-    let trigger: UNNotificationTrigger
     
-    switch type {
-    case .timerDone(let seconds):
-      content.title = "Timer Done!"
-      content.body = "Your focus session is completed"
-      trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(seconds), repeats: false)
-    case .restReminder:
-      content.title = "Rest Time"
-      content.body = "Take a short break"
-      trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5 * 60, repeats: false)
+    content.title = entity.title
+    content.body = entity.body
+    if let subtitle = entity.subtitle {
+      content.subtitle = subtitle
+    }
+    if let imageName = entity.symbol {
+      content.launchImageName = imageName
     }
     
     let request = UNNotificationRequest(
@@ -82,14 +89,11 @@ extension NotificationService {
 extension NotificationService: UNUserNotificationCenterDelegate {
   func userNotificationCenter(
     _ center: UNUserNotificationCenter,
-    willPresent notification: UNNotification,
-    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
   ) {
-    completionHandler([.banner, .sound])
-    delegate?.notificationDidTrigger(for: parseType(from: notification))
-  }
-  
-  private func parseType(from notification: UNNotification) -> NotificationType {
-    return .timerDone(seconds: 0)
+    completionHandler()
+    print("Notification.didReceive")
+    delegate?.didReceive(response)
   }
 }
