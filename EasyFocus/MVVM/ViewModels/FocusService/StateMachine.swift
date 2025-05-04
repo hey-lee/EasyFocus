@@ -42,10 +42,6 @@ final class StateMachine {
     case (.paused(let mode), .resume):
       transition(to: .running(mode))
       return true
-    // loop mode (.running(.work) -> .running(.rest)) -> .running(.work)
-   case (.running, .start(let mode)):
-     transition(to: .running(mode))
-     return true
       // count down finished
     case (.running, .finish):
       transition(to: .idle)
