@@ -34,7 +34,7 @@ final class FocusService {
   public var timer: TimerService = .init()
   
   var sm: StateMachine = .init()
-  var notify: NotificationService = .init(["timer.done", "reminder.rest"])
+  var notification: NotificationService = .init()
   var backgroundTaskService: BackgroundTaskService = BackgroundTaskService.shared
   
   public var state: FocusService.State = .idle
@@ -65,7 +65,7 @@ final class FocusService {
   init() {
     timer.duration = duration
     timer.delegate = self
-    notify.delegate = self
+    notification.delegate = self
     backgroundTaskService.delegate = self
     sm.onStateChanged = onStateChange
     AppLifeCycleService.shared.addListener(self)
@@ -110,7 +110,6 @@ extension FocusService {
       timer.duration = duration
       timer.start()
     case (_, .idle):
-      print("timer.stop")
       timer.stop(type: .finish)
     default: break
     }
@@ -182,31 +181,28 @@ extension FocusService: BackgroundTaskServiceDelegate {
 
 // MARK - Notification
 extension FocusService: NotificationServiceDelegate {
-  func notificationDidTrigger(for type: NotificationType) {
-    switch type {
-    case .timerDone:
-      _ = sm.emit(.finish)
-    case .restReminder:
-      print()
-    }
-  }
-  
-  func scheduleNotification() {
-    notify.schedule(.timerDone(seconds: 40))
+  func didReceive(_ response: UNNotificationResponse) {
+    print("notificationDidTrigger", notification)
   }
   
   private func cancelNotifications() {
-    notify.cancelAll()
+    notification.cancelAll()
   }
 }
 
 extension FocusService: AppLifeCycleServiceDelegate {
   func didEnterBackground() {
-    _ = sm.emit(.background)
+    notification.schedule(
+      .init(
+        title: "Timer is done!",
+        body: "Your focus session is completed",
+        timeInterval: timer.remainingSeconds
+      )
+    )
+     _ = sm.emit(.background)
   }
   
   func willEnterForeground() {
     _ = sm.emit(.foreground)
-    notify.schedule(.timerDone(seconds: timer.remainingSeconds))
   }
 }
