@@ -7,28 +7,49 @@
 
 import SwiftUI
 
-enum StateEvent {
-  case start(_ mode: FocusService.Mode)
-  case pause
-  case resume
-  case finish
-  case stop
-  case background
-  case foreground
-}
-
-enum TransitionStage {
-  case willTransition(from: FocusService.State, to: FocusService.State)
-  case didTransition(to: FocusService.State)
+extension StateMachine {
+  enum Mode: String, CustomStringConvertible {
+    case work, rest
+    var description: String { rawValue }
+  }
+  
+  enum State: Equatable {
+    case idle
+    case running(_ mode: Mode)
+    case paused(_ mode: Mode)
+  }
+  
+  enum Event {
+    case start(_ mode: Mode)
+    case pause
+    case resume
+    case finish
+    case stop
+    case background
+    case foreground
+  }
+  
+  enum Stage {
+    case willTransition(from: State, to: State)
+    case didTransition(to: State)
+  }
 }
 
 @Observable
 final class StateMachine {
-  private(set) var state: FocusService.State = .idle
+  private(set) var state: State = .idle
+  public var mode: Mode {
+    switch state {
+    case .idle:
+      .work
+    case .running(let mode), .paused(let mode):
+      mode
+    }
+  }
   
-  public var onStateChanged: ((FocusService.State, FocusService.State) -> Void)?
+  public var onStateChanged: ((State, State) -> Void)?
   
-  func emit(_ event: StateEvent) -> Bool {
+  func emit(_ event: Event) -> Bool {
     print("state machine emit \(event)")
     switch (state, event) {
       // start
@@ -64,7 +85,7 @@ final class StateMachine {
     }
   }
   
-  private func transition(to newState: FocusService.State) {
+  private func transition(to newState: State) {
     let oldState = state
     state = newState
     

@@ -8,24 +8,13 @@
 import SwiftUI
 
 extension FocusService {
-  enum Mode: String, CustomStringConvertible {
-    case work, rest
-    var description: String { rawValue }
-  }
-  
-  enum State: Equatable {
-    case idle
-    case running(_ mode: Mode)
-    case paused(_ mode: Mode)
-  }
-  
   enum BreakType: String, CustomStringConvertible {
     case short, long
     var description: String { rawValue }
   }
 }
 
-fileprivate let ONE_MINUTE_IN_SECONDS: Int = 60
+fileprivate let ONE_MINUTE_IN_SECONDS: Int = 6
 
 @Observable
 final class FocusService {
@@ -36,17 +25,17 @@ final class FocusService {
   var sm: StateMachine = .init()
   var notification: NotificationService = .init()
   
-  var state: FocusService.State { sm.state }
+  var state: StateMachine.State { sm.state }
+  var mode: StateMachine.Mode { sm.mode }
   var settings: FocusSettings = FocusSettings.shared
   
   private var duration: Int {
     switch mode {
-    case .work: timer.mode == .forward ? Int.max : settings.minutes * ONE_MINUTE_IN_SECONDS
-    case .rest: (breakType == .short ? settings.shortBreak : settings.longBreak) * ONE_MINUTE_IN_SECONDS
+    case .work: return timer.mode == .forward ? Int.max : settings.minutes * ONE_MINUTE_IN_SECONDS
+    case .rest: return (breakType == .short ? settings.shortBreak : settings.longBreak) * ONE_MINUTE_IN_SECONDS
     }
   }
-  
-  public var mode: FocusService.Mode = .work
+
   public var breakType: FocusService.BreakType {
     (completedSessionsCount % 4 == 0) ? .long : .short
   }
@@ -89,7 +78,7 @@ extension FocusService {
 
 // MARK - State Machine
 extension FocusService {
-  private func onStateChange(_ oldState: FocusService.State, _ newState: FocusService.State) {
+  private func onStateChange(_ oldState: StateMachine.State, _ newState: StateMachine.State) {
     print("state changed from \(oldState) to \(newState)")
     
     switch (oldState, newState) {
@@ -100,7 +89,7 @@ extension FocusService {
     case (.paused, .running):
       timer.resume()
     case (_, .idle):
-      timer.stop(type: .finish)
+      timer.stop()
     default: break
     }
   }
@@ -117,7 +106,7 @@ extension FocusService: TimerServiceDelegate {
   
   func onTimerComplete(type: TimerCompletionType) {
     _ = sm.emit(.finish)
-    
+
     switch mode {
     case .work:
       onWorkTimerComplete()
@@ -129,18 +118,17 @@ extension FocusService: TimerServiceDelegate {
   func onWorkTimerComplete() {
     if settings.autoStartShortBreaks {
       _ = sm.emit(.start(.rest))
-      mode = .rest
     }
   }
   
   func onBreakTimerComplete() {
     completedSessionsCount += 1
+    print("completedSessionsCount", completedSessionsCount)
     if completedSessionsCount >= settings.sessionsCount, state != .idle {
       _ = sm.emit(.finish)
     } else {
       if settings.autoStartSessions {
         _ = sm.emit(.start(.work))
-        mode = .work
       }
     }
   }
