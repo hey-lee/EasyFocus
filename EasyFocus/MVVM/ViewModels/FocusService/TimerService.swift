@@ -67,7 +67,7 @@ extension TimerService {
     fireTimer()
   }
   
-  public func stop(type: TimerCompletionType = .stop) {
+  public func stop() {
     timer?.invalidate()
     startedAt = nil
     secondsOnPaused = 0
