@@ -29,7 +29,7 @@ final class FocusService {
   public var duration: Int {
     switch sm.mode {
     case .work: timer.mode == .forward ? Int.max : settings.minutes * ONE_MINUTE_IN_SECONDS
-    case .rest: (breakType == .short ? settings.shortBreak : settings.longBreak) * ONE_MINUTE_IN_SECONDS
+    case .rest: (breakType == .short ? settings.shortBreakMinutes : settings.longBreakMinutes) * ONE_MINUTE_IN_SECONDS
     }
   }
   var isSessionsCompleted: Bool {
@@ -44,7 +44,18 @@ final class FocusService {
     return (minutes: parts[0], seconds: parts[1])
   }
   public var totalRemainingSeconds: Int {
-    0
+    if sm.mode == .work {
+      let pendingSessions = settings.sessionsCount - completedSessionsCount - 1
+      let pendingSeconds = pendingSessions * (settings.minutes + settings.shortBreakMinutes) * ONE_MINUTE_IN_SECONDS
+      return pendingSeconds + timer.remainingSeconds
+    } else {
+      guard breakType == .short else { return 0 }
+      let pendingSessions = settings.sessionsCount - completedSessionsCount
+      let pendingWorkSeconds = pendingSessions * settings.minutes
+      let pendingBreakSeconds = (pendingSessions - 1) * settings.shortBreakMinutes
+      let pendingSeconds = (pendingWorkSeconds + pendingBreakSeconds) * ONE_MINUTE_IN_SECONDS
+      return pendingSeconds + timer.remainingSeconds
+    }
   }
   public var progress: Double = 0
   public var completedSessionsCount: Int = 0
@@ -104,7 +115,7 @@ extension FocusService {
 // MARK - Timer Service Delegate
 extension FocusService: TimerServiceDelegate {
   func onTick(_ secondsSinceStart: Int) {
-    print(timer.remainingSeconds, totalRemainingSeconds)
+    print(timer.remainingSeconds)
     if timer.mode == .countdown {
       progress = Double(secondsSinceStart) / Double(duration)
     }
@@ -123,23 +134,30 @@ extension FocusService: TimerServiceDelegate {
     _ = sm.emit(.finish)
     
     completedSessionsCount = min(completedSessionsCount + 1, settings.sessionsCount)
-    print("completedSessionsCount", completedSessionsCount)
     
-    if settings.autoStartShortBreaks {
-      _ = sm.emit(.start(.rest))
+    if isSessionsCompleted {
+      restoreSession()
+    } else {
+      print("onWorkTimerComplete", breakType)
+      if settings.autoStartShortBreaks {
+        _ = sm.emit(.start(.rest))
+      }
     }
   }
   
   func onBreakTimerComplete() {
     _ = sm.emit(.finish)
-    print("isSessionsCompleted", isSessionsCompleted, completedSessionsCount)
-    if isSessionsCompleted {
-      restoreSession()
-    } else {
-      if settings.autoStartSessions {
-        _ = sm.emit(.start(.work))
-      }
+    
+    if settings.autoStartSessions {
+      _ = sm.emit(.start(.work))
     }
+//    if isSessionsCompleted {
+//      restoreSession()
+//    } else {
+//      if settings.autoStartSessions {
+//        _ = sm.emit(.start(.work))
+//      }
+//    }
   }
 }
 
