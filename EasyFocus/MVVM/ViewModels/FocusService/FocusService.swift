@@ -174,7 +174,7 @@ extension FocusService: NotificationServiceDelegate {
 
 extension FocusService: AppLifeCycleServiceDelegate {
   func didEnterBackground() {
-    if case .running = sm.state {
+    if sm.emit(.background) {
       print("notification.schedule", remainingSeconds)
       notification.schedule(
         .init(
@@ -184,7 +184,6 @@ extension FocusService: AppLifeCycleServiceDelegate {
         )
       )
     }
-    _ = sm.emit(.background)
   }
   
   func willEnterForeground() {
