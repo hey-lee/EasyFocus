@@ -36,8 +36,7 @@ final class FocusService {
   var sm: StateMachine = .init()
   var notification: NotificationService = .init()
   
-  public var state: FocusService.State = .idle
-  
+  var state: FocusService.State { sm.state }
   var settings: FocusSettings = FocusSettings.shared
   
   private var duration: Int {
@@ -91,7 +90,6 @@ extension FocusService {
 // MARK - State Machine
 extension FocusService {
   private func onStateChange(_ oldState: FocusService.State, _ newState: FocusService.State) {
-    updateStage(.willTransition(from: oldState, to: newState))
     print("state changed from \(oldState) to \(newState)")
     
     switch (oldState, newState) {
@@ -101,19 +99,10 @@ extension FocusService {
       timer.pause()
     case (.paused, .running):
       timer.resume()
-    case (.running, .running):
-      mode = mode == .work ? .rest : .work
-      timer.duration = duration
-      timer.start()
     case (_, .idle):
       timer.stop(type: .finish)
     default: break
     }
-    updateStage(.didTransition(to: newState))
-  }
-  
-  private func updateStage(_ stage: TransitionStage) {
-    // print("stage", stage)
   }
 }
 
@@ -140,6 +129,7 @@ extension FocusService: TimerServiceDelegate {
   func onWorkTimerComplete() {
     if settings.autoStartShortBreaks {
       _ = sm.emit(.start(.rest))
+      mode = .rest
     }
   }
   
@@ -150,6 +140,7 @@ extension FocusService: TimerServiceDelegate {
     } else {
       if settings.autoStartSessions {
         _ = sm.emit(.start(.work))
+        mode = .work
       }
     }
   }
@@ -172,14 +163,16 @@ extension FocusService: NotificationServiceDelegate {
 
 extension FocusService: AppLifeCycleServiceDelegate {
   func didEnterBackground() {
-    notification.schedule(
-      .init(
-        title: "Timer is done!",
-        body: "Your focus session is completed",
-        timeInterval: timer.remainingSeconds
+    if case .running = state {
+      notification.schedule(
+        .init(
+          title: "Timer is done!",
+          body: "Your focus session is completed",
+          timeInterval: timer.remainingSeconds
+        )
       )
-    )
-     _ = sm.emit(.background)
+    }
+    _ = sm.emit(.background)
   }
   
   func willEnterForeground() {
