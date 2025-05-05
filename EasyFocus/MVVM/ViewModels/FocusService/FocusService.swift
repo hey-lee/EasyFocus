@@ -32,13 +32,19 @@ final class FocusService {
     case .rest: (breakType == .short ? settings.shortBreak : settings.longBreak) * ONE_MINUTE_IN_SECONDS
     }
   }
+  var isSessionsCompleted: Bool {
+    completedSessionsCount % settings.sessionsCount == 0
+  }
   // TOFIXED
   public var breakType: FocusService.BreakType {
-    (completedSessionsCount % settings.sessionsCount == 0) ? .long : .short
+    isSessionsCompleted ? .long : .short
   }
   public var display: (minutes: String, seconds: String) {
     let parts = format(timer.remainingSeconds).components(separatedBy: ":")
     return (minutes: parts[0], seconds: parts[1])
+  }
+  public var totalRemainingSeconds: Int {
+    0
   }
   public var progress: Double = 0
   public var completedSessionsCount: Int = 0
@@ -68,6 +74,10 @@ extension FocusService {
   func stop() {
     _ = sm.emit(.stop)
   }
+  
+  func restoreSession() {
+    completedSessionsCount = 0
+  }
 }
 
 // MARK - State Machine
@@ -85,6 +95,7 @@ extension FocusService {
       timer.resume()
     case (_, .idle):
       timer.stop()
+      timer.duration = duration
     default: break
     }
   }
@@ -93,7 +104,7 @@ extension FocusService {
 // MARK - Timer Service Delegate
 extension FocusService: TimerServiceDelegate {
   func onTick(_ secondsSinceStart: Int) {
-    print(timer.remainingSeconds)
+    print(timer.remainingSeconds, totalRemainingSeconds)
     if timer.mode == .countdown {
       progress = Double(secondsSinceStart) / Double(duration)
     }
@@ -110,7 +121,10 @@ extension FocusService: TimerServiceDelegate {
   
   func onWorkTimerComplete() {
     _ = sm.emit(.finish)
-    print("should auto start breaks", settings.autoStartShortBreaks)
+    
+    completedSessionsCount = min(completedSessionsCount + 1, settings.sessionsCount)
+    print("completedSessionsCount", completedSessionsCount)
+    
     if settings.autoStartShortBreaks {
       _ = sm.emit(.start(.rest))
     }
@@ -118,15 +132,13 @@ extension FocusService: TimerServiceDelegate {
   
   func onBreakTimerComplete() {
     _ = sm.emit(.finish)
-    completedSessionsCount += 1
-    print("completedSessionsCount", completedSessionsCount)
-    if completedSessionsCount < settings.sessionsCount {
-      print("should auto start sessions", settings.autoStartSessions)
+    print("isSessionsCompleted", isSessionsCompleted, completedSessionsCount)
+    if isSessionsCompleted {
+      restoreSession()
+    } else {
       if settings.autoStartSessions {
         _ = sm.emit(.start(.work))
       }
-    } else {
-      completedSessionsCount = 0
     }
   }
 }
