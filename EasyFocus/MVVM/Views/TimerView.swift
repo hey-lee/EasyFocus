@@ -57,11 +57,13 @@ struct TimerView: View {
           Text("Timer minutes: \(focusService.settings.minutes)")
           Text("Timer seconds: \(focusService.duration) (\(focusService.sm.mode))")
           Text("Timer break type: \(focusService.breakType)")
-          Text("Short break minutes: \(focusService.settings.shortBreak)")
-          Text("Long break minutes: \(focusService.settings.longBreak)")
+          Text("Short break minutes: \(focusService.settings.shortBreakMinutes)")
+          Text("Long break minutes: \(focusService.settings.longBreakMinutes)")
           Text("Total sessions count: \(focusService.settings.sessionsCount)")
           Text("Completed cessions count: \(focusService.completedSessionsCount)")
           Text("Remaining seconds: \(focusService.timer.remainingSeconds)")
+          Text("Total remaining seconds: \(focusService.totalRemainingSeconds)")
+
           Toggle("Auto start sessions", isOn: .init(get: {
             focusService.settings.autoStartSessions
           }, set: { value in
@@ -76,9 +78,9 @@ struct TimerView: View {
       }
       .buttonStyle(.borderedProminent)
     }
-    .onChange(of: focusService.duration) { oldValue, newValue in
-      print("focusService.duration", newValue)
-    }
+//    .onChange(of: focusService.duration) { oldValue, newValue in
+//      print("focusService.duration", newValue)
+//    }
   }
 }
 
