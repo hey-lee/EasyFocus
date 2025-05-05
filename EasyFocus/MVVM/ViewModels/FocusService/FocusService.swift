@@ -44,18 +44,7 @@ final class FocusService {
     return (minutes: parts[0], seconds: parts[1])
   }
   public var totalRemainingSeconds: Int {
-    if sm.mode == .work {
-      let pendingSessions = settings.sessionsCount - completedSessionsCount - 1
-      let pendingSeconds = pendingSessions * (settings.minutes + settings.shortBreakMinutes) * ONE_MINUTE_IN_SECONDS
-      return pendingSeconds + timer.remainingSeconds
-    } else {
-      guard breakType == .short else { return 0 }
-      let pendingSessions = settings.sessionsCount - completedSessionsCount
-      let pendingWorkSeconds = pendingSessions * settings.minutes
-      let pendingBreakSeconds = (pendingSessions - 1) * settings.shortBreakMinutes
-      let pendingSeconds = (pendingWorkSeconds + pendingBreakSeconds) * ONE_MINUTE_IN_SECONDS
-      return pendingSeconds + timer.remainingSeconds
-    }
+    computeTotalRemainingSeconds()
   }
   public var progress: Double = 0
   public var completedSessionsCount: Int = 0
@@ -167,6 +156,21 @@ extension FocusService {
     guard seconds > 0 else { return "00:00" }
     return String(format: "%02d:%02d", seconds / 60, seconds % 60)
   }
+  
+  private func computeTotalRemainingSeconds() -> Int {
+    if sm.mode == .work {
+      let pendingSessions = settings.sessionsCount - completedSessionsCount - 1
+      let pendingSeconds = pendingSessions * (settings.minutes + settings.shortBreakMinutes) * ONE_MINUTE_IN_SECONDS
+      return pendingSeconds + timer.remainingSeconds
+    } else {
+      guard breakType == .short else { return 0 }
+      let pendingSessions = settings.sessionsCount - completedSessionsCount
+      let pendingWorkSeconds = pendingSessions * settings.minutes
+      let pendingBreakSeconds = (pendingSessions - 1) * settings.shortBreakMinutes
+      let pendingSeconds = (pendingWorkSeconds + pendingBreakSeconds) * ONE_MINUTE_IN_SECONDS
+      return pendingSeconds + timer.remainingSeconds
+    }
+  }
 }
 
 // MARK - Notification
@@ -183,7 +187,7 @@ extension FocusService: AppLifeCycleServiceDelegate {
         .init(
           title: "Timer is done!",
           body: "Your focus session is completed",
-          timeInterval: timer.remainingSeconds
+          timeInterval: totalRemainingSeconds
         )
       )
     }
