@@ -32,10 +32,9 @@ final class FocusService {
     case .rest: (breakType == .short ? settings.shortBreakMinutes : settings.longBreakMinutes) * ONE_MINUTE_IN_SECONDS
     }
   }
-  var isSessionsCompleted: Bool {
+  private var isSessionsCompleted: Bool {
     completedSessionsCount % settings.sessionsCount == 0
   }
-  // TOFIXED
   public var breakType: FocusService.BreakType {
     isSessionsCompleted ? .long : .short
   }
@@ -43,7 +42,7 @@ final class FocusService {
     let parts = format(timer.remainingSeconds).components(separatedBy: ":")
     return (minutes: parts[0], seconds: parts[1])
   }
-  public var totalRemainingSeconds: Int {
+  public var remainingSeconds: Int {
     computeTotalRemainingSeconds()
   }
   public var progress: Double = 0
@@ -72,6 +71,7 @@ extension FocusService {
   }
   
   func stop() {
+    restoreSession()
     _ = sm.emit(.stop)
   }
   
@@ -127,7 +127,6 @@ extension FocusService: TimerServiceDelegate {
     if isSessionsCompleted {
       restoreSession()
     } else {
-      print("onWorkTimerComplete", breakType)
       if settings.autoStartShortBreaks {
         _ = sm.emit(.start(.rest))
       }
@@ -140,13 +139,6 @@ extension FocusService: TimerServiceDelegate {
     if settings.autoStartSessions {
       _ = sm.emit(.start(.work))
     }
-//    if isSessionsCompleted {
-//      restoreSession()
-//    } else {
-//      if settings.autoStartSessions {
-//        _ = sm.emit(.start(.work))
-//      }
-//    }
   }
 }
 
@@ -183,11 +175,12 @@ extension FocusService: NotificationServiceDelegate {
 extension FocusService: AppLifeCycleServiceDelegate {
   func didEnterBackground() {
     if case .running = sm.state {
+      print("notification.schedule", remainingSeconds)
       notification.schedule(
         .init(
           title: "Timer is done!",
           body: "Your focus session is completed",
-          timeInterval: totalRemainingSeconds
+          timeInterval: remainingSeconds
         )
       )
     }
