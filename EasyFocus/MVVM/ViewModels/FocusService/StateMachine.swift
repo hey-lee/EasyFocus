@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum FocusEvent {
+enum StateEvent {
   case start(_ mode: FocusService.Mode)
   case pause
   case resume
@@ -28,7 +28,7 @@ final class StateMachine {
   
   public var onStateChanged: ((FocusService.State, FocusService.State) -> Void)?
   
-  func emit(_ event: FocusEvent) -> Bool {
+  func emit(_ event: StateEvent) -> Bool {
     print("state machine emit \(event)")
     switch (state, event) {
       // start
