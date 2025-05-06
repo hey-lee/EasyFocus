@@ -17,6 +17,7 @@ struct WheelSliderView: View {
         get: { CGFloat(focus.minutes) },
         set: {
           focus.minutes = Int($0)
+          FocusSettings.shared.minutes = Int($0)
         }
       ), config: .init(
         count: 12,
