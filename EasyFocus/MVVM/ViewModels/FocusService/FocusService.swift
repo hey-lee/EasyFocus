@@ -49,6 +49,7 @@ final class FocusService {
     computeTotalRemainingSeconds()
   }
   
+  public var backgroundSeconds: Int = 0
   public var totalSeconds: Int {
     return cycleSeconds * settings.sessionsCount - breakSeconds
   }
@@ -242,7 +243,7 @@ extension FocusService: AppLifeCycleServiceDelegate {
     guard let snapshop = backgroundSnapShot else { return }
     
     let workSeconds = settings.minutes * ONE_MINUTE_IN_SECONDS
-    let backgroundSeconds = Int(Date().timeIntervalSince(snapshop.enterTime))
+    backgroundSeconds = Int(Date().timeIntervalSince(snapshop.enterTime))
     let totalElapsedSeconds = snapshop.secondsOnEnter + backgroundSeconds
     let mode = getMode(by: totalElapsedSeconds)
 
@@ -253,12 +254,12 @@ extension FocusService: AppLifeCycleServiceDelegate {
     } else {
       let currentCycleSeconds = mode == .work ? workSeconds : breakSeconds
       let currentCycleElapsedSeconds = totalElapsedSeconds % (mode == .work ? cycleSeconds : workSeconds)
-      let remainingTotalSeconds = totalSeconds - totalElapsedSeconds
+
       currentCycleRemainingSeconds = currentCycleSeconds - currentCycleElapsedSeconds
     }
     
     _ = sm.emit(.foreground(mode))
-    
+
     backgroundSnapShot = nil
   }
 }
