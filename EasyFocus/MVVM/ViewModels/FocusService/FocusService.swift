@@ -24,11 +24,6 @@ fileprivate let ONE_MINUTE_IN_SECONDS: Int = 6
 final class FocusService {
   static let shared = FocusService()
   
-  public var timer: TimerService = .init()
-  
-  var sm: StateMachine = .init()
-  var notification: NotificationService = .init()
-  var settings: FocusSettings = FocusSettings.shared
   
   public var duration: Int {
     switch sm.mode {
@@ -69,6 +64,11 @@ final class FocusService {
   private var currentCycleRemainingSeconds: Int = 0
 
   private var backgroundSnapShot: SnapShot?
+  
+  private var notification: NotificationService = .init()
+  private(set) var settings: FocusSettings = FocusSettings.shared
+  private(set) var sm: StateMachine = .init()
+  private(set) var timer: TimerService = .init()
   
   init() {
     timer.delegate = self
