@@ -12,6 +12,10 @@ extension FocusService {
     case short, long
     var description: String { rawValue }
   }
+  struct SnapShot {
+    var enterTime: Date
+    var secondsOnEnter: Int
+  }
 }
 
 fileprivate let ONE_MINUTE_IN_SECONDS: Int = 6
@@ -42,11 +46,27 @@ final class FocusService {
     let parts = format(timer.remainingSeconds).components(separatedBy: ":")
     return (minutes: parts[0], seconds: parts[1])
   }
-  public var remainingSeconds: Int {
-    computeTotalRemainingSeconds()
-  }
   public var progress: Double = 0
   public var completedSessionsCount: Int = 0
+  public var remainingTotalSeconds: Int {
+    computeTotalRemainingSeconds()
+  }
+  
+  public var totalSeconds: Int {
+    return cycleSeconds * settings.sessionsCount - breakSeconds
+  }
+  private var workSeconds: Int {
+    settings.minutes * ONE_MINUTE_IN_SECONDS
+  }
+  private var breakSeconds: Int {
+    settings.shortBreakMinutes * ONE_MINUTE_IN_SECONDS
+  }
+  private var cycleSeconds: Int {
+    workSeconds + breakSeconds
+  }
+  private var currentCycleRemainingSeconds: Int = 0
+
+  private var backgroundSnapShot: SnapShot?
   
   init() {
     timer.delegate = self
@@ -58,8 +78,8 @@ final class FocusService {
 
 // MARK - Core Controls
 extension FocusService {
-  func start() {
-    _ = sm.emit(.start(sm.mode))
+  func start(_ mode: StateMachine.Mode = .work) {
+    _ = sm.emit(.start(mode))
   }
   
   func pause() {
@@ -82,7 +102,7 @@ extension FocusService {
 
 // MARK - State Machine
 extension FocusService {
-  private func onStateChange(_ oldState: StateMachine.State, _ newState: StateMachine.State) {
+  private func onStateChange(_ oldState: StateMachine.State, _ newState: StateMachine.State, _ event: StateMachine.Event) {
     print("state changed from \(oldState) to \(newState)")
     
     switch (oldState, newState) {
@@ -92,7 +112,11 @@ extension FocusService {
     case (.running, .paused):
       timer.pause()
     case (.paused, .running):
-      timer.resume()
+      if case .foreground = event {
+        timer.sink(currentCycleRemainingSeconds)
+      } else {
+        timer.resume()
+      }
     case (_, .idle):
       timer.stop()
       timer.duration = duration
@@ -149,10 +173,22 @@ extension FocusService {
     return String(format: "%02d:%02d", seconds / 60, seconds % 60)
   }
   
+  public func getMode(by seconds: Int) -> StateMachine.Mode {
+    let currentCycleSeconds = seconds % cycleSeconds
+    return currentCycleSeconds < workSeconds ? .work : .rest
+  }
+  
+  public func getSessionsCount(by seconds: Int) -> Int {
+    let cycleCount = Int(floor(Double(seconds) / Double(cycleSeconds)))
+    let remainingSessionsCount = Int(floor(Double(seconds % cycleSeconds) / Double(workSeconds)))
+    
+    return cycleCount + remainingSessionsCount
+  }
+  
   private func computeTotalRemainingSeconds() -> Int {
     if sm.mode == .work {
       let pendingSessions = settings.sessionsCount - completedSessionsCount - 1
-      let pendingSeconds = pendingSessions * (settings.minutes + settings.shortBreakMinutes) * ONE_MINUTE_IN_SECONDS
+      let pendingSeconds = pendingSessions * cycleSeconds
       return pendingSeconds + timer.remainingSeconds
     } else {
       guard breakType == .short else { return 0 }
@@ -174,20 +210,49 @@ extension FocusService: NotificationServiceDelegate {
 
 extension FocusService: AppLifeCycleServiceDelegate {
   func didEnterBackground() {
+    if case .running = sm.state {
+      backgroundSnapShot = SnapShot(
+        enterTime: .now,
+        secondsOnEnter: totalSeconds - remainingTotalSeconds
+      )
+      print("didEnterBackground", totalSeconds, remainingTotalSeconds)
+    }
+
     if sm.emit(.background) {
-      print("notification.schedule", remainingSeconds)
+      print("notification.schedule", remainingTotalSeconds)
       notification.schedule(
         .init(
           title: "Timer is done!",
           body: "Your focus session is completed",
-          timeInterval: remainingSeconds
+          timeInterval: remainingTotalSeconds
         )
       )
     }
   }
   
   func willEnterForeground() {
-    _ = sm.emit(.foreground)
     notification.clearAll()
+    
+    guard let snapshop = backgroundSnapShot else { return }
+    
+    let workSeconds = settings.minutes * ONE_MINUTE_IN_SECONDS
+    let backgroundSeconds = Int(Date().timeIntervalSince(snapshop.enterTime))
+    let totalElapsedSeconds = snapshop.secondsOnEnter + backgroundSeconds
+    let mode = getMode(by: totalElapsedSeconds)
+
+    completedSessionsCount = min(getSessionsCount(by: totalElapsedSeconds), settings.sessionsCount)
+    
+    if completedSessionsCount == settings.sessionsCount {
+      stop()
+    } else {
+      let currentCycleSeconds = mode == .work ? workSeconds : breakSeconds
+      let currentCycleElapsedSeconds = totalElapsedSeconds % (mode == .work ? cycleSeconds : workSeconds)
+      let remainingTotalSeconds = totalSeconds - totalElapsedSeconds
+      currentCycleRemainingSeconds = currentCycleSeconds - currentCycleElapsedSeconds
+    }
+    
+    _ = sm.emit(.foreground(mode))
+    
+    backgroundSnapShot = nil
   }
 }
