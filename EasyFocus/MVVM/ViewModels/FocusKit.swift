@@ -301,7 +301,7 @@ extension FocusKit {
 extension FocusKit {
   private func scheduleNotification() {
     guard state == .running else { return }
-    NotificationKit.addNotification(TimeInterval(secondsLeft), "Timer Done!", "Your focus session is completed")
+    NotificationKit.addNotification(TimeInterval(max(0, minutes * ONE_MINUTE_IN_SECONDS - completedSecondsCount)), "Timer Done!", "Your focus session is completed")
   }
 }
 
@@ -354,9 +354,10 @@ extension FocusKit {
   
   @objc private func didEnterBackground() {
     guard state == .running else { return }
+    scheduleNotification()
+    scheduleBackgroundTask()
     lastBackgroundDate = .now
     timer?.invalidate()
-    scheduleNotification()
   }
   
   @objc private func willEnterForeground() {
