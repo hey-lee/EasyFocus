@@ -13,6 +13,7 @@ struct FocusView: View {
   @Environment(DBKit.self) var db
   @Environment(TagsKit.self) var tagsKit
   @Environment(FocusKit.self) var focusKit
+  @Environment(FocusService.self) var focusService
   @Environment(ModalKit.self) var modalKit
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
@@ -28,37 +29,37 @@ struct FocusView: View {
         VStack(spacing: 0) {
           focusView
           
-          if focusKit.state == .running {
-            if focusKit.mode == .rest {
+          if case .running = focusService.state {
+            if focusService.mode == .rest {
               Symbol("sf.cup.and.saucer")
             } else {
-              if !focusKit.isForwardMode {
+              if focusService.timer.mode == .countdown {
                 sessionsView
               }
             }
           }
-          if focusKit.state == .idle, focusKit.mode == .work, focusKit.sessionIndex == 0 {
+          if focusService.state == .idle, focusService.mode == .work, focusService.completedSessionsCount == 0 {
             tagView
           }
         }
         
-        if focusKit.state == .idle {
+        if focusService.state == .idle {
           Group {
-            if focusKit.sessionIndex == 0 {
+            if focusService.completedSessionsCount == 0 {
               Text("Start Focus")
                 .onTapGesture {
                   Tools.haptic()
                   focusKit.createFocusModel()
                   AppControlsKit.shared.startShield()
                   withAnimation {
-                    focusKit.start()
+                    focusService.start()
                   }
                 }
             } else {
-              Text(focusKit.mode == .work ? "Continue" : "Take a rest")
+              Text(focusService.mode == .work ? "Continue" : "Take a rest")
                 .onTapGesture {
                   withAnimation {
-                    focusKit.start()
+                    focusService.start()
                     Tools.haptic()
                   }
                 }
@@ -73,7 +74,7 @@ struct FocusView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .toolbar {
-        if focusKit.state == .idle {
+        if focusService.state == .idle {
           ToolbarItem(placement: .topBarLeading) {
             Symbol("sf.chart.bar.fill")
               .onTapGesture {
@@ -100,11 +101,11 @@ struct FocusView: View {
         if focusKit.state == .running {
           LongTapView {
             withAnimation {
-              if focusKit.isForwardMode {
+              if focusService.timer.mode == .forward {
                 self.focusKit.stop()
               } else {
-                if self.focusKit.percent != 0 {
-                  self.focusKit.stop()
+                if self.focusService.progress != 0 {
+                  self.focusService.stop()
                 }
               }
             }
@@ -135,6 +136,9 @@ struct FocusView: View {
           focus.label = label
         }
       }
+      .onChange(of: focusService.duration, { oldValue, newValue in
+        print(focusService.duration)
+      })
       .task {
         focusKit.onStateChange { state, stage, stats in
           if stage == .beforeStop {
@@ -159,9 +163,6 @@ struct FocusView: View {
           }
         }
       }
-      .onChange(of: focusKit.mode, { oldValue, newValue in
-//        showModalView = focusKit.mode == .rest
-      })
       .modalView(isPresented: $showModalView) {
         ModalView(
           title: "Congrets",
@@ -222,23 +223,23 @@ struct FocusView: View {
   var focusView: some View {
     HStack(spacing: 8) {
       Group {
-        Text(focusKit.display.minutes)
+        Text(focusService.display.minutes)
         VStack {
-          let size: CGFloat = focusKit.state != .idle ? 20 : 16
+          let size: CGFloat = focusService.state != .idle ? 20 : 16
           Circle()
             .frame(width: size, height: size)
           Circle()
             .frame(width: size, height: size)
         }
-        Text(focusKit.display.seconds)
+        Text(focusService.display.seconds)
       }
       .tracking(-4)
-      .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focusKit.state == .idle) ? 80 : 100).monospacedDigit())
+      .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focusService.state == .idle) ? 80 : 100).monospacedDigit())
     }
     .onTapGesture {
       Tools.haptic()
       withAnimation {
-        if focusKit.state == .idle {
+        if focusService.state == .idle {
           show.WheelSliderView = true
         }
       }
@@ -261,16 +262,16 @@ struct FocusView: View {
   
   var sessionsView: some View {
     HStack(spacing: 16) {
-      ForEach(0...focusKit.sessionsCount - 1, id: \.self) { index in
+      ForEach(0...focusService.settings.sessionsCount - 1, id: \.self) { index in
         ZStack {
           Circle()
             .stroke(Color.black, lineWidth: 4)
             .frame(width: 20, height: 20)
           Circle()
-            .trim(from: 0, to: focusKit.getSessionProgress(index))
+            .trim(from: 0, to: focusService.getSessionProgress(index))
             .stroke(Color.black, lineWidth: 10)
             .frame(width: 10, height: 10)
-            .animation(.linear(duration: 0.5), value: focusKit.percent)
+            .animation(.linear(duration: 0.5), value: focusService.progress)
         }
       }
     }
@@ -283,6 +284,7 @@ struct FocusView: View {
     .environment(DBKit())
     .environment(TagsKit())
     .environment(FocusKit())
+    .environment(FocusService())
     .environment(ModalKit.shared)
     .environmentObject(NavKit())
     .environmentObject(ShowKit())
