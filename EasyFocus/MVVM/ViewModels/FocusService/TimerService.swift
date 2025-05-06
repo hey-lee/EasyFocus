@@ -69,9 +69,17 @@ extension TimerService {
   
   public func stop() {
     timer?.invalidate()
+    timer = nil
     startedAt = nil
     secondsOnPaused = 0
     secondsSinceStart = 0
+  }
+  
+  public func sink(_ duration: Int) {
+    self.duration = duration
+    stop()
+    mode = .countdown
+    start()
   }
 }
 
