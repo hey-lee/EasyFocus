@@ -33,7 +33,7 @@ struct TimerView: View {
             focusService.start()
           }
           Button("Start Rest") {
-            focusService.start()
+            focusService.start(.rest)
           }
           Button("Pause") {
             focusService.pause()
@@ -53,6 +53,7 @@ struct TimerView: View {
           }
         }
         VStack(alignment: .leading) {
+          Text("\(focusService.getSessionsCount(by: 18))")
           Text("Timer state: \(focusService.sm.state)")
           Text("Timer minutes: \(focusService.settings.minutes)")
           Text("Timer seconds: \(focusService.duration) (\(focusService.sm.mode))")
@@ -62,7 +63,8 @@ struct TimerView: View {
           Text("Total sessions count: \(focusService.settings.sessionsCount)")
           Text("Completed cessions count: \(focusService.completedSessionsCount)")
           Text("Remaining seconds: \(focusService.timer.remainingSeconds)")
-          Text("Total remaining seconds: \(focusService.totalRemainingSeconds)")
+          Text("Total seconds: \(focusService.totalSeconds)")
+          Text("Total remaining seconds: \(focusService.remainingTotalSeconds)")
 
           Toggle("Auto start sessions", isOn: .init(get: {
             focusService.settings.autoStartSessions
@@ -78,9 +80,6 @@ struct TimerView: View {
       }
       .buttonStyle(.borderedProminent)
     }
-//    .onChange(of: focusService.duration) { oldValue, newValue in
-//      print("focusService.duration", newValue)
-//    }
   }
 }
 
