@@ -11,9 +11,9 @@ struct FocusSettings {
   static let shared = FocusSettings()
 
   @AppStorage("minutes") var minutes: Int = 20
+  @AppStorage("shortBreak") var shortBreakMinutes: Int = 1
+  @AppStorage("longBreak") var longBreakMinutes: Int = 3
   @AppStorage("sessionsCount") var sessionsCount: Int = 4
-  @AppStorage("shortBreak") var shortBreak: Int = 5
-  @AppStorage("longBreak") var longBreak: Int = 15
   @AppStorage("autoStartSessions") var autoStartSessions: Bool = false
   @AppStorage("autoStartShortBreaks") var autoStartShortBreaks: Bool = false
 }
