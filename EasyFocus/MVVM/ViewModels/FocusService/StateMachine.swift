@@ -26,7 +26,7 @@ extension StateMachine {
     case finish
     case stop
     case background
-    case foreground
+    case foreground(_ mode: Mode)
   }
   
   enum Stage {
@@ -47,37 +47,37 @@ final class StateMachine {
     }
   }
   
-  public var onStateChanged: ((State, State) -> Void)?
+  public var onStateChanged: ((State, State, Event) -> Void)?
   
   func emit(_ event: Event) -> Bool {
     print("state machine emit \(event)")
     switch (state, event) {
       // start
     case (.idle, .start(let mode)):
-      transition(to: .running(mode))
+      transition(to: .running(mode), event)
       return true
       // pause
     case (.running(let mode), .pause):
-      transition(to: .paused(mode))
+      transition(to: .paused(mode), event)
       return true
       // resume
     case (.paused(let mode), .resume):
-      transition(to: .running(mode))
+      transition(to: .running(mode), event)
       return true
       // count down finished
     case (.running, .finish):
-      transition(to: .idle)
+      transition(to: .idle, event)
       return true
       // stop manually
     case (.running, .stop), (.paused, .stop):
-      transition(to: .idle)
+      transition(to: .idle, event)
       return true
       // handle background & foreground events
     case (.running(let mode), .background):
-      transition(to: .paused(mode))
+      transition(to: .paused(mode), event)
       return true
-    case (.paused(let mode), .foreground):
-      transition(to: .running(mode))
+    case (.paused, .foreground(let mode)):
+      transition(to: .running(mode), event)
       return true
     default:
       print("invalid event \(event) on state \(state)")
@@ -85,10 +85,10 @@ final class StateMachine {
     }
   }
   
-  private func transition(to newState: State) {
+  private func transition(to newState: State, _ event: Event) {
     let oldState = state
     state = newState
     
-    onStateChanged?(oldState, newState)
+    onStateChanged?(oldState, newState, event)
   }
 }
