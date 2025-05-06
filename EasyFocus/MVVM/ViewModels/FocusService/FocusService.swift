@@ -39,6 +39,8 @@ final class FocusService {
   private var isSessionsCompleted: Bool {
     completedSessionsCount % settings.sessionsCount == 0
   }
+  public var mode: StateMachine.Mode { sm.mode }
+  public var state: StateMachine.State { sm.state }
   public var breakType: FocusService.BreakType {
     isSessionsCompleted ? .long : .short
   }
@@ -130,7 +132,7 @@ extension FocusService: TimerServiceDelegate {
   func onTick(_ secondsSinceStart: Int) {
     print(timer.remainingSeconds)
     if timer.mode == .countdown {
-      progress = Double(secondsSinceStart) / Double(duration)
+      progress = max(min(Double(secondsSinceStart) / Double(duration), 1), 0)
     }
   }
   
@@ -171,6 +173,10 @@ extension FocusService {
   public func format(_ seconds: Int) -> String {
     guard seconds > 0 else { return "00:00" }
     return String(format: "%02d:%02d", seconds / 60, seconds % 60)
+  }
+  
+  public func getSessionProgress(_ index: Int) -> CGFloat {
+    completedSessionsCount > index ? 1 : ((completedSessionsCount == index) && sm.mode == .work ? progress : 0)
   }
   
   public func getMode(by seconds: Int) -> StateMachine.Mode {
