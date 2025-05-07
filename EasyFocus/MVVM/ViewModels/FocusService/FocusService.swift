@@ -24,6 +24,7 @@ final class FocusService {
   static let shared = FocusService()
   
   let ONE_MINUTE_IN_SECONDS: Int = 6
+  private var _onStageChange: (StateMachine.Stage) -> () = { _ in }
   
   public var duration: Int {
     switch sm.mode {
@@ -85,6 +86,7 @@ extension FocusService {
 extension FocusService {
   private func onStateChange(_ oldState: StateMachine.State, _ newState: StateMachine.State, _ event: StateMachine.Event) {
     print("state changed from \(oldState) to \(newState)")
+    _onStageChange(.willTransition(from: oldState, to: newState))
     
     switch (oldState, newState) {
     case (.idle, .running):
@@ -103,6 +105,11 @@ extension FocusService {
       timer.duration = duration
     default: break
     }
+    
+    _onStageChange(.didTransition(to: newState))
+  }
+  public func onStageChange(_ onStageChange: @escaping (StateMachine.Stage) -> () = { _ in }) {
+    self._onStageChange = onStageChange
   }
 }
 
