@@ -63,8 +63,8 @@ final class FocusService {
 
 // MARK - Core Controls
 extension FocusService {
-  func start(_ mode: StateMachine.Mode = .work) {
-    _ = sm.emit(.start(mode))
+  func start(_ mode: StateMachine.Mode? = nil) {
+    _ = sm.emit(.start(mode ?? self.mode))
   }
   
   func pause() {

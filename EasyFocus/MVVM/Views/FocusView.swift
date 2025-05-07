@@ -98,11 +98,11 @@ struct FocusView: View {
         }
       }
       .overlay {
-        if focusKit.state == .running {
+        if focusService.state == .running {
           LongTapView {
             withAnimation {
               if focusService.timer.mode == .forward {
-                self.focusKit.stop()
+                self.focusService.stop()
               } else {
                 if self.focusService.progress != 0 {
                   self.focusService.stop()
@@ -178,7 +178,7 @@ struct FocusView: View {
             backgroundColor: .black,
             action: {
               print("take a break")
-              focusKit.start()
+              focusService.start(.rest)
               showModalView = false
             }
           )
@@ -271,7 +271,7 @@ struct FocusView: View {
             .trim(from: 0, to: focusService.getSessionProgress(index))
             .stroke(Color.black, lineWidth: 10)
             .frame(width: 10, height: 10)
-            .animation(.linear(duration: 0.5), value: focusService.progress)
+            .animation(.linear(duration: 0.5), value: focusService.sessions.progress)
         }
       }
     }
