@@ -12,7 +12,6 @@ struct FocusView: View {
   @Environment(\.modelContext) var context
   @Environment(DBKit.self) var db
   @Environment(TagsKit.self) var tagsKit
-  @Environment(FocusKit.self) var focusKit
   @Environment(FocusService.self) var focusService
   @Environment(ModalKit.self) var modalKit
   @EnvironmentObject var nav: NavKit
@@ -38,12 +37,12 @@ struct FocusView: View {
               }
             }
           }
-          if focusService.state == .idle, focusService.mode == .work, focusService.sessions.completedCount == 0 {
+          if case .idle = focusService.state, focusService.mode == .work, focusService.sessions.completedCount == 0 {
             tagView
           }
         }
         
-        if focusService.state == .idle {
+        if case .idle = focusService.state {
           Group {
             if focusService.sessions.completedCount == 0 {
               Text("Start Focus")
@@ -74,7 +73,7 @@ struct FocusView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .toolbar {
-        if focusService.state == .idle {
+        if case .idle = focusService.state {
           ToolbarItem(placement: .topBarLeading) {
             Symbol("sf.chart.bar.fill")
               .onTapGesture {
@@ -227,7 +226,7 @@ struct FocusView: View {
       Group {
         Text(focusService.display.minutes)
         VStack {
-          let size: CGFloat = focusService.state != .idle ? 20 : 16
+          let size: CGFloat = focusService.state != .idle() ? 20 : 16
           Circle()
             .frame(width: size, height: size)
           Circle()
@@ -236,12 +235,12 @@ struct FocusView: View {
         Text(focusService.display.seconds)
       }
       .tracking(-4)
-      .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focusService.state == .idle) ? 80 : 100).monospacedDigit())
+      .font(.custom("Code Next ExtraBold", size: UIDevice.current.orientation.isLandscape ? 200 : (focusService.state == .idle()) ? 80 : 100).monospacedDigit())
     }
     .onTapGesture {
       Tools.haptic()
       withAnimation {
-        if focusService.state == .idle {
+        if case .idle = focusService.state {
           show.WheelSliderView = true
         }
       }

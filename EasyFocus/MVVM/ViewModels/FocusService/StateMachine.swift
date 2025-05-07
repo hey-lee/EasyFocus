@@ -14,7 +14,7 @@ extension StateMachine {
   }
   
   enum State: Equatable {
-    case idle
+    case idle(_ mode: Mode? = nil)
     case running(_ mode: Mode)
     case paused(_ mode: Mode)
   }
@@ -23,7 +23,7 @@ extension StateMachine {
     case start(_ mode: Mode)
     case pause
     case resume
-    case finish
+    case finish(_ mode: Mode)
     case stop
     case background
     case foreground(_ mode: Mode)
@@ -37,11 +37,11 @@ extension StateMachine {
 
 @Observable
 final class StateMachine {
-  private(set) var state: State = .idle
+  private(set) var state: State = .idle()
   public var mode: Mode {
     switch state {
-    case .idle:
-      .work
+    case .idle(let mode):
+      mode ?? .work
     case .running(let mode), .paused(let mode):
       mode
     }
@@ -65,12 +65,12 @@ final class StateMachine {
       transition(to: .running(mode), event)
       return true
       // count down finished
-    case (.running, .finish):
-      transition(to: .idle, event)
+    case (.running, .finish(let mode)):
+      transition(to: .idle(mode == .work ? .rest : .work), event)
       return true
       // stop manually
     case (.running, .stop), (.paused, .stop):
-      transition(to: .idle, event)
+      transition(to: .idle(), event)
       return true
       // handle background & foreground events
     case (.running(let mode), .background):
