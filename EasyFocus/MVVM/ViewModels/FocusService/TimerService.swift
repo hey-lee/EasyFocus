@@ -25,6 +25,7 @@ final class TimerService {
   // MARK - External properties
   public var duration: Int = 0
   public var mode: Mode = .countdown
+  public var secondsSinceStart: Int = 0
   public var remainingSeconds: Int {
    mode == .forward ? secondsSinceStart : max(duration - secondsSinceStart, 0)
   }
@@ -32,7 +33,6 @@ final class TimerService {
   // MARK - Internal properties
   private var timer: Timer?
   private var startedAt: Date?
-  private var secondsSinceStart: Int = 0
   private var secondsOnPaused: Int = 0
   private var backgroundEnterTime: Date?
   weak var delegate: TimerServiceDelegate?
