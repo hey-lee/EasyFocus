@@ -53,18 +53,19 @@ struct TimerView: View {
           }
         }
         VStack(alignment: .leading) {
-          Text("\(focusService.getSessionsCount(by: 18))")
           Text("Timer state: \(focusService.sm.state)")
           Text("Timer minutes: \(focusService.settings.minutes)")
           Text("Timer seconds: \(focusService.duration) (\(focusService.sm.mode))")
-          Text("Timer break type: \(focusService.breakType)")
+          Text("Timer break type: \(focusService.sessions.breakType)")
           Text("Short break minutes: \(focusService.settings.shortBreakMinutes)")
           Text("Long break minutes: \(focusService.settings.longBreakMinutes)")
-          Text("Total sessions count: \(focusService.settings.sessionsCount)")
-          Text("Completed cessions count: \(focusService.completedSessionsCount)")
+          Text("Total sessions count: \(focusService.sessions.totalCount)")
+          Text("Completed cessions count: \(focusService.sessions.completedCount)")
           Text("Remaining seconds: \(focusService.timer.remainingSeconds)")
           Text("Total seconds: \(focusService.totalSeconds)")
           Text("Total remaining seconds: \(focusService.remainingTotalSeconds)")
+
+          Text("Background seconds: \(focusService.backgroundSeconds)s")
 
           Toggle("Auto start sessions", isOn: .init(get: {
             focusService.settings.autoStartSessions
