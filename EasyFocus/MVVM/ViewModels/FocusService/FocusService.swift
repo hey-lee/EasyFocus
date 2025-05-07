@@ -49,7 +49,7 @@ final class FocusService {
   public var totalRemainingSeconds: Int {
     computeTotalRemainingSeconds()
   }
-  var scheduleTotalSeconds: Int {
+  var totalSeconds: Int {
     if !settings.autoStartShortBreaks {
       seconds.work
     } else {
@@ -253,7 +253,7 @@ extension FocusService: AppLifeCycleServiceDelegate {
     if case .running = sm.state {
       backgroundSnapShot = SnapShot(
         enterTime: .now,
-        secondsOnEnter: scheduleTotalSeconds - scheduleSeconds
+        secondsOnEnter: totalSeconds - scheduleSeconds
       )
     }
     
