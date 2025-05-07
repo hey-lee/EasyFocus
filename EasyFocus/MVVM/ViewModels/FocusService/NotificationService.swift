@@ -13,7 +13,7 @@ struct NotificationEntity {
   var subtitle: String?
   var body: String
   var symbol: String?
-  var timeInterval: Int
+  var seconds: Int
   var repeats: Bool = false
 }
 
@@ -56,11 +56,11 @@ extension NotificationService {
 // MARK - Schedule Notification
 extension NotificationService {
   func schedule(_ entity: NotificationEntity) {
-    guard entity.timeInterval > 0 else {
+    guard entity.seconds > 0 else {
       print("notification schedule failed: time interval must be greater than 0")
       return
     }
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(entity.timeInterval), repeats: entity.repeats)
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(entity.seconds), repeats: entity.repeats)
     let content = UNMutableNotificationContent()
     
     content.title = entity.title
