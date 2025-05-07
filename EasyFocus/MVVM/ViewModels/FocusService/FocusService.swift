@@ -28,13 +28,13 @@ final class FocusService {
   private var _onStageChange: (StateMachine.Stage) -> () = { _ in }
   
   public var duration: Int {
-    switch sm.mode {
+    switch mode {
     case .work: timer.mode == .forward ? Int.max : settings.minutes * ONE_MINUTE_IN_SECONDS
     case .rest: (sessions.breakType == .short ? settings.shortBreakMinutes : settings.longBreakMinutes) * ONE_MINUTE_IN_SECONDS
     }
   }
   public var completedSecondsCount: Int {
-    let currentSessionSeconds = sm.mode == .work ? min(timer.secondsSinceStart, sessions.totalSeconds) : 0
+    let currentSessionSeconds = mode == .work ? min(timer.secondsSinceStart, sessions.totalSeconds) : 0
     print("completedSecondsCount", sessions.completedSeconds, currentSessionSeconds)
     return sessions.completedSeconds + currentSessionSeconds
   }
@@ -50,10 +50,15 @@ final class FocusService {
     computeTotalRemainingSeconds()
   }
   var scheduleSeconds: Int {
-    if settings.autoStartShortBreaks, settings.autoStartSessions {
-      totalRemainingSeconds
-    } else {
+    if !settings.autoStartShortBreaks {
       timer.remainingSeconds
+    } else {
+      if settings.autoStartSessions {
+        totalRemainingSeconds
+      } else {
+        // calc first cycle elapsed seconds
+        mode == .work ? timer.remainingSeconds + seconds.break : timer.remainingSeconds
+      }
     }
   }
   
@@ -77,8 +82,8 @@ final class FocusService {
 
 // MARK - Core Controls
 extension FocusService {
-  func start(_ mode: StateMachine.Mode? = nil) {
-    _ = sm.emit(.start(mode ?? self.mode))
+  func start() {
+    _ = sm.emit(.start(mode))
   }
   
   func pause() {
@@ -136,7 +141,7 @@ extension FocusService: TimerServiceDelegate {
   }
   
   func onTimerComplete(type: TimerCompletionType) {
-    switch sm.mode {
+    switch mode {
     case .work:
       onWorkTimerComplete()
     case .rest:
@@ -152,7 +157,7 @@ extension FocusService: TimerServiceDelegate {
       sessions.restore()
       _ = sm.emit(.stop)
     } else {
-      _ = sm.emit(.finish(.work))
+      _ = sm.emit(.finish)
       if settings.autoStartShortBreaks {
         _ = sm.emit(.start(.rest))
       }
@@ -160,7 +165,7 @@ extension FocusService: TimerServiceDelegate {
   }
   
   func onBreakTimerComplete() {
-    _ = sm.emit(.finish(.rest))
+    _ = sm.emit(.finish)
     
     if settings.autoStartSessions {
       _ = sm.emit(.start(.work))
@@ -197,8 +202,12 @@ extension FocusService {
     return String(format: "%02d:%02d", seconds / 60, seconds % 60)
   }
   
+  public func updateDuration() {
+    timer.duration = duration
+  }
+  
   public func getSessionProgress(_ index: Int) -> CGFloat {
-    sessions.getSessionProgress(index, sm.mode)
+    sessions.getSessionProgress(index, mode)
   }
   
   public func getMode(by secs: Int) -> StateMachine.Mode {
@@ -207,8 +216,8 @@ extension FocusService {
   }
   
   private func computeTotalRemainingSeconds() -> Int {
-    let pendingSessions = sessions.getPendingCount(by: sm.mode)
-    if sm.mode == .work {
+    let pendingSessions = sessions.getPendingCount(by: mode)
+    if mode == .work {
       let pendingSeconds = pendingSessions * seconds.cycle
       return pendingSeconds + timer.remainingSeconds
     } else {
@@ -233,17 +242,17 @@ extension FocusService: AppLifeCycleServiceDelegate {
     if case .running = sm.state {
       backgroundSnapShot = SnapShot(
         enterTime: .now,
-        secondsOnEnter: seconds.total - totalRemainingSeconds
+        secondsOnEnter: seconds.total - scheduleSeconds
       )
     }
     
     if sm.emit(.background) {
-      print("notification.schedule", totalRemainingSeconds)
+      print("notification.schedule", scheduleSeconds)
       notification.schedule(
         .init(
           title: "Timer is done!",
           body: "Your focus session is completed",
-          seconds: totalRemainingSeconds
+          seconds: scheduleSeconds
         )
       )
     }

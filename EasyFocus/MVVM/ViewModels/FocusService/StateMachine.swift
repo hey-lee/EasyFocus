@@ -23,7 +23,7 @@ extension StateMachine {
     case start(_ mode: Mode)
     case pause
     case resume
-    case finish(_ mode: Mode)
+    case finish
     case stop
     case background
     case foreground(_ mode: Mode)
@@ -65,7 +65,7 @@ final class StateMachine {
       transition(to: .running(mode), event)
       return true
       // count down finished
-    case (.running, .finish(let mode)):
+    case (.running(let mode), .finish):
       transition(to: .idle(mode == .work ? .rest : .work), event)
       return true
       // stop manually
