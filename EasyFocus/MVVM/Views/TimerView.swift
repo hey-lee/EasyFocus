@@ -62,10 +62,10 @@ struct TimerView: View {
           Text("Total sessions count: \(focusService.sessions.totalCount)")
           Text("Completed cessions count: \(focusService.sessions.completedCount)")
           Text("Remaining seconds: \(focusService.timer.remainingSeconds)")
-          Text("Total seconds: \(focusService.totalSeconds)")
+          Text("Total seconds: \(focusService.seconds.total)")
           Text("Total remaining seconds: \(focusService.remainingTotalSeconds)")
 
-          Text("Background seconds: \(focusService.backgroundSeconds)s")
+          Text("Background seconds: \(focusService.seconds.background)s")
 
           Toggle("Auto start sessions", isOn: .init(get: {
             focusService.settings.autoStartSessions
