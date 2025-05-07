@@ -49,7 +49,7 @@ struct FocusView: View {
               Text("Start Focus")
                 .onTapGesture {
                   Tools.haptic()
-                  focusKit.createFocusModel()
+                  focusService.createFocusModel()
                   AppControlsKit.shared.startShield()
                   withAnimation {
                     focusService.start()
@@ -132,7 +132,7 @@ struct FocusView: View {
         TimelineView()
       }
       .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
-        if let label = tagsKit.modelLabel, let focus = focusKit.focus {
+        if let label = tagsKit.modelLabel, let focus = focusService.focusModel {
           focus.label = label
         }
       }
@@ -144,14 +144,14 @@ struct FocusView: View {
           print("onStageChange", stage)
           switch stage {
           case .willTransition(from: .running, to: .idle):
-            focusKit.updateFocusModel()
-            if let focus = focusKit.focus {
+            focusService.updateFocusModel()
+            if let focusModel = focusService.focusModel {
               Task {
                 do {
                   if enableCalendarSync {
-                    focus.calendarEventID = try await CalendarKit.shared.addFocusToCalendar(focus)
+                    focusModel.calendarEventID = try await CalendarKit.shared.addFocusToCalendar(focusModel)
                   }
-                  context.insert(focus)
+                  context.insert(focusModel)
                   try context.save()
                   print("focus.saved")
                 } catch let error {

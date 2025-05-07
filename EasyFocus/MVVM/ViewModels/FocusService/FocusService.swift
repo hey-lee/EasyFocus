@@ -23,6 +23,7 @@ extension FocusService {
 final class FocusService {
   static let shared = FocusService()
   
+  var focusModel: Focus?
   let ONE_MINUTE_IN_SECONDS: Int = 6
   private var _onStageChange: (StateMachine.Stage) -> () = { _ in }
   
@@ -31,6 +32,11 @@ final class FocusService {
     case .work: timer.mode == .forward ? Int.max : settings.minutes * ONE_MINUTE_IN_SECONDS
     case .rest: (sessions.breakType == .short ? settings.shortBreakMinutes : settings.longBreakMinutes) * ONE_MINUTE_IN_SECONDS
     }
+  }
+  public var completedSecondsCount: Int {
+    let currentSessionSeconds = sm.mode == .work ? min(timer.secondsSinceStart, sessions.totalSeconds) : 0
+    print("completedSecondsCount", sessions.completedSeconds, currentSessionSeconds)
+    return sessions.completedSeconds + currentSessionSeconds
   }
   public var mode: StateMachine.Mode { sm.mode }
   public var state: StateMachine.State { sm.state }
@@ -152,6 +158,28 @@ extension FocusService: TimerServiceDelegate {
       _ = sm.emit(.start(.work))
     }
   }
+}
+
+// MARK - Focus storage
+extension FocusService {
+  public func createFocusModel() {
+    self.focusModel = Focus(
+      minutes: settings.minutes,
+      sessionsCount: sessions.completedCount,
+      restShort: settings.shortBreakMinutes,
+      restLong: settings.longBreakMinutes,
+      label: TagsKit.shared.modelLabel,
+    )
+  }
+  
+  public func updateFocusModel() {
+    if let focusModel {
+      focusModel.endedAt = Date()
+      focusModel.completedSecondsCount = completedSecondsCount
+      focusModel.completedSessionsCount = sessions.completedCount
+    }
+  }
+
 }
 
 // MARK - Helpers
