@@ -16,6 +16,21 @@ extension FocusService {
     var enterTime: Date
     var secondsOnEnter: Int
   }
+  @Observable
+  final class Seconds {
+    var total: Int = 0
+    var totalRemaining: Int = 0
+    var background: Int = 0
+    private var workSeconds: Int {
+      Settings.shared.minutes * ONE_MINUTE_IN_SECONDS
+    }
+    private var breakSeconds: Int {
+      Settings.shared.shortBreakMinutes * ONE_MINUTE_IN_SECONDS
+    }
+    private var cycleSeconds: Int {
+      workSeconds + breakSeconds
+    }
+  }
 }
 
 fileprivate let ONE_MINUTE_IN_SECONDS: Int = 6
@@ -64,8 +79,8 @@ final class FocusService {
   
   private(set) var sm: StateMachine = .init()
   private(set) var timer: TimerService = .init()
-  private(set) var sessions: FocusSessions = .shared
-  private(set) var settings: FocusSettings = .shared
+  private(set) var sessions: Sessions = .shared
+  private(set) var settings: Settings = .shared
   
   init() {
     timer.delegate = self
