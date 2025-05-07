@@ -63,7 +63,8 @@ struct TimerView: View {
           Text("Completed cessions count: \(focusService.sessions.completedCount)")
           Text("Remaining seconds: \(focusService.timer.remainingSeconds)")
           Text("Total seconds: \(focusService.seconds.total)")
-          Text("Total remaining seconds: \(focusService.remainingTotalSeconds)")
+          Text("Total remaining seconds: \(focusService.totalRemainingSeconds)")
+          Text("Schedule seconds: \(focusService.scheduleSeconds)")
 
           Text("Background seconds: \(focusService.seconds.background)s")
 
@@ -80,6 +81,9 @@ struct TimerView: View {
         }
       }
       .buttonStyle(.borderedProminent)
+    }
+    .onChange(of: focusService.mode) { oldValue, newValue in
+      print("mode", newValue)
     }
   }
 }
