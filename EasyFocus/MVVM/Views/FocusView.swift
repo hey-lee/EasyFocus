@@ -139,6 +139,7 @@ struct FocusView: View {
         print(focusService.duration)
       })
       .task {
+        focusService.updateDuration()
         focusService.onStageChange { stage in
           print("onStageChange", stage)
           switch stage {
@@ -179,7 +180,7 @@ struct FocusView: View {
             backgroundColor: .black,
             action: {
               print("take a break")
-              focusService.start(.rest)
+              focusService.start()
               showModalView = false
             }
           )

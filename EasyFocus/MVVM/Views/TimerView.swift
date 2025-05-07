@@ -29,11 +29,8 @@ struct TimerView: View {
       
       Group {
         HStack {
-          Button("Start Work") {
+          Button("Start") {
             focusService.start()
-          }
-          Button("Start Rest") {
-            focusService.start(.rest)
           }
           Button("Pause") {
             focusService.pause()
