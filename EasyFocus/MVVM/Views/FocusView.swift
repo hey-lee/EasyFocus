@@ -140,8 +140,10 @@ struct FocusView: View {
         print(focusService.duration)
       })
       .task {
-        focusKit.onStateChange { state, stage, stats in
-          if stage == .beforeStop {
+        focusService.onStageChange { stage in
+          print("onStageChange", stage)
+          switch stage {
+          case .willTransition(from: .running, to: .idle):
             focusKit.updateFocusModel()
             if let focus = focusKit.focus {
               Task {
@@ -157,9 +159,9 @@ struct FocusView: View {
                 }
               }
             }
-          }
-          if stage == .stop {
+          case .didTransition(to: .idle):
             AppControlsKit.shared.stopShield()
+          default: break
           }
         }
       }
