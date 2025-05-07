@@ -18,7 +18,7 @@ struct FocusView: View {
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var show: ShowKit
   @EnvironmentObject var stack: Stackit
-
+  
   @AppStorage("enableCalendarSync") var enableCalendarSync = false
   
   @State var showModalView: Bool = false
@@ -98,7 +98,7 @@ struct FocusView: View {
         }
       }
       .overlay {
-        if focusService.state == .running {
+        if case .running = focusService.state {
           LongTapView {
             withAnimation {
               if focusService.timer.mode == .forward {
@@ -207,7 +207,7 @@ struct FocusView: View {
             }
             Button("打开系统设置") {
               if let url = URL(string: UIApplication.openSettingsURLString),
-                UIApplication.shared.canOpenURL(url) {
+                 UIApplication.shared.canOpenURL(url) {
                 UIApplication.shared.open(url)
               }
             }
@@ -262,7 +262,7 @@ struct FocusView: View {
   
   var sessionsView: some View {
     HStack(spacing: 16) {
-      ForEach(0...focusService.settings.sessionsCount - 1, id: \.self) { index in
+      ForEach(0...focusService.sessions.totalCount - 1, id: \.self) { index in
         ZStack {
           Circle()
             .stroke(Color.black, lineWidth: 4)
@@ -271,7 +271,7 @@ struct FocusView: View {
             .trim(from: 0, to: focusService.getSessionProgress(index))
             .stroke(Color.black, lineWidth: 10)
             .frame(width: 10, height: 10)
-            .animation(.linear(duration: 0.5), value: focusService.sessions.progress)
+            .animation(.linear(duration: 0.5), value: focusService.progress)
         }
       }
     }
