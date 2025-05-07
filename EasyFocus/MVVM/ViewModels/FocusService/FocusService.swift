@@ -46,8 +46,15 @@ final class FocusService {
   }
   public var progress: Double { sessions.progress }
   
-  public var remainingTotalSeconds: Int {
+  public var totalRemainingSeconds: Int {
     computeTotalRemainingSeconds()
+  }
+  var scheduleSeconds: Int {
+    if settings.autoStartShortBreaks, settings.autoStartSessions {
+      totalRemainingSeconds
+    } else {
+      timer.remainingSeconds
+    }
   }
   
   private var backgroundSnapShot: SnapShot?
@@ -138,13 +145,14 @@ extension FocusService: TimerServiceDelegate {
   }
   
   func onWorkTimerComplete() {
-    _ = sm.emit(.finish)
     
     sessions.finish()
     
     if sessions.isComplete {
       sessions.restore()
+      _ = sm.emit(.stop)
     } else {
+      _ = sm.emit(.finish(.work))
       if settings.autoStartShortBreaks {
         _ = sm.emit(.start(.rest))
       }
@@ -152,7 +160,7 @@ extension FocusService: TimerServiceDelegate {
   }
   
   func onBreakTimerComplete() {
-    _ = sm.emit(.finish)
+    _ = sm.emit(.finish(.rest))
     
     if settings.autoStartSessions {
       _ = sm.emit(.start(.work))
@@ -225,18 +233,17 @@ extension FocusService: AppLifeCycleServiceDelegate {
     if case .running = sm.state {
       backgroundSnapShot = SnapShot(
         enterTime: .now,
-        secondsOnEnter: seconds.total - remainingTotalSeconds
+        secondsOnEnter: seconds.total - totalRemainingSeconds
       )
-      print("didEnterBackground", seconds.total, remainingTotalSeconds)
     }
     
     if sm.emit(.background) {
-      print("notification.schedule", remainingTotalSeconds)
+      print("notification.schedule", totalRemainingSeconds)
       notification.schedule(
         .init(
           title: "Timer is done!",
           body: "Your focus session is completed",
-          timeInterval: remainingTotalSeconds
+          seconds: totalRemainingSeconds
         )
       )
     }
