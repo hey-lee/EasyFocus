@@ -38,14 +38,14 @@ struct FocusView: View {
               }
             }
           }
-          if focusService.state == .idle, focusService.mode == .work, focusService.completedSessionsCount == 0 {
+          if focusService.state == .idle, focusService.mode == .work, focusService.sessions.completedCount == 0 {
             tagView
           }
         }
         
         if focusService.state == .idle {
           Group {
-            if focusService.completedSessionsCount == 0 {
+            if focusService.sessions.completedCount == 0 {
               Text("Start Focus")
                 .onTapGesture {
                   Tools.haptic()
