@@ -192,7 +192,7 @@ extension FocusService {
       sessionsCount: sessions.completedCount,
       restShort: settings.shortBreakMinutes,
       restLong: settings.longBreakMinutes,
-      label: TagsKit.shared.modelLabel,
+      label: TagsKit.shared.modelLabel
     )
   }
   

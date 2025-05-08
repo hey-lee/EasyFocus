@@ -143,7 +143,7 @@ extension FocusKit {
       sessionsCount: sessionsCount,
       restShort: restShort,
       restLong: restLong,
-      label: TagsKit.shared.modelLabel,
+      label: TagsKit.shared.modelLabel
     )
   }
   

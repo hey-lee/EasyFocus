@@ -114,7 +114,7 @@ final class StoreKit {
         label: labels.randomElement(),
         startedAt: randomDate,
         endedAt: randomDate.addingTimeInterval(TimeInterval(completedSecondsCount)),
-        createdAt: randomDate,
+        createdAt: randomDate
       )
       
       events.append(event)
