@@ -119,12 +119,12 @@ extension TimerService: AppLifeCycleServiceDelegate {
     guard let backgroundEnterTime else { return }
     
     let backgroundTime = Int(Date().timeIntervalSince(backgroundEnterTime))
-    secondsOnPaused += backgroundTime
+    
     self.backgroundEnterTime = nil
     
     if startedAt != nil {
-      startedAt = .now
-      fireTimer()
+      secondsOnPaused += backgroundTime
+      resume()
     }
   }
 }
