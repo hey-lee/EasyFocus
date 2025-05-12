@@ -77,16 +77,49 @@ struct SettingsView: View {
                 VStack {
                   CellView(cell: cell, isOn: $enableAppWhitelist)
                   if enableAppWhitelist {
-                    SegmentedView(selection: $whitelistMode, segments: [
-                      (key: "strict", name: "Strict Mode"),
-                      (key: "whitelist", name: "Whitelist Mode"),
-                      (key: "loose", name: "Loose Mode"),
-                    ])
-                    .animation(.snappy, value: whitelistMode)
-                    .background(ThemeKit.theme.backgroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    Group {
+                      SegmentedView(selection: $whitelistMode, segments: [
+                        (key: "strict", name: "Strict Mode"),
+                        (key: "whitelist", name: "Whitelist Mode"),
+                        (key: "loose", name: "Loose Mode"),
+                      ])
+                      .background(ThemeKit.theme.backgroundColor)
+                      .clipShape(RoundedRectangle(cornerRadius: 12))
+                      
+                      Group {
+                        if whitelistMode == "strict" {
+                          HStack {
+                            Text("In focus, opening other apps causes failure")
+                            Spacer()
+                          }
+                        }
+                        if whitelistMode == "whitelist" {
+                          VStack(alignment: .leading) {
+                            Button("Select allowed apps") {
+                              show.FamilyActivityPicker = true
+                            }
+                            .buttonStyle(BlackCapsule(padding: 8, fontWeight: .regular, shape: RoundedRectangle(cornerRadius: 10, style: .continuous)))
+                            Text("In focus, only apps in whitelist can be opened")
+                          }
+                        }
+                        if whitelistMode == "loose" {
+                          HStack {
+                            Text("In focus, you are free to open any app")
+                            Spacer()
+                          }
+                        }
+                      }
+                      .padding(.horizontal)
+                      .foregroundColor(.secondary)
+                    }
+//                    .transition(.opacity.combined(with: .offset(y: 32)))
+                    .transition(.asymmetric(
+                      insertion: .offset(y: 30).combined(with: .opacity),
+                      removal: .opacity
+                    ))
                   }
                 }
+                .animation(.snappy, value: enableAppWhitelist)
               default:
                 EmptyView()
               }
@@ -192,9 +225,9 @@ struct SettingsView: View {
       }
     })
     .onChange(of: whitelistMode, { _, whitelistMode in
-      if whitelistMode == "whitelist" {
-        show.FamilyActivityPicker = true
-      }
+      //      if whitelistMode == "whitelist" {
+      //        show.FamilyActivityPicker = true
+      //      }
     })
     .onChange(of: enableHaptic, { _, enableHaptic in
       UserDefaults.standard.set(enableHaptic, forKey: "enableHaptic")
