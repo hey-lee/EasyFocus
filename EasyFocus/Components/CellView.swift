@@ -23,6 +23,7 @@ extension CellView {
     var description: String = ""
     var trailingText: String = ""
     var type: CellType?
+    var showChevron: Bool = true
   }
 }
 
@@ -69,11 +70,13 @@ struct CellView: View {
           if let isOn {
             Toggle("", isOn: isOn)
           } else {
-            Image(systemName: "chevron.compact.right")
-              .resizable()
-              .aspectRatio(contentMode: .fit)
-              .frame(height: 12)
-              .foregroundColor(.slate400)
+            if cell.showChevron {
+              Image(systemName: "chevron.compact.right")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(height: 12)
+                .foregroundColor(.slate400)
+            }
           }
         }
       }
