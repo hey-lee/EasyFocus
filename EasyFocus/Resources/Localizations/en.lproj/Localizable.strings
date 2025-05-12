@@ -6,21 +6,28 @@
   
 */
 
+//basic
+"focus" = "Focus";
+"icloud" = "iCloud";
 "language" = "Language";
-"theme" = "Theming";
-"app.icons" = "App Icons";
+"network" = "Network";
 "security" = "Security";
+"reminder" = "Reminder";
 "reminders" = "Reminders";
 "subscription" = "Subscription";
+"theme" = "Theming";
+//
 "icloud.sync" = "Sync with iCloud";
+"enable.icloud.sync" = "Enable iCould Sync";
 "calendar.sync" = "Sync to Calendar";
+"app.icons" = "App Icons";
 "app.whitelist" = "App Whitelist";
 "haptic" = "Hapic Feedback";
+"sync.status" = "Sync Status";
 "tap.sound" = "Button Sound Feedback";
-"focus" = "Focus";
 "short.break" = "Short break";
 "long.break" = "Long break";
 "auto.start.short.breaks" = "Auto start short breaks";
 "auto.start.sessions" = "Auto start sessions";
 "focus.sessions.per.round" = "Focus sessions per round";
-"reminder" = "Reminder";
+"icloud.last.sync.time" = "Last Sync Time";

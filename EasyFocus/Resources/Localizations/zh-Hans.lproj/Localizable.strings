@@ -6,21 +6,28 @@
   
 */
 
+//basic
+"focus" = "Focus";
+"icloud" = "iCloud";
 "language" = "语言";
-"theme" = "主题";
-"app.icons" = "更改 App 图标";
+"network" = "网络";
 "security" = "安全";
+"reminder" = "提醒";
 "reminders" = "提醒";
 "subscription" = "订阅与分期管理";
+"theme" = "主题";
+//
 "icloud.sync" = "同步到 iCloud";
+"enable.icloud.sync" = "开启 iCloud 同步";
 "calendar.sync" = "同步到日历";
+"app.icons" = "更改 App 图标";
 "app.whitelist" = "App 白名单";
 "haptic" = "开启震动反馈";
+"sync.status" = "同步状态";
 "tap.sound" = "开启按钮音效反馈";
-"focus" = "Focus";
 "short.break" = "短休息";
 "long.break" = "长休息";
 "auto.start.short.breaks" = "自动开始短休息";
 "auto.start.sessions" = "休息后自动开始";
 "focus.sessions.per.round" = "番茄钟循环";
-"reminder" = "提醒";
+"icloud.last.sync.time" = "最近同步时间";
