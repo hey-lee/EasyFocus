@@ -157,15 +157,25 @@ struct ProductsView: View {
   }
 }
 
-struct BlackCapsule: ButtonStyle {
+struct BlackCapsule<S: Shape>: ButtonStyle {
+  var padding: CGFloat = 8
+  var fontWeight: Font.Weight = .regular
+  var shape: S
+  
+  init(padding: CGFloat = 8, fontWeight: Font.Weight = .regular, shape: S = .capsule) {
+    self.padding = padding
+    self.fontWeight = fontWeight
+    self.shape = shape
+  }
+  
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .fontWeight(.heavy)
-      .padding()
+      .fontWeight(fontWeight)
+      .padding(padding)
       .scaleEffect(configuration.isPressed ? 0.97 : 1)
       .background(configuration.isPressed ? Color.black.opacity(0.8) : Color.black)
       .foregroundStyle(.white)
-      .clipShape(Capsule())
+      .clipShape(shape)
   }
 }
 
