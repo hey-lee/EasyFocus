@@ -88,6 +88,12 @@ struct FocusView: View {
                 show.TimelineView = true
               }
           }
+          ToolbarItem(placement: .topBarLeading) {
+            Text("VIP")
+              .onTapGesture {
+                show.ProView = true
+              }
+          }
           ToolbarItem(placement: .topBarTrailing) {
             Symbol("sf.ellipsis")
               .onTapGesture {
@@ -127,9 +133,15 @@ struct FocusView: View {
       .fullScreenCover(isPresented: $show.StatsView) {
         StatsView()
       }
+      .fullScreenCover(isPresented: $show.ProView) {
+        ProductsView()
+      }
       .fullScreenCover(isPresented: $show.TimelineView) {
         TimelineView()
       }
+      .onChange(of: show.ProView, { oldValue, newValue in
+        print("show.ProView", show.ProView)
+      })
       .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
         if let label = tagsKit.modelLabel, let focus = focusService.focusModel {
           focus.label = label

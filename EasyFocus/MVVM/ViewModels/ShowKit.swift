@@ -19,4 +19,6 @@ final class ShowKit: ObservableObject {
   @Published var sessionsCountSheetView: Bool = false
   // settings
   @Published var FamilyActivityPicker: Bool = false
+  //
+  @Published var ProView: Bool = false
 }
