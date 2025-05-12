@@ -11,7 +11,7 @@ import CoreData
 
 struct StatsView: View {
   @Environment(\.modelContext) var context
-  @Environment(StoreKit.self) var storeKit
+  @Environment(StoreService.self) var storeKit
   @Query(sort: \Focus.createdAt, order: .reverse)
   var focuses: [Focus] = []
   let segments: [(key: String, name: String)] = [
@@ -89,5 +89,5 @@ struct StatsView: View {
 
 #Preview {
   StatsView()
-    .environment(StoreKit.shared)
+    .environment(StoreService.shared)
 }

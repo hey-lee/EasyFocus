@@ -8,8 +8,8 @@
 import Foundation
 
 @Observable
-final class StoreKit {
-  static let shared = StoreKit()
+final class StoreService {
+  static let shared = StoreService()
   
   enum RangeType: String, CustomStringConvertible {
     case day, week, month, year
@@ -18,7 +18,7 @@ final class StoreKit {
   
   var rangeType: String = "day"
   var focusEvents: [Focus] {
-    StoreKit.mock(100)
+    StoreService.mock(100)
   }
   var totalSeconds: Int {
     focusEvents.reduce(0) { $0 + $1.completedSecondsCount }

@@ -33,7 +33,7 @@ struct ChartEntity: Identifiable, Equatable {
 }
 
 struct ChartsView: View {
-  @Environment(StoreKit.self) var storeKit
+  @Environment(StoreService.self) var storeKit
   
   @State var events: [ChartEntity] = []
   
@@ -65,5 +65,5 @@ struct ChartsView: View {
 
 #Preview {
   ChartsView()
-    .environment(StoreKit.shared)
+    .environment(StoreService.shared)
 }

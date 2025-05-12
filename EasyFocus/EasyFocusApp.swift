@@ -12,6 +12,7 @@ import CloudKit
 @main
 struct EasyFocusApp: App {
   @AppStorage("mode") var isDark = false
+  @Environment(\.scenePhase) private var scenePhase
   @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   
   var sharedModelContainer: ModelContainer = {
@@ -52,12 +53,17 @@ struct EasyFocusApp: App {
           ModalKit.shared.modelView()
         }
         .preferredColorScheme(isDark ? .dark : .light)
+        .task(id: scenePhase) {
+          if scenePhase == .active {
+            await Store.shared.fetchTransactions()
+          }
+        }
     }
     .environment(DBKit())
     .environment(FocusKit())
     .environment(TagsKit.shared)
     .environment(ModalKit.shared)
-    .environment(StoreKit.shared)
+    .environment(StoreService.shared)
     .environment(FocusService())
     .environmentObject(NavKit())
     .environmentObject(Stackit())
