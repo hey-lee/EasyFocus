@@ -55,7 +55,7 @@ struct EasyFocusApp: App {
         .preferredColorScheme(isDark ? .dark : .light)
         .task(id: scenePhase) {
           if scenePhase == .active {
-            await Store.shared.fetchTransactions()
+            await PurchaseKit.shared.fetchTransactions()
           }
         }
     }
