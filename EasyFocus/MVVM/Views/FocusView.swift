@@ -147,9 +147,6 @@ struct FocusView: View {
           focus.label = label
         }
       }
-      .onChange(of: focusService.duration, { oldValue, newValue in
-        print(focusService.duration)
-      })
       .task {
         focusService.updateDuration()
         focusService.onStageChange { stage in
@@ -204,29 +201,8 @@ struct FocusView: View {
           StatsView()
         case "settings":
           SettingsView()
-        case "icloud":
-          PageView {
-            Text("Settings")
-            Toggle(isOn: .init(get: {
-              UserDefaults.standard.bool(forKey: "enableiCloudSync")
-            }, set: { enableiCloudSync in
-              UserDefaults.standard.set(enableiCloudSync, forKey: "enableiCloudSync")
-            })) {
-              Text("iCloud Sync")
-            }
-            Text("iCloud: \(db.iCloudStatus)")
-            Text("iCloud sync status: \(db.iCloudSyncStatus)")
-            if let lastSyncTime = db.lastSyncTime {
-              Text("iCloud last sync time: \(Tools.format(lastSyncTime))")
-            }
-            Button("打开系统设置") {
-              if let url = URL(string: UIApplication.openSettingsURLString),
-                 UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url)
-              }
-            }
-            .buttonStyle(.borderedProminent)
-          }
+        case "icloud.sync":
+          iCloudSyncView()
         default:
           PageView()
         }
