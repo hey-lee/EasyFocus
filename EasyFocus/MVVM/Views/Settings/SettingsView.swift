@@ -45,17 +45,14 @@ struct SettingsView: View {
   }
   
   var body: some View {
-    PageView {
+    PageView(spacing: 24) {
+      ProCardView()
+        .padding(.top)
+        .onTapGesture {
+          show.ProView = true
+        }
+      
       ForEach(Array(zip(SettingsKit.shared.sections.indices, SettingsKit.shared.sections)), id: \.0) { index, section in
-        //        VStack {
-        //          HStack {
-        //            Text(section.name)
-        //              .textCase(.uppercase)
-        //              .font(.title2.weight(.heavy))
-        //              .foregroundColor(ThemeKit.theme.foregroundColor)
-        //            Spacer()
-        //          }
-        //        }
         LazyVStack(spacing: 0) {
           ForEach(section.items) { cell in
             switch cell.type {
@@ -73,53 +70,6 @@ struct SettingsView: View {
                 CellView(cell: cell, isOn: $enableSound)
               case "calendar.sync":
                 CellView(cell: cell, isOn: $enableCalendarSync)
-              case "app.whitelist":
-                VStack {
-                  CellView(cell: cell, isOn: $enableAppWhitelist)
-                  if enableAppWhitelist {
-                    Group {
-                      SegmentedView(selection: $whitelistMode, segments: [
-                        (key: "strict", name: "Strict Mode"),
-                        (key: "whitelist", name: "Whitelist Mode"),
-                        (key: "loose", name: "Loose Mode"),
-                      ])
-                      .background(ThemeKit.theme.backgroundColor)
-                      .clipShape(RoundedRectangle(cornerRadius: 12))
-                      
-                      Group {
-                        if whitelistMode == "strict" {
-                          HStack {
-                            Text("In focus, opening other apps causes failure")
-                            Spacer()
-                          }
-                        }
-                        if whitelistMode == "whitelist" {
-                          VStack(alignment: .leading) {
-                            Button("Select allowed apps") {
-                              show.FamilyActivityPicker = true
-                            }
-                            .buttonStyle(BlackCapsule(padding: 8, fontWeight: .regular, shape: RoundedRectangle(cornerRadius: 10, style: .continuous)))
-                            Text("In focus, only apps in whitelist can be opened")
-                          }
-                        }
-                        if whitelistMode == "loose" {
-                          HStack {
-                            Text("In focus, you are free to open any app")
-                            Spacer()
-                          }
-                        }
-                      }
-                      .padding(.horizontal)
-                      .foregroundColor(.secondary)
-                    }
-//                    .transition(.opacity.combined(with: .offset(y: 32)))
-                    .transition(.asymmetric(
-                      insertion: .offset(y: 30).combined(with: .opacity),
-                      removal: .opacity
-                    ))
-                  }
-                }
-                .animation(.snappy, value: enableAppWhitelist)
               default:
                 EmptyView()
               }
@@ -140,6 +90,12 @@ struct SettingsView: View {
                 CellView(cell: cell, trailingText: sessionsCount.description)
                   .onTapGesture {
                     show.sessionsCountSheetView = true
+                  }
+              case "app.whitelist":
+                CellView(cell: cell, trailingText: "")
+                  .onTapGesture {
+                    print("whitelist")
+                    show.Whitelist = true
                   }
               default:
                 CellView(cell: cell)
@@ -166,16 +122,22 @@ struct SettingsView: View {
                   }
                 }
                 .scaledToFit()
-                .scaleEffect(CGSize(width: isTouched && touchingKey == cell.key ? 0.97 : 1, height: isTouched && touchingKey == cell.key ? 0.97 : 1))
+//                .scaleEffect(CGSize(width: isTouched && touchingKey == cell.key ? 0.97 : 1, height: isTouched && touchingKey == cell.key ? 0.97 : 1))
             }
           }
         }
         .padding(.vertical)
-        .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: ThemeKit.theme.backgroundColor, radius: CGFloat(24), x: 0, y: CGFloat(24))
+        //        .shadow(color: ThemeKit.theme.backgroundColor, radius: CGFloat(24), x: 0, y: CGFloat(24))
+        .glassmorphic(cornerRadius: 24, glowWidth: 2)
       }
     }
+    .background(
+      Image("gradient")
+        .resizable()
+        .blur(radius: 100)
+        .ignoresSafeArea(.container, edges: .all)
+    )
     .toolbar(.hidden, for: .tabBar)
     .sheet(isPresented: $show.shortBreakSheetView) {
       VStack {
@@ -201,6 +163,54 @@ struct SettingsView: View {
         .height(320),
       ])
     }
+    .sheet(isPresented: $show.Whitelist) {
+      VStack {
+        Group {
+          SegmentedView(selection: $whitelistMode, segments: [
+            (key: "strict", name: "Strict Mode"),
+            (key: "whitelist", name: "Whitelist Mode"),
+            (key: "loose", name: "Loose Mode"),
+          ])
+          .background(ThemeKit.theme.backgroundColor)
+          .clipShape(RoundedRectangle(cornerRadius: 12))
+          
+          Group {
+            if whitelistMode == "strict" {
+              HStack {
+                Text("In focus, opening other apps causes failure")
+                Spacer()
+              }
+            }
+            if whitelistMode == "whitelist" {
+              VStack(alignment: .leading) {
+                Button("Select allowed apps") {
+                  show.FamilyActivityPicker = true
+                }
+                .buttonStyle(BlackCapsule(padding: 8, fontWeight: .regular, shape: RoundedRectangle(cornerRadius: 10, style: .continuous)))
+                Text("In focus, only apps in whitelist can be opened")
+              }
+            }
+            if whitelistMode == "loose" {
+              HStack {
+                Text("In focus, you are free to open any app")
+                Spacer()
+              }
+            }
+          }
+          .animation(.snappy, value: whitelistMode)
+          .foregroundColor(.secondary)
+        }
+        .transition(.asymmetric(
+          insertion: .offset(y: 30).combined(with: .opacity),
+          removal: .opacity
+        ))
+        Spacer()
+      }
+      .padding()
+      .presentationDetents([
+        .height(160),
+      ])
+    }
     .sheet(isPresented: $show.sessionsCountSheetView) {
       VStack {
         Picker("", selection: $sessionsCount) {
@@ -223,11 +233,6 @@ struct SettingsView: View {
       } else {
         AppControlsKit.shared.stopShield()
       }
-    })
-    .onChange(of: whitelistMode, { _, whitelistMode in
-      //      if whitelistMode == "whitelist" {
-      //        show.FamilyActivityPicker = true
-      //      }
     })
     .onChange(of: enableHaptic, { _, enableHaptic in
       UserDefaults.standard.set(enableHaptic, forKey: "enableHaptic")

@@ -12,40 +12,35 @@ import CoreData
 struct StatsView: View {
   @Environment(\.modelContext) var context
   @Environment(StoreService.self) var storeKit
-  @Query(sort: \Focus.createdAt, order: .reverse)
-  var focuses: [Focus] = []
-  let segments: [(key: String, name: String)] = [
-    (key: "day", name: "Day"),
-    (key: "week", name: "Week"),
-    (key: "month", name: "Month"),
-    (key: "year", name: "Year"),
-  ]
+  @EnvironmentObject var show: ShowKit
   
   @State var rangeType: String = ""
-  @State var chunkedEvents: [Focus] = []
   
   var body: some View {
-    PageView {
+    PageView(backStyle: .none) {
       HStack {
         Spacer()
         BackButton("sf.xmark")
       }
       
-      SegmentedView(selection: $rangeType, segments: segments, .init(animationDuration: 0.2))
+      SegmentedView(selection: $rangeType, segments: storeKit.segments, .init(animationDuration: 0.2))
       
       VStack {
         ChartsView()
         Text("count: \(storeKit.chartEntities.count)")
       }
     }
-//    .onAppear {
-//      storeKit.focusEvents = focuses
-//    }
-//    .onChange(of: focuses) { oldValue, newValue in
-//      storeKit.focusEvents = focuses
-//    }
     .onChange(of: rangeType) { oldValue, newValue in
       storeKit.rangeType = rangeType
+    }
+    .toolbar {
+      ToolbarItem(placement: .topBarTrailing) {
+        Symbol("sf.calendar")
+          .onTapGesture {
+            // stack.settings.append("stats")
+            show.TimelineView = true
+          }
+      }
     }
   }
   
@@ -90,4 +85,5 @@ struct StatsView: View {
 #Preview {
   StatsView()
     .environment(StoreService.shared)
+    .environmentObject(ShowKit())
 }
