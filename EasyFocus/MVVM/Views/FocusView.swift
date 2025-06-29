@@ -72,36 +72,6 @@ struct FocusView: View {
         }
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .toolbar {
-        if case .idle = focusService.state {
-          ToolbarItem(placement: .topBarLeading) {
-            Symbol("sf.chart.bar.fill")
-              .onTapGesture {
-                // stack.settings.append("stats")
-                show.StatsView = true
-              }
-          }
-          ToolbarItem(placement: .topBarLeading) {
-            Symbol("sf.calendar")
-              .onTapGesture {
-                // stack.settings.append("stats")
-                show.TimelineView = true
-              }
-          }
-          ToolbarItem(placement: .topBarLeading) {
-            Text("VIP")
-              .onTapGesture {
-                show.ProView = true
-              }
-          }
-          ToolbarItem(placement: .topBarTrailing) {
-            Symbol("sf.ellipsis")
-              .onTapGesture {
-                stack.settings.append("settings")
-              }
-          }
-        }
-      }
       .overlay {
         if case .running = focusService.state {
           LongTapView {
@@ -117,11 +87,6 @@ struct FocusView: View {
           }
         }
       }
-      .overlay {
-        if show.WheelSliderView {
-          WheelSliderView()
-        }
-      }
       .sheet(isPresented: $show.tags) {
         TagsView()
           .presentationDetents([
@@ -133,15 +98,9 @@ struct FocusView: View {
       .fullScreenCover(isPresented: $show.StatsView) {
         StatsView()
       }
-      .fullScreenCover(isPresented: $show.ProView) {
-        ProductsView()
-      }
       .fullScreenCover(isPresented: $show.TimelineView) {
         TimelineView()
       }
-      .onChange(of: show.ProView, { oldValue, newValue in
-        print("show.ProView", show.ProView)
-      })
       .onChange(of: tagsKit.modelLabel) { oldValue, newValue in
         if let label = tagsKit.modelLabel, let focus = focusService.focusModel {
           focus.label = label
