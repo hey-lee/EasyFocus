@@ -36,6 +36,53 @@ extension Tools {
       return "\(seconds)s"
     }
   }
+  
+  static func dictionaryToJSON(_ dictionary: [String: Any]) -> String? {
+    guard JSONSerialization.isValidJSONObject(dictionary) else {
+      print("Dictionary is not valid JSON")
+      return nil
+    }
+    
+    do {
+      let jsonData = try JSONSerialization.data(
+        withJSONObject: dictionary,
+        options: []
+      )
+      return String(data: jsonData, encoding: .utf8)
+    } catch {
+      print("JSON serialization failed: \(error.localizedDescription)")
+      return nil
+    }
+  }
+  
+  static func structToJSON<T: Codable>(_ value: T, prettyPrinted: Bool = false) throws -> String? {
+    let encoder = JSONEncoder()
+    
+    if prettyPrinted {
+      encoder.outputFormatting = .prettyPrinted
+    }
+    
+    encoder.dateEncodingStrategy = .iso8601
+    
+    do {
+      let jsonData = try encoder.encode(value)
+      
+      guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+        throw EncodingError.invalidValue(
+          value,
+          EncodingError.Context(
+            codingPath: [],
+            debugDescription: "Failed to convert JSON data to UTF-8 string"
+          )
+        )
+      }
+      
+      return jsonString
+    } catch {
+      print("struct serialization failed: \(error.localizedDescription)")
+      return nil
+    }
+  }
 }
 
 extension Tools {
