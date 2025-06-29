@@ -11,21 +11,24 @@ struct PageView<Content: View>: View {
   enum BackStyle {
     case back, close, none
   }
+  
+  @State var spacing: CGFloat
   @State var backStyle: BackStyle
   @ViewBuilder var content: () -> Content
   
   init(
+    spacing: CGFloat = 8,
     backStyle: BackStyle = .back,
     @ViewBuilder content: @escaping () -> Content = { EmptyView() }
   ) {
+    self.spacing = spacing
     self.backStyle = backStyle
     self.content = content
-    Tools.transparentNavBar()
   }
   
   var body: some View {
     ScrollView {
-      VStack {
+      VStack(spacing: spacing) {
         content()
           .frame(maxWidth: .infinity, maxHeight: .infinity)
       }
@@ -36,6 +39,7 @@ struct PageView<Content: View>: View {
           if backStyle == .back {
             ToolbarItem(placement: .topBarLeading) {
               BackButton()
+                .stroke(width: 2, shadow: .init(radius: 2, color: .black.opacity(0.1)))
             }
           }
           if backStyle == .close {
@@ -47,13 +51,12 @@ struct PageView<Content: View>: View {
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(ThemeKit.theme.backgroundColor.ignoresSafeArea())
+    .ignoresSafeArea(.container, edges: .all)
   }
 }
 
 #Preview {
   PageView {
     Text("App Content")
-      .foregroundColor(.white)
   }
 }

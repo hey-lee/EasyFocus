@@ -20,6 +20,7 @@ extension CellView {
     var name: String
     var icon: String = ""
     var colors: [Color] = []
+    var foregroundColor: Color = .white
     var description: String = ""
     var trailingText: String = ""
     var type: CellType?
@@ -47,7 +48,8 @@ struct CellView: View {
       let size = $0.size
       HStack {
         if !cell.icon.isEmpty {
-          Symbol(cell.icon, colors: cell.colors, foregroundColor: Color.white)
+          Symbol(cell.icon, colors: cell.colors, foregroundColor: cell.foregroundColor)
+            .stroke(width: 2, shadow: .init(x: 1, y: 2, radius: 1, color: .black.opacity(0.2)))
         }
         
         VStack(alignment: .leading, spacing: 0) {
@@ -80,9 +82,9 @@ struct CellView: View {
           }
         }
       }
-      .padding(.horizontal, 10)
+      .padding(.leading, 8)
+      .padding(.trailing, 16)
       .frame(height: size.height)
-      .background(.white)
       .contentShape(Rectangle())
       .clipShape(.rect())
     }
@@ -91,10 +93,24 @@ struct CellView: View {
 }
 
 #Preview {
-  VStack {
-    CellView(cell: CellView.Cell(key: "cell.view", name: "CellView", icon: "", colors: [Color.blue400], description: "description"))
+  PageView {
+    VStack {
+      CellView(cell: .init(
+        key: "reminder",
+        name: "Reminder",
+        icon: "sf.bell.fill",
+        foregroundColor: Color.slate600,
+        description: "Enable reminder",
+        type: .toggle
+      ), isOn: .constant(true))
+      CellView(cell: .init(
+        key: "voice.accent",
+        name: "Voice Accent",
+        icon: "sf.headphones",
+        foregroundColor: Color.slate600,
+        description: "Change the voice accent"
+      ))
+    }
+    .glassmorphic(cornerRadius: 24)
   }
-  .padding(.horizontal)
-  .frame(maxWidth: .infinity, maxHeight: .infinity)
-  .background(Color.sky50)
 }
