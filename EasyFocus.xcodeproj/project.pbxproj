@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F02D4732E0C17E6005141E4 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 0F02D4722E0C17E6005141E4 /* RevenueCat */; };
+		0F02D4752E0C1842005141E4 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F02D4742E0C1842005141E4 /* StoreKit.framework */; };
 		9A78D0112DB77B740052E8C3 /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 9A78D0102DB77B740052E8C3 /* Shimmer */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0F02D4742E0C1842005141E4 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		9A78CFA82DB75B300052E8C3 /* EasyFocus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EasyFocus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A78CFB92DB75B310052E8C3 /* EasyFocusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EasyFocusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A78CFC32DB75B310052E8C3 /* EasyFocusUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EasyFocusUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -69,6 +72,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0F02D4752E0C1842005141E4 /* StoreKit.framework in Frameworks */,
+				0F02D4732E0C17E6005141E4 /* RevenueCat in Frameworks */,
 				9A78D0112DB77B740052E8C3 /* Shimmer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -114,6 +119,7 @@
 		9A78D00F2DB77B740052E8C3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0F02D4742E0C1842005141E4 /* StoreKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -139,6 +145,7 @@
 			name = EasyFocus;
 			packageProductDependencies = (
 				9A78D0102DB77B740052E8C3 /* Shimmer */,
+				0F02D4722E0C17E6005141E4 /* RevenueCat */,
 			);
 			productName = EasyFocus;
 			productReference = 9A78CFA82DB75B300052E8C3 /* EasyFocus.app */;
@@ -225,6 +232,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				9A78D00E2DB77B650052E8C3 /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
+				0F02D4712E0C17B5005141E4 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9A78CFA92DB75B300052E8C3 /* Products */;
@@ -636,6 +644,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0F02D4712E0C17B5005141E4 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.29.0;
+			};
+		};
 		9A78D00E2DB77B650052E8C3 /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer";
@@ -647,6 +663,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0F02D4722E0C17E6005141E4 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0F02D4712E0C17B5005141E4 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
 		9A78D0102DB77B740052E8C3 /* Shimmer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 9A78D00E2DB77B650052E8C3 /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;

@@ -1,6 +1,15 @@
 {
-  "originHash" : "fef25bdca91813013e9f62da30996b2504576bc8f5ed9d0a0bb177a563058bf3",
+  "originHash" : "690aef59ac85b0d95fa6daecb41442a10755828f6b90d809ccedaab396068c16",
   "pins" : [
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm",
+      "state" : {
+        "revision" : "f7c5738962d14b7800addd2a517270aa66d5ce29",
+        "version" : "5.29.0"
+      }
+    },
     {
       "identity" : "swiftui-shimmer",
       "kind" : "remoteSourceControl",
