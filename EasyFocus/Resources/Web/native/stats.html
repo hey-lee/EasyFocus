@@ -9,32 +9,42 @@
 		<script>
 			setTimeout(() => {
 				new VConsole()
-			}, 0)
+			}, 10)
 		</script>
 	<link rel="stylesheet" href="/_astro/index.C4JqRgR_.css"></head>
 	<body>
 		
   <h1 class="text-3xl font-bold underline">Stats</h1>
   <button id="get-year-stats">Get Year Stats</button>
+  <button id="get-month-stats">Get Month Stats</button>
   <ul id="stats"></ul>
   <script>
-    // const getYearStatsBtn = document.querySelector("#get-year-stats")
-    // getYearStatsBtn?.addEventListener("click", () => {
-    //   console.log(typeof bridge.invoke)
-
-    //   try {
-    //     bridge.invoke(`stats.year`)
-    //   } catch (error) {
-    //     console.log(`get year stats error`, error?.message)
-    //   }
-    // })
+    const getYearStatsBtn = document.querySelector("#get-year-stats")
+    getYearStatsBtn?.addEventListener("click", () => {
+      try {
+        bridge.callScheme(`stats`, {
+          rangeType: `year`,
+        })
+      } catch (error) {
+        console.log(`get year stats error`)
+      }
+    })
+    const getMonthStatsBtn = document.querySelector("#get-month-stats")
+    getMonthStatsBtn?.addEventListener("click", () => {
+      try {
+        bridge.callScheme(`stats`, {
+          rangeType: `month`,
+        })
+      } catch (error) {
+        console.log(`get month stats error`)
+      }
+    })
 
     window.addEventListener("stats", ({ detail: data }) => {
       console.log(`on stats`, data)
-
       const stats = document.querySelector("#stats")
       if (stats) {
-        stats.innerHTML = data.map((item) => `<li>${item.label}</li>`).join(``)
+        stats.innerHTML = data.map((item) => `<li>${item.label} ${item.value}</li>`).join(``)
       }
     })
   </script>
