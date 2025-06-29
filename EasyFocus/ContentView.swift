@@ -8,42 +8,77 @@
 import SwiftUI
 import SwiftData
 
+enum Route {
+  case Stats, StatsWeb, Home, Settings
+}
+
 struct ContentView: View {
   @EnvironmentObject var nav: NavKit
   @EnvironmentObject var stack: Stackit
+  @EnvironmentObject var show: ShowKit
   @State var showTimerView: Bool = false
+  @State var activeRoute: Route = Route.Home
   
   init() {
     Tools.transparentNavBar()
-    Tools.transparentTabBar()
+    Tools.transparentPageIndicator()
   }
   
   var body: some View {
-    FocusView()
-      .overlay {
-        VStack {
-          Spacer()
-          HStack {
+    TabView(selection: $activeRoute) {
+      StatsView()
+        .tag(Route.Stats)
+      StatsWebView()
+        .tag(Route.StatsWeb)
+      
+      FocusView()
+        .tag(Route.Home)
+        .padding(.top, 8)
+        .overlay {
+          VStack {
             Spacer()
-            Symbol("sf.timer", colors: [.slate50])
-              .onTapGesture {
-                showTimerView = true
-              }
+            HStack {
+              Spacer()
+              Symbol("sf.timer", colors: [.slate50])
+                .onTapGesture {
+                  showTimerView = true
+                }
+            }
+            .padding()
+            .padding(.bottom, 40)
           }
-          .padding()
-          .padding(.bottom, 40)
         }
+        .sheet(isPresented: $showTimerView) {
+          TimerView()
+        }
+      
+      SettingsView()
+        .tag(Route.Settings)
+    }
+    .fullScreenCover(isPresented: $show.ProView) {
+      ProductsView()
+    }
+    .ignoresSafeArea()
+    .tabViewStyle(.page)
+    .overlay {
+      if show.WheelSliderView {
+        WheelSliderView()
       }
-      .sheet(isPresented: $showTimerView) {
-        TimerView()
-      }
+    }
   }
 }
 
 #Preview {
   ContentView()
+    .environment(DBKit())
+    .environment(TagsKit())
     .environment(FocusKit())
+    .environment(FocusService())
+    .environment(ModalKit.shared)
     .environmentObject(NavKit())
+    .environmentObject(ShowKit())
     .environmentObject(Stackit())
-    .modelContainer(for: [])
+    .modelContainer(for: [
+      Focus.self,
+    ])
 }
