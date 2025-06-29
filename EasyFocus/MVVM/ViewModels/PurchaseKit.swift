@@ -7,6 +7,7 @@
 
 import SwiftUI
 import StoreKit
+import RevenueCat
 
 @Observable
 class PurchaseKit {
@@ -68,7 +69,7 @@ class PurchaseKit {
   
   func purchase(_ product: Product) async throws {
     let result = try await product.purchase()
-
+    
     switch result {
     case .success(let verificationResult):
       if let transaction = try? verificationResult.payloadValue {
@@ -97,6 +98,28 @@ class PurchaseKit {
     
     self.transactions = transactions
     print("transactions", transactions.map { $0.productID })
-//    Store.isSubscribed = transactions.contains { $0.ownershipType == .purchased || $0.ownershipType == .familyShared }
+    //    Store.isSubscribed = transactions.contains { $0.ownershipType == .purchased || $0.ownershipType == .familyShared }
+  }
+}
+
+@Observable
+final class RevenueKit {
+  static let shared = RevenueKit()
+  
+  func subscribe() {
+    Purchases.shared.getOfferings { offerings, error in
+      if let packages = offerings?.current?.availablePackages {
+        Purchases.shared.purchase(package: packages.first!) { transaction, purchaseInfo, error, userCancelled in
+          if error != nil {
+            // handle error
+          }
+          print(purchaseInfo?.entitlements)
+          if purchaseInfo?.entitlements["pro"]?.isActive == true {
+            // success
+            print("purchese success")
+          }
+        }
+      }
+    }
   }
 }

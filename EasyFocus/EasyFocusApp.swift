@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import CloudKit
+import RevenueCat
 
 @main
 struct EasyFocusApp: App {
@@ -52,6 +53,16 @@ struct EasyFocusApp: App {
         })) {
           ModalKit.shared.modelView()
         }
+        .overlay(
+          VStack {
+            if let sheet = PresentKit.shared.presentView {
+              sheet
+                .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .offset(y: 20)))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.thinMaterial)
+            }
+          }
+        )
         .preferredColorScheme(isDark ? .dark : .light)
         .task(id: scenePhase) {
           if scenePhase == .active {
