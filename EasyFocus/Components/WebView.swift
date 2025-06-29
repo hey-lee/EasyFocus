@@ -26,10 +26,8 @@ struct WebView: UIViewRepresentable {
     webView.navigationDelegate = bridge
     
     bridge.setWebView(webView)
-    bridge.addScripts([
-      "webridge",
-      "vconsole.min",
-    ])
+    bridge.addScript("webridge")
+    bridge.addScript("vconsole.min")
     
     if let url = Bundle.main.url(forResource: html, withExtension: "html") {
       webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
