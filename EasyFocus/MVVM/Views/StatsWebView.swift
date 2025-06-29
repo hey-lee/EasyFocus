@@ -13,26 +13,12 @@ struct StatsWebView: View {
   @Environment(StoreService.self) var storeKit
   @EnvironmentObject var show: ShowKit
   
-//  @State var rangeType: String = ""
+  //  @State var rangeType: String = ""
   
   var body: some View {
     WebView(html: "stats")
-    .task {
-      storeKit.rangeType = "year"
-      BridgeKit.shared.onMessageReceived { message in
-        switch message.type {
-        case .url:
-          if let url = URL(string: message.content) {
-            print("url.scheme", url.scheme as Any)
-            print("url.host", url.host as Any)
-            print("url.query", url.queryParameters)
-          }
-        case .string:
-          print("string", message.content)
-        }
-      }
-      BridgeKit.shared.onFinish { webView in
-        print("onFinish")
+      .onChange(of: storeKit.chartEntities) { oldValue, newValue in
+        print(storeKit.rangeType)
         do {
           let events = try Tools.structToJSON(storeKit.chartEntities)
           BridgeKit.shared.emit("stats", events ?? "")
@@ -40,6 +26,36 @@ struct StatsWebView: View {
           print("")
         }
       }
-    }
+      .task {
+        storeKit.rangeType = "year"
+        BridgeKit.shared.onMessageReceived { message in
+          switch message.type {
+          case .url:
+            if let url = URL(string: message.content) {
+              switch url.host {
+              case "stats":
+                print(url.queryParameters)
+                if let rangeType = url.queryParameters["rangeType"] {
+                  print("rangeType", rangeType)
+                  storeKit.rangeType = rangeType
+                }
+              default:
+                break
+              }
+              //            print("url.scheme", url.scheme as Any)
+              //            print("url.host", url.host as Any)
+              //            print("url.query", url.queryParameters)
+            }
+          case .string:
+            print("string", Tools.JSONToDictionary(message.content) as Any)
+          }
+        }
+        do {
+          let events = try Tools.structToJSON(storeKit.chartEntities)
+          BridgeKit.shared.emit("stats", events ?? "")
+        } catch {
+          print("")
+        }
+      }
   }
 }
