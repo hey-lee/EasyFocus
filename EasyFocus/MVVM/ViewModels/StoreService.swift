@@ -7,9 +7,39 @@
 
 import Foundation
 
+struct ChartEntity: Identifiable, Equatable, Codable {
+  var id: String = UUID().uuidString
+  var label: String = ""
+  var value: Int = 0
+  var percent: Int = 0
+  var createdAt: Date = Date()
+  var isAnimated: Bool = false
+  
+  var day: String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "E"
+    return formatter.string(from: createdAt)
+  }
+  
+  static func == (lhs: ChartEntity, rhs: ChartEntity) -> Bool {
+    lhs.id == rhs.id &&
+    lhs.label == rhs.label &&
+    lhs.value == rhs.value &&
+    lhs.createdAt == rhs.createdAt &&
+    lhs.isAnimated == rhs.isAnimated
+  }
+}
+
 @Observable
 final class StoreService {
   static let shared = StoreService()
+  
+  let segments: [(key: String, name: String)] = [
+    (key: "day", name: "Day"),
+    (key: "week", name: "Week"),
+    (key: "month", name: "Month"),
+    (key: "year", name: "Year"),
+  ]
   
   enum RangeType: String, CustomStringConvertible {
     case day, week, month, year
