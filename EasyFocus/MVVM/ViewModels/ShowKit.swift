@@ -8,6 +8,7 @@
 import SwiftUI
 
 final class ShowKit: ObservableObject {
+  static let shared = ShowKit()
   @Published var tags: Bool = false
   @Published var lego: Bool = false
   @Published var StatsView: Bool = false
@@ -19,6 +20,7 @@ final class ShowKit: ObservableObject {
   @Published var sessionsCountSheetView: Bool = false
   // settings
   @Published var FamilyActivityPicker: Bool = false
+  @Published var Whitelist: Bool = false
   //
   @Published var ProView: Bool = false
 }
