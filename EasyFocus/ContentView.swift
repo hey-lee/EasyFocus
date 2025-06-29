@@ -26,8 +26,8 @@ struct ContentView: View {
   
   var body: some View {
     TabView(selection: $activeRoute) {
-      StatsView()
-        .tag(Route.Stats)
+//      StatsView()
+//        .tag(Route.Stats)
       StatsWebView()
         .tag(Route.StatsWeb)
       
