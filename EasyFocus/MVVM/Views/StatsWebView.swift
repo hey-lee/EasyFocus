@@ -47,7 +47,7 @@ struct StatsWebView: View {
               //            print("url.query", url.queryParameters)
             }
           case .string:
-            print("string", Tools.JSONToDictionary(message.content) as Any)
+            print("")
           }
         }
         do {
