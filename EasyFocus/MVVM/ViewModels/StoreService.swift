@@ -85,6 +85,35 @@ final class StoreService {
       }
     }
   }
+  var rangedCodableEvents: [C.Focus] {
+    rangedEvents.map {
+      var focus = C.Focus(
+        id: $0.id,
+        minutes: $0.minutes,
+        sessionsCount: $0.sessionsCount,
+        completedSecondsCount: $0.completedSecondsCount,
+        completedSessionsCount: $0.completedSessionsCount,
+        restShort: $0.restLong,
+        restLong: $0.restLong,
+        notes: $0.notes,
+        calendarEventID: $0.calendarEventID,
+        startedAt: $0.startedAt,
+        endedAt: $0.endedAt,
+        createdAt: $0.createdAt
+      )
+      
+      if let label = $0.label {
+        focus.label = C.FocusLabel(
+          id: label.id,
+          name: label.name,
+          icon: label.icon,
+          backgroundColor: label.backgroundColor
+        )
+      }
+      
+      return focus
+    }
+  }
   var labelEventsMap: [String: [Focus]] {
     Dictionary(grouping: rangedEvents.filter { $0.label != nil }) { $0.label!.name }
   }
