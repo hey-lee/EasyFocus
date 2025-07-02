@@ -31,6 +31,29 @@ final class BridgeKit: NSObject {
     self.webView = webView
   }
   
+  func fixRelativePaths(html: String) -> String {
+    // replace absolute path to relative path
+    let pattern = #"(\b(src|href)\s*=\s*['"])\/_next\/static\/([^'"]+['"])"#
+    
+    do {
+      let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+      
+      let result = NSMutableString(string: html)
+      
+      regex.replaceMatches(
+        in: result,
+        options: [],
+        range: NSRange(location: 0, length: result.length),
+        withTemplate: "$1./_next/static/$3"
+      )
+      
+      return result as String
+      
+    } catch {
+      return html
+    }
+  }
+  
   func evaluateJavaScriptHandler(_ result: Any?, _ error: (any Error)?) {
     if let error = error {
       print("evaluateJavaScript error: \(error)")
