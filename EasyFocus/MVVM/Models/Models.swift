@@ -10,6 +10,7 @@ import Foundation
 
 @Model
 class Focus {
+  var id: String = UUID().uuidString
   var minutes: Int = 25
   var sessionsCount: Int = 4
   var completedSecondsCount: Int = 0
@@ -40,6 +41,7 @@ Focus(
   }
   
   init(
+    id: String = UUID().uuidString,
     minutes: Int = 25,
     sessionsCount: Int = 4,
     completedSecondsCount: Int = 0,
@@ -53,6 +55,7 @@ Focus(
     endedAt: Date = Date(),
     createdAt: Date = Date()
   ) {
+    self.id = id
     self.minutes = minutes
     self.sessionsCount = sessionsCount
     self.completedSecondsCount = completedSecondsCount
