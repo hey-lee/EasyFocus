@@ -9,10 +9,18 @@ import SwiftUI
 import WebKit
 
 struct WebView: UIViewRepresentable {
-  let html: String
+  let url: String?
+  let html: String?
   let bridge: BridgeKit
   
+  init(url: String, bridge: BridgeKit = BridgeKit.shared) {
+    self.url = url
+    self.html = nil
+    self.bridge = bridge
+  }
+  
   init(html: String, bridge: BridgeKit = BridgeKit.shared) {
+    self.url = nil
     self.html = html
     self.bridge = bridge
   }
@@ -24,13 +32,16 @@ struct WebView: UIViewRepresentable {
     
     let webView = WKWebView(frame: .zero, configuration: config)
     webView.navigationDelegate = bridge
+    webView.isInspectable = true
     
     bridge.setWebView(webView)
     bridge.addScript("webridge")
-    bridge.addScript("vconsole.min")
     
-    if let url = Bundle.main.url(forResource: html, withExtension: "html") {
-      webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+    if let url, let url = URL(string: url) {
+      webView.load(URLRequest(url: url))
+    }
+    if let html, let fileURL = Bundle.main.url(forResource: html, withExtension: "html") {
+      webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL.deletingLastPathComponent())
     }
     
     return webView
