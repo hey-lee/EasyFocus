@@ -16,7 +16,7 @@ extension Bundle {
     guard let data = try? Data(contentsOf: url) else {
       fatalError("Failed to load \(file) from bundle.")
     }
-
+    
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = dateDecodingStrategy
     decoder.keyDecodingStrategy = keyDecodingStrategy
@@ -34,5 +34,37 @@ extension Bundle {
     } catch {
       fatalError("Failed to decode \(file) from bundle: \(error.localizedDescription)")
     }
+  }
+}
+
+extension Bundle {
+  func allResourcePaths() -> [String] {
+    guard let resourcePath = resourcePath else { return [] }
+    
+    var paths: [String] = []
+    let fileManager = FileManager.default
+    
+    if let enumerator = fileManager.enumerator(atPath: resourcePath) {
+      while let file = enumerator.nextObject() as? String {
+        paths.append("\(resourcePath)/\(file)")
+      }
+    }
+    
+    return paths.sorted()
+  }
+  
+  func allResourceRelativePaths() -> [String] {
+    guard let resourcePath = resourcePath else { return [] }
+    
+    var paths: [String] = []
+    let fileManager = FileManager.default
+    
+    if let enumerator = fileManager.enumerator(atPath: resourcePath) {
+      while let file = enumerator.nextObject() as? String {
+        paths.append(file)
+      }
+    }
+    
+    return paths.sorted()
   }
 }
