@@ -111,5 +111,3 @@ var emit = function(key, data) {
 };
 // src/index.ts
 window.bridge = bridge_exports;
-export { callScheme, emit, invoke };
-//# sourceMappingURL=webridge.js.map
