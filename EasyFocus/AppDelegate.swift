@@ -11,8 +11,8 @@ import RevenueCat
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     
-    Purchases.logLevel = .verbose
-    Purchases.configure(withAPIKey: "appl_TAICzJUuIyCenilYTIjTSItDEQW")
+//    Purchases.logLevel = .verbose
+//    Purchases.configure(withAPIKey: "appl_TAICzJUuIyCenilYTIjTSItDEQW")
 
     AppLifeCycleService.shared.setupObservers()
     BackgroundTaskService.shared.registerTask()
