@@ -16,18 +16,18 @@ struct StatsWebView: View {
   //  @State var rangeType: String = ""
   
   var body: some View {
-    WebView(html: "stats")
-      .onChange(of: storeKit.chartEntities) { oldValue, newValue in
-        print(storeKit.rangeType)
+    WebView(url: "http://192.168.1.4:3000/stats")
+//    WebView(html: "stats")
+      .onChange(of: storeKit.rangedCodableEvents) { oldValue, newValue in
         do {
-          let events = try Tools.structToJSON(storeKit.chartEntities)
+          let events = try Tools.structToJSON(storeKit.rangedCodableEvents)
+          print("events", events)
           BridgeKit.shared.emit("stats", events ?? "")
         } catch {
           print("")
         }
       }
       .task {
-        storeKit.rangeType = "year"
         BridgeKit.shared.onMessageReceived { message in
           switch message.type {
           case .url:
@@ -50,8 +50,9 @@ struct StatsWebView: View {
             print("")
           }
         }
+        storeKit.rangeType = "year"
         do {
-          let events = try Tools.structToJSON(storeKit.chartEntities)
+          let events = try Tools.structToJSON(storeKit.rangedCodableEvents)
           BridgeKit.shared.emit("stats", events ?? "")
         } catch {
           print("")
