@@ -40,7 +40,7 @@ struct WebView: UIViewRepresentable {
     if let url, let url = URL(string: url) {
       webView.load(URLRequest(url: url))
     }
-    if let html, let fileURL = Bundle.main.url(forResource: html, withExtension: "html") {
+    if let html, let fileURL = Bundle.main.url(forResource: html, withExtension: "html", subdirectory: "Web/out") {
       bridge.load(fileURL, type: .string)
     }
     

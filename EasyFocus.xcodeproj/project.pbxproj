@@ -53,7 +53,7 @@
 				9A78CFCB2DB75B310052E8C3 /* Exceptions for "EasyFocus" folder in "EasyFocus" target */,
 			);
 			explicitFolders = (
-				_next,
+				Web,
 			);
 			path = EasyFocus;
 			sourceTree = "<group>";
