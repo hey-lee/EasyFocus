@@ -96,7 +96,7 @@ final class BridgeKit: NSObject {
   }
   
   func addScript(_ name: String, injectionTime: WKUserScriptInjectionTime = .atDocumentStart) {
-    if let url = Bundle.main.url(forResource: name, withExtension: "js") {
+    if let url = Bundle.main.url(forResource: name, withExtension: "js", subdirectory: "Web") {
       do {
         let webridge = try String(contentsOf: url, encoding: .utf8)
         webView?.configuration.userContentController.addUserScript(
