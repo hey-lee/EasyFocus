@@ -13,6 +13,17 @@ struct StatsWebView: View {
   @Environment(StoreService.self) var storeKit
   @EnvironmentObject var show: ShowKit
   
+  init() {
+    BridgeKit.shared.onFinish { webView in
+      do {
+        let events = try Tools.structToJSON(StoreService.shared.rangedCodableEvents)
+        BridgeKit.shared.emit("stats", events ?? "")
+      } catch {
+        print(error.localizedDescription)
+      }
+    }
+  }
+  
   var body: some View {
     WebView(html: "stats")
       .onChange(of: storeKit.rangeType, { oldValue, newValue in
