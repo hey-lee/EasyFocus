@@ -18,6 +18,10 @@ final class BridgeKit: NSObject {
   var handleFinish: (WKWebView) -> Void = { _ in }
   var handleFail: (WKWebView, Error) -> Void = { _, _ in }
   
+  enum LoadType {
+    case url, string
+  }
+  
   enum MessageType {
     case url, string
   }
@@ -107,6 +111,23 @@ final class BridgeKit: NSObject {
       }
     } else {
       print("\(name).js not found")
+    }
+  }
+}
+
+extension BridgeKit {
+  func load(_ url: URL, type loadType: LoadType = .url) {
+    switch loadType {
+    case .url:
+      webView?.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+    case .string:
+      do {
+        var htmlString = try String(contentsOfFile: url.path, encoding: .utf8)
+        htmlString = BridgeKit.shared.fixRelativePaths(html: htmlString)
+        webView?.loadHTMLString(htmlString, baseURL: url.deletingLastPathComponent())
+      } catch {
+        print("loadHTMLString error: \(error)")
+      }
     }
   }
 }

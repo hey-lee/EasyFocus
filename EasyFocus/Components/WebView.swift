@@ -41,7 +41,7 @@ struct WebView: UIViewRepresentable {
       webView.load(URLRequest(url: url))
     }
     if let html, let fileURL = Bundle.main.url(forResource: html, withExtension: "html") {
-      webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL.deletingLastPathComponent())
+      bridge.load(fileURL, type: .string)
     }
     
     return webView
