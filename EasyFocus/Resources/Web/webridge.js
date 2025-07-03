@@ -110,4 +110,6 @@ var emit = function(key, data) {
     }
 };
 // src/index.ts
-window.bridge = bridge_exports;
+if (typeof window !== 'undefined') {
+    window.bridge = bridge_exports;
+}
