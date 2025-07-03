@@ -84,6 +84,7 @@ final class StoreService {
         return false
       }
     }
+    .sorted { $0.createdAt < $1.createdAt }
   }
   var rangedCodableEvents: [C.Focus] {
     rangedEvents.map {
